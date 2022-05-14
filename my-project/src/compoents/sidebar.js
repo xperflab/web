@@ -19,7 +19,7 @@ const navigation = [
     name: 'Open file',
     icon: FolderIcon,
     current: false,
-    href:'#'
+    href:'/open_file'
   },
   {
     name: 'Current profile',
