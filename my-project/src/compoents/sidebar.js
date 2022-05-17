@@ -1,7 +1,8 @@
 /* This example requires Tailwind CSS v2.0+ */
 import { Disclosure } from '@headlessui/react'
 import { CalendarIcon, ChartBarIcon, FolderIcon, HomeIcon, InboxIcon, UsersIcon } from '@heroicons/react/outline'
-
+import { Link } from 'react-router-dom';
+var showCurrentFile = false;
 const navigation = [
 //   { name: 'Dashboard', icon: HomeIcon, current: true, href: '#' },
 //   {
@@ -26,7 +27,7 @@ const navigation = [
     icon: CalendarIcon,
     current: false,
     children: [
-      { name: 'Flame graph', href: '#' },
+      { name: 'Flame graph', href: '/flame_graph' },
       { name: 'Feature2', href: '#' },
       { name: 'Feature3', href: '#' },
       { name: 'Feature4', href: '#' },
@@ -46,7 +47,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function Sidebar() {
+export default function Sidebar(props) {
   return (
     <div className="hidden lg:flex lg:w-64 lg:fixed lg:inset-y-0">
     <div className="flex-1 flex flex-col min-h-0">
@@ -62,8 +63,7 @@ export default function Sidebar() {
           {navigation.map((item) =>
             !item.children ? (
               <div key={item.name}>
-                <a
-                  href="#"
+                <Link to ="/open_file"
                   className={classNames(
         
                     item.current ? 'bg-gray-900 text-white' : 'text-white hover:text-gray-900 hover:bg-gray-50',
@@ -78,11 +78,11 @@ export default function Sidebar() {
                     aria-hidden="true"
                   />
                   {item.name}
-                </a>
+                </Link>
               </div>
             ) : (
               <Disclosure as="div" key={item.name} className="space-y-1">
-                {({ open}) => (
+                {({open}) => (
                   <>
                     <Disclosure.Button
                       className={classNames(
@@ -111,14 +111,16 @@ export default function Sidebar() {
                     </Disclosure.Button>
                     <Disclosure.Panel className="space-y-1">
                       {item.children.map((subItem) => (
+                         <Link to ={subItem.href} key={subItem.name}>
                         <Disclosure.Button
                           key={subItem.name}
-                          as="a"
-                          href={subItem.href}
                           className="group w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium text-white rounded-md hover:text-gray-900 hover:bg-gray-50"
                         >
+                         
                           {subItem.name}
+                       
                         </Disclosure.Button>
+                        </Link>
                       ))}
                     </Disclosure.Panel>
                   </>
