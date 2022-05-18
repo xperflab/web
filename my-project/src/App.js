@@ -6,6 +6,7 @@ import open_file from "./pages/open_file";
 import { useDropzone } from 'react-dropzone';
 import { Route, Switch, useHistory } from 'react-router-dom'
 import FlameGraph from "./pages/flame_graph";
+
 var showCurrentFile = false;
 
 
@@ -21,18 +22,19 @@ function MyDropzone() {
         const binaryStr = reader.result
         console.log(typeof binaryStr)
         localStorage.setItem('data', binaryStr)
-        // let result = window.decodeProfile(binaryStr, '2')
-        // console.log(result)
-        // if (result == 0) {
+       
+        let result = window.decodeProfile(binaryStr, '2')
+        console.log(result)
+        //  if (result == 0) {
         //   showCurrentFile = true
-        //   let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
-        //   console.log(jsonStr)
+          // let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
+          //  console.log(jsonStr)
         //   let fileExistList = JSON.parse(jsonStr)
         //   for (let i = 0; i < fileExistList.length; i++) {
         //     window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
         //   }
-         window.location.href="/flame_graph";      
-        //}
+      window.navigate("/flame_graph");      
+        // }
       }
       reader.readAsBinaryString(file)
     })
@@ -78,7 +80,7 @@ render() {
 
     <>
 
-      <div className="min-h-full flex">
+      {/* <div className="min-h-full flex">
         <Sidebar showCurrentFile={showCurrentFile} />
 
         <div className="lg:pl-64 flex flex-col w-0 flex-1">
@@ -107,8 +109,37 @@ render() {
 
 
 
-      </div>
+      </div> */}
+      <div className="min-h-full flex">
+        <Sidebar showCurrentFile={showCurrentFile} />
 
+        <div className="lg:pl-64 flex flex-col w-0 flex-1">
+
+          <main className="flex-1">
+          
+            
+               
+                  <div>
+                    <Route path="/open_file">
+                        <div>
+                          <MyDropzone />
+
+                        </div>
+                      </Route>
+                      <Route path="/flame_graph">
+                        <FlameGraph />
+                      </Route>
+                      
+                 
+                
+     
+            </div>
+          </main>
+        </div>
+
+
+
+      </div>
 
 
     </>

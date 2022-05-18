@@ -2,14 +2,16 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import XEUtils from "xe-utils";
 import * as PIXI from "pixi.js";
+import '../pages-css/flame_graph.css';
 function str2ab(str) {
-    var buf = new ArrayBuffer(str.length); // 每个字符占用2个字节
+    var buf = new ArrayBuffer(str.length); 
     var bufView = new Uint8Array(buf);
     for (var i=0, strLen=str.length; i<strLen; i++) {
     bufView[i] = str.charCodeAt(i);
     }
     return buf;
 }
+
 export default class FlameGraph extends Component {
   constructor(props) {
     super(props);
@@ -18,6 +20,9 @@ export default class FlameGraph extends Component {
       global: {},
       focusNode: {}
     };
+    window.Module['onRuntimeInitialized'] = () =>{
+      console.log("Runtime ready")
+    }
   }
 
   static propTypes = {
@@ -28,6 +33,7 @@ export default class FlameGraph extends Component {
   };
 
   componentDidMount() {
+
    
     this.state.focusNode.dataShowType = 0;
     this.state.focusNode.metricIndex = 0;
@@ -56,26 +62,46 @@ export default class FlameGraph extends Component {
     function ConvertRGBtoHex(red, green, blue) {
       return "0x" + ColorToHex(red) + ColorToHex(green) + ColorToHex(blue);
     }
+    function decodeProfile(buffer, mime) {
+      let data = new Uint8Array(buffer);
+      let len = data.length;
+      if(mime == "application/gzip") {
+        // data = pako.ungzip(data);
+        // len = data.length;
+        // let newBuf = window.Module._malloc(data.length);
+        // Module.HEAPU8.set(data, newBuf);
+        // let result = window.Module._decode(newBuf, len);
+        // return result;
+      } else {
+        let newBuf = window.Module._malloc(data.length);
+        window.Module.HEAPU8.set(data, newBuf);
+        let result = window.Module._decode(newBuf, len);
+        if (result == 1) {
+          try {
+            // data = pako.ungzip(data);
+            // len = data.length;
+            // newBuf = window.Module._malloc(data.length);
+            // Module.HEAPU8.set(data, newBuf);
+            result = window.Module._decode(newBuf, len);
+          } catch (error) {
+            return 1;
+          }
+        }
+        return result;
+      }
+    }
 
-    this.state.global.textsTop = -this.props.height - 4;
-    this.state.global.textsRender.style.top = this.state.global.textsTop + "px";
-    this.state.global.textsRender.style.width = this.state.global.width + "px";
-    this.state.global.textsRender.style.height = this.props.height + "px";
-    this.state.global.texts = document.getElementById("renderTexts");
-    this.state.global.app = new PIXI.Application({
-      view: document.getElementById("renderView"),
-      width: this.state.global.width,
-      height: this.props.height,
-      backgroundColor: ConvertRGBtoHex(
-        parseInt(bgColor[0]),
-        parseInt(bgColor[1]),
-        parseInt(bgColor[2])
-      )
-    });
-    this.state.global.container.appendChild(this.state.global.app.view);
-
+  var drawTagHtml=(x, y, w, h, id, c)=>{
+    var label = document.createElement("div");
+    label.setAttribute("class", "flamegraph-tag");
+    label.innerHTML = window.Module.cwrap("getContextName", "string", ["number"])(id);
+    label.style.width = w + "px";
+    label.style.height = h + "px";
+    label.style.top = y + "px";
+    label.style.left = x + "px";
+    this.state.global.texts.append(label);
   }
-  onDraw() {
+  var onDraw =()=>{
     this.state.global.texts.innerHTML = "";
     this.state.global.app.stage.removeChildren();
     this.state.global.app.renderer.resize(
@@ -91,8 +117,7 @@ export default class FlameGraph extends Component {
       20
     );
   }
-
-  update() {
+  var update=()=>{
     this.state.global.viewStyle = window.getComputedStyle(
       this.state.global.container,
       null
@@ -101,24 +126,12 @@ export default class FlameGraph extends Component {
       parseInt(this.state.global.viewStyle.width) -
       2 * parseInt(this.state.global.viewStyle.paddingLeft) -
       2 * parseInt(this.state.global.viewStyle.marginLeft);
-    this.state.global.textsTop = -this.props.height - 4;
+    this.state.global.textsTop = -this.props.height;
     this.state.global.textsRender.style.top = this.state.global.textsTop + "px";
     this.state.global.textsRender.style.width = this.state.global.width + "px";
     this.state.global.textsRender.style.height = this.props.height + "px";
   }
-
-  drawTagHtml(x, y, w, h, id, c) {
-    var label = document.createElement("div");
-    label.setAttribute("class", "flamegraph-tag");
-    label.innerHTML = window.Module.cwrap("getContextName", "string", ["number"])(id);
-    label.style.width = w + "px";
-    label.style.height = h + "px";
-    label.style.top = y + "px";
-    label.style.left = x + "px";
-    this.state.global.texts.append(label);
-  }
-
-  drawRectNode(x, y, w, h, id, c, exsit) {
+  var drawRectNode=(x, y, w, h, id, c, exsit)=>{
     let color = Number(c);
     let outline = new PIXI.Graphics();
     outline.beginFill(0xefefef);
@@ -127,7 +140,7 @@ export default class FlameGraph extends Component {
     outline.hitArea = new PIXI.Rectangle(x, y, w, h);
     outline.tint = 0xffffff;
 
-    outline.mouseover = function(mouseData) {
+    outline.mouseover = (mouseData)=>{
       this.setState({
         tint: 0x9f78d9
       });
@@ -139,13 +152,13 @@ export default class FlameGraph extends Component {
       });
     };
 
-    outline.mouseout = function(mouseData) {
+    outline.mouseout = (mouseData)=>{
       this.setState({
         tint: 0xffffff
       });
     };
 
-    outline.click = function(ev) {
+    outline.click = (ev)=>{
       window.postMessage({
         type: "drawClickNode",
         data: {
@@ -157,29 +170,26 @@ export default class FlameGraph extends Component {
       });
     };
 
-    this.state.global.app.stage.addChild(outline);
+   this.state.global.app.stage.addChild(outline);
 
     if (w > 2) {
       let node = new PIXI.Graphics();
-      node.beginFill(color, exsit ? 0.9 : 0.4);
+      node.beginFill(color, exsit ? 0.9 : 0.9);
       node.drawRect(x + 1, y + 1, w - 2, h - 2);
-      this.state.global.app.stage.addChild(node);
+     this.state.global.app.stage.addChild(node);
     }
 
     if (w > 20) {
-      this.drawTagHtml(x + 1, y + 1, w - 10, h - 2, id, c);
+      drawTagHtml(x + 1, y + 1, w - 10, h - 2, id, c);
     }
   }
-
-  onWindowResize() {
-    this.update();
-    this.onDraw();
+  function onWindowResize() {
+    update();
+    onDraw();
   }
 
-  drawFlameGraph(dataShowType, metricIndex, functionFilter) {
-    if (
-      this.state.focusNode.dataShowType != dataShowType ||
-      this.state.focusNode.metricIndex != metricIndex
+  var drawFlameGraph=(dataShowType, metricIndex, functionFilter) =>{
+    if (this.state.focusNode.dataShowType != dataShowType || this.state.focusNode.metricIndex != metricIndex
     ) {
       this.state.focusNode.dataShowType = dataShowType;
       this.state.focusNode.metricIndex = metricIndex;
@@ -193,27 +203,70 @@ export default class FlameGraph extends Component {
 
     window.Module._updateValueTree(0, dataShowType, metricIndex);
 
-    this.onDraw();
+    onDraw();
   }
+
+    this.state.global.textsTop = -this.props.height;
+    this.state.global.textsRender.style.top = this.state.global.textsTop + "px";
+    this.state.global.textsRender.style.width = this.state.global.width + "px";
+    this.state.global.textsRender.style.height = this.props.height + "px";
+    this.state.global.texts = document.getElementById("renderTexts");
+    this.state.global.app = new PIXI.Application({
+      view: document.getElementById("renderView"),
+      width: this.state.global.width,
+      height: this.props.height
+      // backgroundColor: ConvertRGBtoHex(
+      //   parseInt(256),
+      //   parseInt(256),
+      //   parseInt(256)
+      // )
+    });
+    this.state.global.container.appendChild(this.state.global.app.view);
+    const data = localStorage.getItem('data')
+    const binaryStr = str2ab(data)
+    console.log(binaryStr)
+    let result = decodeProfile(binaryStr, '2')
+    console.log(result)
+        if (result == 0) {
+          let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
+          console.log(jsonStr)
+          let fileExistList = JSON.parse(jsonStr)
+          for (let i = 0; i < fileExistList.length; i++) {
+            window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
+          }
+          window.Module._setUpDrawFlameGraph(-1, window.Module.addFunction(drawRectNode, 'viiiiiji'));
+          window.onresize = onWindowResize;
+          drawFlameGraph(0, 0, "");
+        }
+  }
+
+
+
+
+
+
+
+
 
   render() {
     return (
-      <div >
-        <div >
+      <div className="grid grid-cols-6 gap-x-1">
+        <div className="col-start-2 col-span-4">
           <div id="details" className="details">
             VIRTUAL ROOT
           </div>
         </div>
-        <div >
+        <div className="col-start-2 col-span-4">
           <div className="details"></div>
         </div>
-        <div id="viewContainer" >
+        <div id="viewContainer" className="col-start-2 col-span-4">
           <canvas id="renderView"></canvas>
         </div>
-        <div>
-          <div>
-            <div id="renderContainer">
-              <div id="renderTexts"></div>
+        <div className="col-start-2 col-span-4">
+          <div style={{position: "relative", height: 0}}>
+            <div id="renderContainer" style={{position: "absolute", pointerEvents: "none"}}>
+              <div  id="renderTexts" style={{position: "relative", height: 0, width: 0}}>
+              </div>
             </div>
           </div>
         </div>
