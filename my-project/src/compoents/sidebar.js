@@ -1,8 +1,9 @@
 /* This example requires Tailwind CSS v2.0+ */
 import { Disclosure } from '@headlessui/react'
 import { CalendarIcon, ChartBarIcon, FolderIcon, HomeIcon, InboxIcon, UsersIcon } from '@heroicons/react/outline'
+import { Component } from 'react';
 import { Link } from 'react-router-dom';
-var showCurrentFile = false;
+
 const navigation = [
 //   { name: 'Dashboard', icon: HomeIcon, current: true, href: '#' },
 //   {
@@ -43,11 +44,20 @@ const navigation = [
   },
 ]
 
+
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function Sidebar(props) {
+
+export default class Sidebar extends Component {
+  constructor(props) {
+    super(props)
+  }
+ 
+
+  render() {
+    
   return (
     <div className="hidden lg:flex lg:w-64 lg:fixed lg:inset-y-0">
     <div className="flex-1 flex flex-col min-h-0">
@@ -63,7 +73,11 @@ export default function Sidebar(props) {
           {navigation.map((item) =>
             !item.children ? (
               <div key={item.name}>
-                <Link to ="/open_file"
+                < div onClick={() => {
+             {/* 这里给子组件 调用父组件方法  setPare */}
+               this.props.changeComponentToDropzone();
+          //   this.props.setPare('我要传递给父组件');
+          }} 
                   className={classNames(
         
                     item.current ? 'bg-gray-900 text-white' : 'text-white hover:text-gray-900 hover:bg-gray-50',
@@ -78,11 +92,12 @@ export default function Sidebar(props) {
                     aria-hidden="true"
                   />
                   {item.name}
-                </Link>
+               </div>
               </div>
             ) : (
               <Disclosure as="div" key={item.name} className="space-y-1">
-                {({open}) => (
+                {({open }) => (
+                
                   <>
                     <Disclosure.Button
                       className={classNames(
@@ -95,7 +110,7 @@ export default function Sidebar(props) {
                             item.current ? 'text-white' : 'text-white group-hover:text-gray-900 ',
                             'mr-4 flex-shrink-0 h-6 w-6'
                           )}
-                        aria-hidden="true"
+                        aria-hidden="false"
                       />
                       <span className="flex-1">{item.name}</span>
                       <svg
@@ -104,7 +119,7 @@ export default function Sidebar(props) {
                           'ml-3 flex-shrink-0 h-5 w-5 transform group-hover:text-gray-900 transition-colors ease-in-out duration-150'
                         )}
                         viewBox="0 0 20 20"
-                        aria-hidden="true"
+                        aria-hidden="false"
                       >
                         <path d="M6 6L14 10L6 14V6Z" fill="currentColor" />
                       </svg>
@@ -133,4 +148,5 @@ export default function Sidebar(props) {
     </div>
     </div>
   )
+}
 }

@@ -10,7 +10,8 @@ import FlameGraph from "./pages/flame_graph";
 var showCurrentFile = false;
 
 
-function MyDropzone() {
+function MyDropzone(props) {
+  const {changeComponentToFlamegraph} = props
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader()
@@ -20,27 +21,37 @@ function MyDropzone() {
       reader.onload = () => {
         // Do whatever you want with the file contents
         const binaryStr = reader.result
-        console.log(typeof binaryStr)
-        localStorage.setItem('data', binaryStr)
-       
-        let result = window.decodeProfile(binaryStr, '2')
+        console.log(binaryStr)
+        var uint8View = new Uint8Array(binaryStr);
+        console.log(uint8View)
+        let result = window.decodeProfile(binaryStr, file.type)
         console.log(result)
-        //  if (result == 0) {
-        //   showCurrentFile = true
-          // let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
-          //  console.log(jsonStr)
-        //   let fileExistList = JSON.parse(jsonStr)
-        //   for (let i = 0; i < fileExistList.length; i++) {
-        //     window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
-        //   }
-      window.navigate("/flame_graph");      
-        // }
+         if (result == 0) {
+          showCurrentFile = true
+          let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
+           console.log(jsonStr)
+          let fileExistList = JSON.parse(jsonStr)
+          for (let i = 0; i < fileExistList.length; i++) {
+            window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
+          }
+        //window.navigate("/flame_graph");  
+          changeComponentToFlamegraph()
+
+        
+        }
       }
-      reader.readAsBinaryString(file)
+      reader.readAsArrayBuffer(file)
+    //  reader.readAsBinaryString(file)
     })
 
   }, [])
-  const { getRootProps, getInputProps } = useDropzone({ onDrop })
+  // const { getRootProps, getInputProps } = useDropzone({ onDrop,accept: {
+  //   'image/jpeg': [],
+  //   'image/png': []
+  // } })
+  const { getRootProps, getInputProps } = useDropzone({ onDrop
+  })
+
 
   return (
     <div>
@@ -70,9 +81,29 @@ function MyDropzone() {
 
 
 class App extends Component {
-
+  constructor() {
+    super();
+    this.state = { showComponent: "dropzone" };
+  }
+  changeComponentToFlamegraph = () => {
+    this.setState({
+        showComponent : "flamegraph"
+    })
+  }
+  changeComponentToDropzone = () => {
+    this.setState({
+        showComponent : "dropzone"
+    })
+  }
 render() {
+  
 
+  let renderComponent;
+  if (this.state.showComponent === "dropzone") {
+    renderComponent = (<MyDropzone changeComponentToFlamegraph  ={this.changeComponentToFlamegraph}/>)
+  } else if (this.state.showComponent === "flamegraph") {
+    renderComponent = (<FlameGraph isShow = {true}/>)
+  }
 
 
   return (
@@ -80,38 +111,8 @@ render() {
 
     <>
 
-      {/* <div className="min-h-full flex">
-        <Sidebar showCurrentFile={showCurrentFile} />
-
-        <div className="lg:pl-64 flex flex-col w-0 flex-1">
-
-          <main className="flex-1">
-            <div className="py-8 xl:py-10">
-              <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 xl:max-w-5xl xl:grid xl:grid-cols-3">
-                <div className="xl:col-span-2 xl:pr-8 xl:border-r xl:border-gray-200">
-                  <div>
-                    <Route path="/open_file">
-                        <div>
-                          <MyDropzone />
-
-                        </div>
-                      </Route>
-                      <Route path="/flame_graph">
-                        <FlameGraph />
-                      </Route>
-                      
-                  </div>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-
-
-
-      </div> */}
       <div className="min-h-full flex">
-        <Sidebar showCurrentFile={showCurrentFile} />
+        <Sidebar changeComponentToDropzone = {this.changeComponentToDropzone} />
 
         <div className="lg:pl-64 flex flex-col w-0 flex-1">
 
@@ -120,7 +121,10 @@ render() {
             
                
                   <div>
-                    <Route path="/open_file">
+                    {
+                      renderComponent
+                    }
+                    {/* <Route path="/open_file">
                         <div>
                           <MyDropzone />
 
@@ -128,9 +132,8 @@ render() {
                       </Route>
                       <Route path="/flame_graph">
                         <FlameGraph />
-                      </Route>
+                      </Route> */}
                       
-                 
                 
      
             </div>
