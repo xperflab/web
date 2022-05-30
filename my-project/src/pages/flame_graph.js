@@ -1,10 +1,21 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import XEUtils from "xe-utils";
+import XEUtils, { filter } from "xe-utils";
 import * as PIXI from "pixi.js";
 import '../pages-css/flame_graph.css';
 import Search from "../compoents/search";
 import Select from 'react-select';
+import {
+  BellIcon,
+  CalendarIcon,
+  ChatAltIcon,
+  CheckCircleIcon,
+  LockOpenIcon,
+  PencilIcon,
+  SearchIcon,
+  TagIcon,
+  UserCircleIcon as UserCircleIconSolid,
+} from '@heroicons/react/solid'
 import { FullScreen} from "react-full-screen";
 function str2ab(str) {
     var buf = new ArrayBuffer(str.length); 
@@ -31,9 +42,13 @@ export default class FlameGraph extends Component {
       metricTypesArray:[] ,
       focusNode: {
         dataShowType : 0,
-        metricIndex : 0
-      }
+        metricIndex : 0,
+        filterName:''
+      },
+      value:''
     };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   static propTypes = {
@@ -44,6 +59,7 @@ export default class FlameGraph extends Component {
   };
 
   componentDidMount() {
+    console.log("Mount")
 
    
    // this.state.focusNode.dataShowType = 0;
@@ -100,12 +116,39 @@ export default class FlameGraph extends Component {
           // this.state.metricTypesArray = JSON.parse(jsonStr);
           this.setState({metricTypesArray:JSON.parse(jsonStr)})
           console.log(this.state.metricTypesArray[0])
-
+          console.log("3")
           this.drawFlameGraph(this.state.focusNode.dataShowType, this.state.focusNode.metricIndex, "");
           
-
+          window.addEventListener("message", (event) => {
+            const message = event.data; // The json data that the extension sent
+            switch (message.type) {
+              case "drawClickNode": {
+                console.log(this);
+                this.state.global.texts.innerHTML = '';
+                this.state.global.app.stage.removeChildren();
+                this.state.focusNode.id = message.data.id;
+                this.state.focusNode.x = message.data.x;
+                this.state.focusNode.y = message.data.y;
+                console.log(message.data)
+                console.log(this.state.global.width)
+                console.log("2")
+                window.Module._drawFlameGraphClickNode(message.data.id, message.data.x, message.data.y, this.state.global.width, message.data.h);
+                let clickNodeMessageStr = window.Module.cwrap('getClickNodeMessage', 'string', ['number', 'number', 'number'])(this.state.focusNode.id, 0, this.state.focusNode.metricIndex);
+                let obj = JSON.parse(clickNodeMessageStr);
+                break;
+            }
+            case "changeMessageDetails": {
+              // console.log(message.type);
+              this.state.focusNode.hovorId = message.data.id;
+              this.state.global.messageDetails.innerHTML = Module.cwrap('getContextDetails', 'string', ['number'])(this.state.focusNode.hovorId);
+              break;
+          }
+            }
+          }
+          )
   }
   componentDidUpdate(prevProps, prevState) { 
+
     if (prevState.focusNode.dataShowType != this.state.focusNode.dataShowType || this.state.focusNode.metricIndex != prevState.focusNode.metricIndex) {
       this.state.global.texts.innerHTML = '';
       this.state.focusNode.metricIndex = 0;
@@ -164,7 +207,8 @@ export default class FlameGraph extends Component {
             // console.log(jsonStr)
             // this.state.metricTypesArray= JSON.parse(jsonStr);
           //  this.state.global.messageDetails.innerHTML = window.Module.cwrap('getContextDetails', 'string', ['number'])(id);
-           this.drawFlameGraph(this.state.focusNode.dataShowType, this.state.focusNode.metricIndex, "");
+          console.log("1")
+           this.drawFlameGraph(this.state.focusNode.dataShowType, this.state.focusNode.metricIndex, this.state.focusNode.filterName);
     }
     
     
@@ -202,7 +246,7 @@ export default class FlameGraph extends Component {
       20
     );
   }
-  onWindowResize() {
+  onWindowResize=()=> {
     this.update()
     this.onDraw()
   }
@@ -217,6 +261,7 @@ export default class FlameGraph extends Component {
     label.style.left = x + "px";
     this.state.global.texts.append(label);
   }
+
    drawRectNode=(x, y, w, h, id, c, exsit)=>{
       let color = Number(c);
       let outline = new PIXI.Graphics();
@@ -226,41 +271,45 @@ export default class FlameGraph extends Component {
       outline.hitArea = new PIXI.Rectangle(x, y, w, h);
       outline.tint = 0xffffff;
   
-      outline.mouseover = (mouseData)=>{
-        this.setState({
-          tint: 0x9f78d9
+      // outline.mouseover (mouseData){
+      //   this.setState({
+      //     tint: 0x9f78d9
+      //   });
+  
+      //   this.state.global.messageDetails.innerHTML = window.Module.cwrap('getContextDetails', 'string', ['number'])(id);
+      // };
+      outline.mouseover = function (mouseData) {
+        this.tint = 0x9F78D9;
+        window.postMessage(
+            {
+                type: "changeMessageDetails",
+                data: {
+                    id: id
+                }
+            }
+        );
+    }
+  
+      // outline.mouseout = (mouseData)=>{
+      //   this.setState({
+      //     tint: 0xffffff
+      //   });
+      // };
+      outline.mouseout = function (mouseData) {
+        this.tint = 0xFFFFFF;
+    }
+  
+      outline.click = function(ev){
+        console.log("click")
+        window.postMessage({
+          type: "drawClickNode",
+          data: {
+            id: id,
+            x: 0,
+            y: y,
+            h: h
+          }
         });
-  
-        this.state.global.messageDetails.innerHTML = window.Module.cwrap('getContextDetails', 'string', ['number'])(id);
-      };
-  
-      outline.mouseout = (mouseData)=>{
-        this.setState({
-          tint: 0xffffff
-        });
-      };
-  
-      outline.click = (ev)=>{
-        console.log(ev)
-        this.state.global.texts.innerHTML = '';
-        this.state.global.app.stage.removeChildren();
-        this.state.focusNode.id = id;
-        this.state.focusNode.x = 0;
-        this.state.focusNode.y = y;
-        console.log(this.state)
-        window.Module._drawFlameGraphClickNode(id,0, y, this.state.global.width, h);
-        let clickNodeMessageStr = window.Module.cwrap('getClickNodeMessage', 'string', ['number', 'number', 'number'])(this.state.focusNode.id, 0, this.state.focusNode.metricIndex);
-        let obj = JSON.parse(clickNodeMessageStr);
-        console.log(obj)
-        // window.postMessage({
-        //   type: "drawClickNode",
-        //   data: {
-        //     id: id,
-        //     x: 0,
-        //     y: y,
-        //     h: h
-        //   }
-        // });
   
       };
   
@@ -321,15 +370,49 @@ handleChangeMetricIndex=(event)=>{
   this.setState({focusNode:{metricIndex:event.target.options.selectedIndex}})
 }
 
+// handleSubmit = (event) => {
 
+//   console.log(this.state.filterValue)
+//   event.preventDefault();
+// }
 
+// handleChange=(event)=> {
+//   console.log(event.target.value)
+//   this.setState({filterValue: event.target.value});
+// }
+handleChange(event) {
+  console.log(event.target.value)
+  this.setState({value: event.target.value});
+}
+
+handleSubmit(event) {
+  this.setState({focusNode:{filterName:XEUtils.toValueString(this.state.value).trim()}})
+//  XEUtils.toValueString(this.state.value).trim();
+  event.preventDefault();
+}
 
 
 
   render() {
     return (
       <div>
-        <Search/>
+      <form className="w-full flex lg:ml-0" onSubmit={this.handleSubmit}>
+        {/* <label>
+          Name:
+          <input type="text" value={this.state.value} onChange={this.handleChange} />
+        </label> */}
+            <label htmlFor="search-field" className="sr-only">
+                                    Search
+                                </label>
+                                <div className="relative w-full text-gray-400 focus-within:text-gray-600">
+                                    <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
+                                        <SearchIcon className="h-5 w-5" aria-hidden="true" />
+                                    </div>
+                                    <input type="text"    className="block w-full h-full pl-8 pr-3 py-2 border-transparent text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent sm:text-sm"
+                                    value={this.state.value}  onChange={this.handleChange}  placeholder="Search"
+                                    />
+                                </div>
+      </form>
          <span className="relative z-0 inline-flex shadow-sm rounded-md">
       <button
         type="button"

@@ -6,7 +6,7 @@ import open_file from "./pages/open_file";
 import { useDropzone } from 'react-dropzone';
 import { Route, Switch, useHistory } from 'react-router-dom'
 import FlameGraph from "./pages/flame_graph";
-
+import VR from "./pages/vr"
 var showCurrentFile = false;
 
 
@@ -95,6 +95,11 @@ class App extends Component {
         showComponent : "dropzone"
     })
   }
+  changeComponentToVR = () => {
+    this.setState({
+        showComponent : "VR"
+    })
+  }
 render() {
   
 
@@ -103,6 +108,8 @@ render() {
     renderComponent = (<MyDropzone changeComponentToFlamegraph  ={this.changeComponentToFlamegraph}/>)
   } else if (this.state.showComponent === "flamegraph") {
     renderComponent = (<FlameGraph isShow = {true}/>)
+  } else if(this.state.showComponent === "VR") {
+    renderComponent =(<VR/>)
   }
 
 
@@ -112,7 +119,9 @@ render() {
     <>
 
       <div className="min-h-full flex">
-        <Sidebar changeComponentToDropzone = {this.changeComponentToDropzone} />
+        <Sidebar changeComponentToDropzone = {this.changeComponentToDropzone}  
+        changeComponentToVR ={this.changeComponentToVR}
+        changeComponentToFlamegraph ={this.changeComponentToFlamegraph}/>
 
         <div className="lg:pl-64 flex flex-col w-0 flex-1">
 
