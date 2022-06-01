@@ -112,9 +112,16 @@ export default class FlameGraph extends Component {
           window.Module._setUpDrawFlameGraph(-1, window.Module.addFunction(this.drawRectNode, 'viiiiiji'));
           window.onresize = this.onWindowResize;
           let jsonStr = window.Module.cwrap('getMetricDesJsonStr', 'string')();
-          console.log(jsonStr)
+          //console.log(jsonStr)
           // this.state.metricTypesArray = JSON.parse(jsonStr);
-          this.setState({metricTypesArray:JSON.parse(jsonStr)})
+          let metricJson = JSON.parse(jsonStr)
+          this.setState({metricTypesArray:metricJson})
+          window.postMessage(
+            {
+                type: "init MetricTypesArray",
+                data: metricJson
+            }
+        );
           console.log(this.state.metricTypesArray[0])
           console.log("3")
           this.drawFlameGraph(this.state.focusNode.dataShowType, this.state.focusNode.metricIndex, "");

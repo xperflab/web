@@ -7,6 +7,7 @@ import { useDropzone } from 'react-dropzone';
 import { Route, Switch, useHistory } from 'react-router-dom'
 import FlameGraph from "./pages/flame_graph";
 import VR from "./pages/vr"
+import Treetable from "./pages/treetable";
 var showCurrentFile = false;
 
 
@@ -100,6 +101,11 @@ class App extends Component {
         showComponent : "VR"
     })
   }
+  changeComponentToTreetable = () =>{
+    this.setState({
+      showComponent : "treetable"
+  })
+  }
 render() {
   
 
@@ -110,7 +116,9 @@ render() {
     renderComponent = (<FlameGraph isShow = {true}/>)
   } else if(this.state.showComponent === "VR") {
     renderComponent =(<VR/>)
-  }
+  } else if(this.state.showComponent === "treetable") {
+    renderComponent =(<Treetable/>)
+  } 
 
 
   return (
@@ -121,7 +129,8 @@ render() {
       <div className="min-h-full flex">
         <Sidebar changeComponentToDropzone = {this.changeComponentToDropzone}  
         changeComponentToVR ={this.changeComponentToVR}
-        changeComponentToFlamegraph ={this.changeComponentToFlamegraph}/>
+        changeComponentToFlamegraph ={this.changeComponentToFlamegraph}
+        changeComponentToTreetable ={this.changeComponentToTreetable}/>
 
         <div className="lg:pl-64 flex flex-col w-0 flex-1">
 

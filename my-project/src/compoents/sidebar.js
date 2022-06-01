@@ -28,7 +28,7 @@ const navigation = [
     icon: CalendarIcon,
     current: false,
     children: [
-      { name: 'Flame graph', href:'#'},
+      { name: 'Flame graph', href: '#' },
       { name: 'Feature2', href: '#' },
       { name: 'Feature3', href: '#' },
       { name: 'Feature4', href: '#' },
@@ -38,7 +38,7 @@ const navigation = [
     name: 'Example profile',
     icon: InboxIcon,
     current: false,
-   
+
   },
 ]
 
@@ -124,17 +124,24 @@ export default class Sidebar extends Component {
                         </Disclosure.Button>
                         <Disclosure.Panel className="space-y-1">
                           <div onClick={() => {
-        
-                      this.props.changeComponentToFlamegraph();
-                      //   this.props.setPare('我要传递给父组件');
-                    }} className="group w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium text-white rounded-md hover:text-gray-900 hover:bg-gray-50">
-                          <Disclosure.Button>  FlameGraph</Disclosure.Button>    </div> 
+
+                            this.props.changeComponentToFlamegraph();
+                            //   this.props.setPare('我要传递给父组件');
+                          }} className="group w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium text-white rounded-md hover:text-gray-900 hover:bg-gray-50">
+                            <Disclosure.Button>  FlameGraph</Disclosure.Button>    </div>
 
                           <div onClick={() => {
-                      this.props.changeComponentToVR();
-      
-                    }} className="group w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium text-white rounded-md hover:text-gray-900 hover:bg-gray-50">
-                          VR   </div> 
+                            this.props.changeComponentToVR();
+
+                          }} className="group w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium text-white rounded-md hover:text-gray-900 hover:bg-gray-50">
+                            VR   </div>
+
+
+                          <div onClick={() => {
+                            this.props.changeComponentToTreetable();
+
+                          }} className="group w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium text-white rounded-md hover:text-gray-900 hover:bg-gray-50">
+                            Treetable   </div>
 
                         </Disclosure.Panel>
                       </>
