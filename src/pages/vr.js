@@ -3,11 +3,12 @@ import 'aframe-animation-component';
 import 'aframe-particle-system-component';
 import 'babel-polyfill';
 import { Entity, Scene } from 'aframe-react';
+import { Disclosure } from '@headlessui/react'
 import React from 'react';
-import ReactDOM from 'react-dom';
-import ScriptTag from 'react-script-tag';
-import traceJson from '../trace_gcc.json'
+import { blockStatement } from '@babel/types';
 const colorHue = 'warm'
+
+require('./orthoAframeComponent.js');
 
 function generateHash(name) {
   // Return a vector (0.0->1.0) that is a hash of the input string.
@@ -15,6 +16,10 @@ function generateHash(name) {
   // that strings with similar starts have similar vectors. Only the first
   // 6 characters are considered.
   const MAX_CHAR = 6
+
+  let hash = 0
+  let maxHash = 0
+  let weight = 1
   const mod = 10
 
   if (name) {
@@ -117,21 +122,6 @@ function colorHash(name, libtype) {
   return calculateColor(hue, vector)
 }
 
-function stringHash(s) {
-  var hash = 0, i, chr;
-  if (s.length === 0) return hash;
-  for (i = 0; i < s.length; i++) {
-    chr = s.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-};
-
-function nameToColor(name) {
-  return colorHash(name)
-}
-
 function handleData(trace, num_graph) {
   // trace should be a array and not null
   if (trace.length <= 0) return
@@ -189,289 +179,208 @@ function handleStack(root, e, start_time, epoch_time) {
   }
 }
 
+// max level = 20
+function mapToD3Tree(root) {
+  let res = {}
+  res.name = root.name
+  res.value = root.value
+  if (!root.descendants || root.level > 20)
+    return null
+  let ch = Object.values(root.descendants).map(e => mapToD3Tree(e)).filter(x => !!x)
+  if (ch.length) {
+    res.children = ch
+  }
+  return res
+}
+
+class AFrameBox {
+  constructor(x, y, z, w, h, d, c, text, opacity, top) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.d = d;
+    this.h = h;
+    this.w = w;
+    this.c = c;
+    this.text = text
+    this.opacity = opacity
+    this.top = top
+  }
+}
+
+function drawABox(box, i) {
+  return <Entity primitive='a-box'
+    depth={box.d}
+    height={box.h}
+    width={box.w}
+    color={box.c}
+    position={{ x: box.x, y: box.y, z: box.z }}
+    material={{ opacity: box.opacity }}
+    key={i}
+  >
+    {
+      box.w > box.text.length * 0.1 && <Entity primitive='a-text' value={box.text} position={
+        { x: -box.w / 2, y: 0, z: box.d / 2 }
+      }></Entity>
+    }
+  </Entity>
+}
+
+function drawAFrameGraph(boxes, index) {
+  return (<Entity key={index}> {boxes.map((b, i) => drawABox(b, i))}</Entity>)
+}
+
+const default_depth = 0.2
+const default_height = 0.2
+const default_graph_gap = 0.1
+const max_width = 6
+// Suitable width with default viewpoint
+
+function draw3DGraphs(root) {
+  const start_x = max_width / 2
+  const start_y = default_height / 2
+  const start_z = -(root.length * default_depth + (root.length - 1) * default_graph_gap) / 2
+  const bs = root.map(e => Object.values(e.descendants)[0].value)
+  const width_list = bs.map(e => e / Math.max(...bs))
+
+  let allBoxes = []
+  for (let index = 0; index < root.length; index++) {
+    const e = root[index];
+
+    const width = max_width * width_list[index]
+
+    let boxes = drawSubBox(e,
+      start_x - width / 2, start_y, start_z + index * (default_depth + default_graph_gap),
+      width)
+
+    allBoxes.push(boxes)
+  }
+
+  return allBoxes
+}
+
+function drawSubBox(ele, x, y, z, width) {
+  let boxes = [];
+  const color = colorHash(ele.name)
+
+  // draw translucent if level is too high..
+  let opacity = 1
+  if (ele.level > 10)
+    opacity = (20 - ele.level) / 10
+  if (ele.level > 20)
+    return boxes
+
+  boxes.push(new AFrameBox(x, y, z, width, default_height, default_depth, color, ele.name, opacity, ele.top))
+
+  let now_x = x - width / 2
+  const new_y = y + default_height // new stack level
+
+  for (const k in ele.descendants) {
+    let e = ele.descendants[k]
+
+    const new_width = width * e.value / ele.value
+    const new_x = now_x + new_width / 2
+    now_x += new_width
+    boxes = boxes.concat(drawSubBox(e, new_x, new_y, z, new_width)).sort((a, b) => a.y - b.y)
+  }
+
+  return boxes
+}
+
+const max_pixel = 100;
+
+// from center and draw from center
+function drawRect(ctx, x, y, l, w, c) {
+
+  ctx.fillStyle = c;
+  ctx.fillRect(x - l, y - w, l * 2, w * 2);
+}
+
+function drawVertical2DView(ctx, data) {
+  const all_data = data.flat().filter(d => d.top).sort((a, b) => a.y - b.y)
+  for (d of all_data) {
+    drawRect(ctx, d.z / max_width * max_pixel + max_pixel / 2,
+      d.x / max_width * max_pixel + max_pixel / 2,
+      default_depth / 2 * max_pixel / max_width,
+      d.w / 2 * max_pixel / max_width,
+      d.c)
+  }
+}
+
+function updateD3(rootmap, selected) {
+  var chart = flamegraph()
+    .width(960);
+
+  const m = mapToD3Tree(rootmap[selected])
+  d3.select("#chart")
+    .datum(m)
+    .call(chart);
+}
+
+function updateCanvas() {
+  let canvas = document.getElementById('my-canvas')
+  canvas.width = canvas.width
+  let ctx = canvas.getContext('2d');
+
+  drawVertical2DView(ctx, all)
+}
+
 export default class VR extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      cameraB: false,
       selected: 0,
       num_graphs: 1,
-      data: "",
-      hash: 0,
-      maxHash: 1,
-      weight: 1
+      rootMap: []
     };
   }
+
   componentDidMount() {
-    this.setState({data: traceJson})
-    console.log(this.state.data)
 
-
-
-    // max level = 20
-    function mapToD3Tree(root) {
-      let res = {}
-      res.name = root.name
-      res.value = root.value
-      if (!root.descendants || root.level > 20)
-        return null
-      let ch = Object.values(root.descendants).map(e => mapToD3Tree(e)).filter(x => !!x)
-      if (ch.length) {
-        res.children = ch
-      }
-      return res
-    }
-
-    function setAttributes(element, attributes) {
-      Object.keys(attributes).forEach(attr => {
-        element.setAttribute(attr, attributes[attr]);
-      });
-    }
-
-    class AFrameBox {
-      constructor(x, y, z, w, h, d, c, text, opacity, top) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.d = d;
-        this.h = h;
-        this.w = w;
-        this.c = c;
-        this.text = text
-        this.opacity = opacity
-        this.top = top
-      }
-    }
-
-    function drawABox(box) {
-      let b = document.createElement('a-box')
-
-      const attr = {
-        depth: `${box.d}`,
-        height: `${box.h}`,
-        width: `${box.w}`,
-        color: `${box.c}`,
-        position: `${box.x} ${box.y} ${box.z}`,
-        material: `opacity: ${box.opacity}`,
-      }
-
-      setAttributes(b, attr)
-
-      if (box.w > box.text.length * 0.1) {
-        let text = document.createElement('a-text')
-        text.setAttribute('value', box.text)
-        text.setAttribute('position', `${-box.w / 2} 0 ${box.d / 2}`)
-        b.appendChild(text)
-      }
-
-      return b
-    }
-
-    function drawAFrameGraph(boxes) {
-      let entity = document.createElement('a-entity')
-      for (const b of boxes) {
-        entity.appendChild(drawABox(b))
-      }
-
-      return entity
-    }
-
-    const default_depth = 0.2
-    const default_height = 0.2
-    const default_graph_gap = 0.1
-    const max_width = 6
-    // Suitable width with default viewpoint
-
-    function draw3DGraphs(root) {
-      const start_x = max_width / 2
-
-      const start_y = default_height / 2
-      const start_z = -(root.length * default_depth + (root.length - 1) * default_graph_gap) / 2
-
-      const bs = root.map(e => Object.values(e.descendants)[0].value)
-      const width_list = bs.map(e => e / Math.max(...bs))
-
-
-      let allBoxes = []
-
-      for (let index = 0; index < root.length; index++) {
-        const e = root[index];
-
-        const width = max_width * width_list[index]
-
-        let boxes = drawSubBox(e,
-          start_x - width / 2, start_y, start_z + index * (default_depth + default_graph_gap),
-          width)
-
-        allBoxes.push(boxes)
-      }
-
-      return allBoxes
-    }
-
-    function drawSubBox(ele, x, y, z, width) {
-      let boxes = [];
-
-      const color = nameToColor(ele.name)
-      // draw translucent if level is too high..
-
-      let opacity = 1
-      if (ele.level > 10)
-        opacity = (20 - ele.level) / 10
-
-      if (ele.level > 20)
-        return boxes
-
-      boxes.push(new AFrameBox(x, y, z, width, default_height, default_depth, color, ele.name, opacity, ele.top))
-
-      let now_x = x - width / 2
-      const new_y = y + default_height // new stack level
-
-      for (const k in ele.descendants) {
-        e = ele.descendants[k]
-
-        const new_width = width * e.value / ele.value
-
-        const new_x = now_x + new_width / 2
-        now_x += new_width
-        boxes = boxes.concat(drawSubBox(e, new_x, new_y, z, new_width)).sort((a, b) => a.y - b.y)
-      }
-
-      return boxes
-    }
-
-    const max_pixel = 100;
-
-    // from center and draw from center
-    function drawRect(ctx, x, y, l, w, c) {
-
-      ctx.fillStyle = c;
-      ctx.fillRect(x - l, y - w, l * 2, w * 2);
-    }
-
-    function drawVertical2DView(ctx, data) {
-
-      const all_data = data.flat().filter(d => d.top).sort((a, b) => a.y - b.y)
-      for (d of all_data) {
-        drawRect(ctx, d.z / max_width * max_pixel + max_pixel / 2,
-          d.x / max_width * max_pixel + max_pixel / 2,
-          default_depth / 2 * max_pixel / max_width,
-          d.w / 2 * max_pixel / max_width,
-          d.c)
-      }
-    }
-
-    AFRAME.registerComponent('ortho', {
-      init: function () {
-        var sceneEl = this.el.sceneEl;
-        sceneEl.addEventListener('render-target-loaded', () => {
-          this.originalCamera = sceneEl.camera;
-          this.cameraParent = sceneEl.camera.parent;
-          this.orthoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1);
-          this.cameraParent.add(this.orthoCamera);
-          sceneEl.camera = this.orthoCamera;
-        });
-      },
-      remove: function () {
-        this.cameraParent.remove(this.orthoCamera);
-        sceneEl.camera = this.originalCamera;
-      }
-    });
-
-    let rootmap;
-
-    function updateAFrame() { }
-
-    function update2D() { }
-
-    function updateD3() {
-      const m = mapToD3Tree(rootmap[selected])
-      d3.select("#chart")
-        .datum(m)
-        .call(chart);
-
-      document.getElementById("numfg").innerHTML = selected
-    }
-
-    function updateAll() {
-      // Clear AFrame
-      let ele = document.getElementById('root')
-      ele.innerHTML = ''
-      if (cameraB) {
-        ele.setAttribute('rotation', "0 -45 -90")
-        ele.setAttribute('position', "0 1.5 -3")
-        ele.setAttribute('scale', "0.5 0.5 0.5")
-      } else {
-        ele.setAttribute('rotation', "0 -45 0")
-        ele.setAttribute('position', "0 0 -3")
-        ele.setAttribute('scale', "0.7 0.7 0.7")
-      }
-
-      // Handle Data
-      const rootMap = handleData(data, num_graphs)
-      rootmap = rootMap
-
-      // Regenerate D3
-      updateD3()
-
-      // Draw 3d flamegraphs
-      const all = draw3DGraphs(rootMap);
-      all.forEach(a => { ele.appendChild(drawAFrameGraph(a)) })
-
-      // Draw Canvas
-      let canvas = document.getElementById('my-canvas')
-      canvas.width = canvas.width
-      let ctx = canvas.getContext('2d');
-
-      drawVertical2DView(ctx, all)
-    }
-
-   
-
-
-
-   
-
-    var chart = flamegraph()
-      .width(960);
   }
 
-  // changeColor() {
-  //   const colors = ['red', 'orange', 'yellow', 'green', 'blue'];
-  //   this.setState({
-  //     color: colors[Math.floor(Math.random() * colors.length)]
-  //   });
-  // }
-   increasefg=()=> {
-    num_graphs++
-    updateAll()
+  increasefg = () => {
+    this.setState({ num_graphs: this.state.num_graphs + 1 })
   }
-  decreasefg=()=> {
-    num_graphs--
-    updateAll()
-  }
-   rotate =()=> {
-    cameraB = true
-    updateAll()
+  decreasefg = () => {
+    this.setState({ num_graphs: this.state.num_graphs - 1 })
   }
 
-  reset=()=> {
-    cameraB = false
-    updateAll()
-  }
-
-  nextFlameGraph=()=> {
-    if (selected < num_graphs - 1) {
-      selected++
-      updateD3()
+  nextFlameGraph = () => {
+    if (this.state.selected < this.state.num_graphs - 1) {
+      this.setState({ selected: this.state.selected + 1 })
     }
   }
 
-  prevFlameGraph=()=> {
-    if (selected > 0) {
-      selected--
-      updateD3()
+  prevFlameGraph = () => {
+    if (this.state.selected > 0) {
+      this.setState({ selected: this.state.selected - 1 })
     }
+  }
+
+  originalView = () => {
+
+  }
+
+  verticalView = () => {
+
+  }
+
+  handleFileFinish = (e) => {
+    const text = (e.target.result)
+    const data = JSON.parse(text)
+    let rm = handleData(data, this.state.num_graphs)
+
+    console.log(data, this.state.num_graphs)
+    this.setState({ rootMap: rm })
+    console.log("Set state", rm)
+  };
+
+  onFile = (e) => {
+    e.preventDefault()
+    const reader = new FileReader()
+    reader.onload = this.handleFileFinish
+    reader.readAsText(e.target.files[0])
   }
 
   render() {
@@ -507,27 +416,33 @@ export default class VR extends React.Component {
       //   </Entity>
       // </Scene>
       <div>
-        <ScriptTag isHydrating={true} type="text/javascript" src="https://aframe.io/releases/1.3.0/aframe.min.js" />
-        <ScriptTag isHydrating={true} type="text/javascript" src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js" />
-        <ScriptTag isHydrating={true} type="text/javascript" src="https://rawgit.com/rdub80/aframe-gui/master/dist/aframe-gui.min.js" />
-        <ScriptTag isHydrating={true} type="text/javascript" src="https://unpkg.com/aframe-debug-cursor-component/dist/aframe-debug-cursor-component.min.js" />
         <canvas id="my-canvas" style={{ width: 500, height: 500 }} crossOrigin="anonymous"></canvas>
         <div id="chart"></div>
+
+        <input type="file" onChange={(e) => this.onFile(e)}></input>
         <button onClick={this.increasefg}>+</button>
         <button onClick={this.decreasefg}>-</button>
-        <button onClick={this.rotate}>Rotate</button>
-        <button onClick={this.reset}>Reset</button>
         <button onClick={this.nextFlameGraph}>Next flamegraph</button>
         <button onClick={this.prevFlameGraph}>Prev flamegraph</button>
-        <span>Now on flamegraph: </span><span id="numfg">0</span>
+        <button onClick={this.originalView}>Original view</button>
+        <button onClick={this.verticalView}>Vertical view</button>
+        <span>Now on flamegraph: </span><span>{this.num_graphs}</span>
 
-        <Scene debug embedded>
-          <a-assets>
-          </a-assets>
-          <a-sky color="white"></a-sky>
-          <a-plane color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></a-plane>
-          <Entity camera="active: true" position="0 4 0" rotation="-60 0 0"></Entity>
-          <Entity id="root" wasd-controls></Entity>
+        <Scene embedded ortho>
+          <Entity primitive='a-sky' color="white"></Entity>
+          <Entity primitive='a-plane' color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></Entity>
+
+          <Entity wasd-controls
+            rotation={{ x: 0, y: 45, z: 0 }}
+            scale={{ x: 0, y: 0, z: -3 }}
+            position={{ x: 0, y: 0, z: -5 }}
+            animation={{ property: 'rotation', to: '0 -90 -90', startEvents: 'vertical' }}
+            animation__2={{ property: 'rotation', to: '20 -45 -20', startEvents: 'vertical' }}
+          >
+            {
+              this.state.rootMap && draw3DGraphs(this.state.rootMap).map((a, i) => drawAFrameGraph(a, i))
+            }
+          </Entity>
           <Entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></Entity>
           <Entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></Entity>
         </Scene>
