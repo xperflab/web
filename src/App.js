@@ -8,6 +8,9 @@ import { Route, Switch, useHistory } from 'react-router-dom'
 import FlameGraph from "./pages/flame_graph";
 import VR from "./pages/vr"
 import Treetable from "./pages/treetable";
+import './pages-css/header.css'
+import './pages-css/table.css'
+import './pages-css/responsive.css'
 var showCurrentFile = false;
 
 

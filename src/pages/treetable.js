@@ -17,12 +17,14 @@ const MOCK_DATA = [
 export default class Treetable extends Component {
  
   state = {
-    treeValue: ""
+    treeValue: "",
+    dataShowType: 0,
+    metricIndex:1
   };
 
-  treeTableRef = React.createRef();
+
   componentWillMount(){
-    Module._updateValueTree(1, 0, 0);
+    Module._updateValueTree(1, this.state.dataShowType, this.state.metricIndex);
     let jsonStr = Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
     let tableList = JSON.parse(jsonStr);
     let jsonStr2 = window.Module.cwrap('getMetricDesJsonStr', 'string')();
@@ -30,7 +32,7 @@ export default class Treetable extends Component {
     console.log(MetricTypesArray)
    // this.state.treeValue = TreeState.create(tableList)
    console.log(tableList)
-    this.state.treeValue = TreeState.create(MOCK_DATA)
+    this.state.treeValue = TreeState.create(tableList)
     console.log(this.state.treeValue)
 }
   render() {
@@ -53,6 +55,7 @@ export default class Treetable extends Component {
           ref={this.treeTableRef}
           onScroll={this.handleOnScroll}>
           <TreeTable.Column renderCell={this.renderIndexCell} renderHeaderCell={this.renderHeaderCell('Name')} basis="180px" grow="0"/>
+        
         </TreeTable>
       </div>
     );
@@ -89,12 +92,18 @@ export default class Treetable extends Component {
   renderIndexCell =(row) => {
     console.log(row)
     return (
-      <div>
-        <button className={`toggle-button ${row.$state.isExpanded ? 'expanded' : ''}`}
-          onClick={row.toggleChildren}>
-          <span>{row.data.name}</span>
-        </button>
-      </div>
+      // <div>
+      //   <button className={`toggle-button ${row.$state.isExpanded ? 'expanded' : ''}`}
+      //     onClick={row.toggleChildren}>
+      //     <div style={{overflow:'hidden', whiteSpace:'nowrap' ,textOverflow:'ellipsis'}}></div><span>{row.data.name}</span>
+      //   </button>
+      // </div>
+      <div style={{ paddingLeft: (row.metadata.depth * 15) + 'px'}}>
+      <button className={`toggle-button ${row.$state.isExpanded ? 'expanded' : ''}`}
+        onClick={row.toggleChildren}>
+         <div style={{overflow:'hidden', whiteSpace:'nowrap' ,textOverflow:'ellipsis'}}><span>{row.data.name}</span></div>
+      </button>
+    </div>
     );
   }
 
