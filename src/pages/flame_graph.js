@@ -305,6 +305,18 @@ export default class FlameGraph extends Component {
       outline.mouseout = function (mouseData) {
         this.tint = 0xFFFFFF;
     }
+     outline.on('touchend', function(e) {
+      console.log("touch")
+        window.postMessage({
+          type: "drawClickNode",
+          data: {
+            id: id,
+            x: 0,
+            y: y,
+            h: h
+          }
+        });
+    });
   
       outline.click = function(ev){
         console.log("click")
