@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import XEUtils, { filter } from "xe-utils";
 import * as PIXI from "pixi.js";
 import '../pages-css/flame_graph.css';
+import debounce from 'lodash/debounce';
 import Search from "../compoents/search";
 import Select from 'react-select';
 import {
@@ -130,6 +131,7 @@ export default class FlameGraph extends Component {
             const message = event.data; // The json data that the extension sent
             switch (message.type) {
               case "drawClickNode": {
+                
                 console.log(this);
                 this.state.global.texts.innerHTML = '';
                 this.state.global.app.stage.removeChildren();
@@ -157,64 +159,64 @@ export default class FlameGraph extends Component {
   componentDidUpdate(prevProps, prevState) { 
 
     if (prevState.focusNode.dataShowType != this.state.focusNode.dataShowType || this.state.focusNode.metricIndex != prevState.focusNode.metricIndex) {
-      this.state.global.texts.innerHTML = '';
-      this.state.focusNode.metricIndex = 0;
-      this.state.focusNode.id = 2;
-      this.state.focusNode.x = 0;
-      this.state.focusNode.y = 0;
-      this.state.focusNode.hovorId = 2;
-      this.state.global.messageDetails = document.getElementById("details");
-      this.state.global.container = document.getElementById("viewContainer");
-      this.state.global.textsRender = document.getElementById("renderContainer");
-      this.state.global.viewStyle = window.getComputedStyle(
-        this.state.global.container,
-        null
-      );
-      this.state.global.width =
-        parseInt(this.state.global.viewStyle.width) -
-        2 * parseInt(this.state.global.viewStyle.paddingLeft) -
-        2 * parseInt(this.state.global.viewStyle.marginLeft);
-      let bgColor = this.state.global.viewStyle.backgroundColor.match(/\d+/g);
+      // this.state.global.texts.innerHTML = '';
+      // this.state.focusNode.metricIndex = 0;
+      // this.state.focusNode.id = 2;
+      // this.state.focusNode.x = 0;
+      // this.state.focusNode.y = 0;
+      // this.state.focusNode.hovorId = 2;
+      // this.state.global.messageDetails = document.getElementById("details");
+      // this.state.global.container = document.getElementById("viewContainer");
+      // this.state.global.textsRender = document.getElementById("renderContainer");
+      // this.state.global.viewStyle = window.getComputedStyle(
+      //   this.state.global.container,
+      //   null
+      // );
+      // this.state.global.width =
+      //   parseInt(this.state.global.viewStyle.width) -
+      //   2 * parseInt(this.state.global.viewStyle.paddingLeft) -
+      //   2 * parseInt(this.state.global.viewStyle.marginLeft);
+      // let bgColor = this.state.global.viewStyle.backgroundColor.match(/\d+/g);
   
-      function ColorToHex(color) {
-        var hexadecimal = color.toString(16);
-        return hexadecimal.length == 1 ? "0" + hexadecimal : hexadecimal;
-      }
+      // function ColorToHex(color) {
+      //   var hexadecimal = color.toString(16);
+      //   return hexadecimal.length == 1 ? "0" + hexadecimal : hexadecimal;
+      // }
   
-      function ConvertRGBtoHex(red, green, blue) {
-        return "0x" + ColorToHex(red) + ColorToHex(green) + ColorToHex(blue);
-      }
-  
-  
+      // function ConvertRGBtoHex(red, green, blue) {
+      //   return "0x" + ColorToHex(red) + ColorToHex(green) + ColorToHex(blue);
+      // }
   
   
   
   
   
-      this.state.global.textsTop = -this.props.height;
-      this.state.global.textsRender.style.top = this.state.global.textsTop + "px";
-      this.state.global.textsRender.style.width = this.state.global.width + "px";
-      this.state.global.textsRender.style.height = this.props.height + "px";
-      this.state.global.texts = document.getElementById("renderTexts");
-      this.state.global.app = new PIXI.Application({
-        view: document.getElementById("renderView"),
-        width: this.state.global.width,
-        height: this.props.height,
-        backgroundColor: ConvertRGBtoHex(
-          parseInt(255),
-          parseInt(255),
-          parseInt(255)
-        )
-      });
-      this.state.global.container.appendChild(this.state.global.app.view);
   
-            window.Module._setUpDrawFlameGraph(-1, window.Module.addFunction(this.drawRectNode, 'viiiiiji'));
-            window.onresize = this.onWindowResize;
-            // let jsonStr = window.Module.cwrap('getMetricDesJsonStr', 'string')();
-            // console.log(jsonStr)
-            // this.state.metricTypesArray= JSON.parse(jsonStr);
-          //  this.state.global.messageDetails.innerHTML = window.Module.cwrap('getContextDetails', 'string', ['number'])(id);
-          console.log("1")
+  
+      // this.state.global.textsTop = -this.props.height;
+      // this.state.global.textsRender.style.top = this.state.global.textsTop + "px";
+      // this.state.global.textsRender.style.width = this.state.global.width + "px";
+      // this.state.global.textsRender.style.height = this.props.height + "px";
+      // this.state.global.texts = document.getElementById("renderTexts");
+      // this.state.global.app = new PIXI.Application({
+      //   view: document.getElementById("renderView"),
+      //   width: this.state.global.width,
+      //   height: this.props.height,
+      //   backgroundColor: ConvertRGBtoHex(
+      //     parseInt(255),
+      //     parseInt(255),
+      //     parseInt(255)
+      //   )
+      // });
+      // this.state.global.container.appendChild(this.state.global.app.view);
+  
+      //       window.Module._setUpDrawFlameGraph(-1, window.Module.addFunction(this.drawRectNode, 'viiiiiji'));
+      //       window.onresize = this.onWindowResize;
+      //       // let jsonStr = window.Module.cwrap('getMetricDesJsonStr', 'string')();
+      //       // console.log(jsonStr)
+      //       // this.state.metricTypesArray= JSON.parse(jsonStr);
+      //     //  this.state.global.messageDetails.innerHTML = window.Module.cwrap('getContextDetails', 'string', ['number'])(id);
+      //     console.log("1")
            this.drawFlameGraph(this.state.focusNode.dataShowType, this.state.focusNode.metricIndex, this.state.focusNode.filterName);
     }
     
@@ -318,7 +320,7 @@ export default class FlameGraph extends Component {
         });
     });
   
-      outline.click = function(ev){
+      outline.click =XEUtils.debounce(  function(ev){
         console.log("click")
         window.postMessage({
           type: "drawClickNode",
@@ -330,7 +332,9 @@ export default class FlameGraph extends Component {
           }
         });
   
-      };
+      }, 200)
+      
+ ;
   
      this.state.global.app.stage.addChild(outline);
   
