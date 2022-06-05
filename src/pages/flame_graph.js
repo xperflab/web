@@ -42,10 +42,10 @@ export default class FlameGraph extends Component {
       global: {},
       metricTypesArray:[] ,
       focusNode: {
-        dataShowType : 0,
-        metricIndex : 0,
-        filterName:''
       },
+      dataShowType:0,
+      metricIndex : 0,
+      filterName:'',
       value:''
     };
     this.handleChange = this.handleChange.bind(this);
@@ -60,11 +60,11 @@ export default class FlameGraph extends Component {
   };
 
   componentDidMount() {
-    console.log("Mount")
+    console.log(this)
 
    
-   // this.state.focusNode.dataShowType = 0;
-   // this.state.focusNode.metricIndex = 0;
+   // this.state.dataShowType = 0;
+   // this.state.metricIndex = 0;
     this.state.focusNode.id = 2;
     this.state.focusNode.x = 0;
     this.state.focusNode.y = 0;
@@ -125,24 +125,23 @@ export default class FlameGraph extends Component {
         );
           console.log(this.state.metricTypesArray[0])
           console.log("3")
-          this.drawFlameGraph(this.state.focusNode.dataShowType, this.state.focusNode.metricIndex, "");
+          this.drawFlameGraph(this.state.dataShowType, this.state.metricIndex, "");
           
           window.addEventListener("message", (event) => {
             const message = event.data; // The json data that the extension sent
             switch (message.type) {
               case "drawClickNode": {
-                
                 console.log(this);
                 this.state.global.texts.innerHTML = '';
                 this.state.global.app.stage.removeChildren();
                 this.state.focusNode.id = message.data.id;
                 this.state.focusNode.x = message.data.x;
                 this.state.focusNode.y = message.data.y;
-                console.log(message.data)
-                console.log(this.state.global.width)
-                console.log("2")
-                window.Module._drawFlameGraphClickNode(message.data.id, message.data.x, message.data.y, this.state.global.width, message.data.h);
-                let clickNodeMessageStr = window.Module.cwrap('getClickNodeMessage', 'string', ['number', 'number', 'number'])(this.state.focusNode.id, 0, this.state.focusNode.metricIndex);
+                console.log(message.data.x)
+             //   console.log(this.state.global.width)
+            //    console.log("2")
+                let drawClickNodes = XEUtils.debounce(window.Module._drawFlameGraphClickNode(message.data.id, message.data.x, message.data.y, this.state.global.width, message.data.h), 200);
+                let clickNodeMessageStr = window.Module.cwrap('getClickNodeMessage', 'string', ['number', 'number', 'number'])(this.state.focusNode.id, 0, this.state.metricIndex);
                 let obj = JSON.parse(clickNodeMessageStr);
                 break;
             }
@@ -152,81 +151,33 @@ export default class FlameGraph extends Component {
               this.state.global.messageDetails.innerHTML = Module.cwrap('getContextDetails', 'string', ['number'])(this.state.focusNode.hovorId);
               break;
           }
-            }
+        }
           }
           )
   }
-  componentDidUpdate(prevProps, prevState) { 
-
-    if (prevState.focusNode.dataShowType != this.state.focusNode.dataShowType || this.state.focusNode.metricIndex != prevState.focusNode.metricIndex) {
-      // this.state.global.texts.innerHTML = '';
-      // this.state.focusNode.metricIndex = 0;
-      // this.state.focusNode.id = 2;
-      // this.state.focusNode.x = 0;
-      // this.state.focusNode.y = 0;
-      // this.state.focusNode.hovorId = 2;
-      // this.state.global.messageDetails = document.getElementById("details");
-      // this.state.global.container = document.getElementById("viewContainer");
-      // this.state.global.textsRender = document.getElementById("renderContainer");
-      // this.state.global.viewStyle = window.getComputedStyle(
-      //   this.state.global.container,
-      //   null
-      // );
-      // this.state.global.width =
-      //   parseInt(this.state.global.viewStyle.width) -
-      //   2 * parseInt(this.state.global.viewStyle.paddingLeft) -
-      //   2 * parseInt(this.state.global.viewStyle.marginLeft);
-      // let bgColor = this.state.global.viewStyle.backgroundColor.match(/\d+/g);
-  
-      // function ColorToHex(color) {
-      //   var hexadecimal = color.toString(16);
-      //   return hexadecimal.length == 1 ? "0" + hexadecimal : hexadecimal;
-      // }
-  
-      // function ConvertRGBtoHex(red, green, blue) {
-      //   return "0x" + ColorToHex(red) + ColorToHex(green) + ColorToHex(blue);
-      // }
-  
-  
-  
-  
-  
-  
-  
-      // this.state.global.textsTop = -this.props.height;
-      // this.state.global.textsRender.style.top = this.state.global.textsTop + "px";
-      // this.state.global.textsRender.style.width = this.state.global.width + "px";
-      // this.state.global.textsRender.style.height = this.props.height + "px";
-      // this.state.global.texts = document.getElementById("renderTexts");
-      // this.state.global.app = new PIXI.Application({
-      //   view: document.getElementById("renderView"),
-      //   width: this.state.global.width,
-      //   height: this.props.height,
-      //   backgroundColor: ConvertRGBtoHex(
-      //     parseInt(255),
-      //     parseInt(255),
-      //     parseInt(255)
-      //   )
-      // });
-      // this.state.global.container.appendChild(this.state.global.app.view);
-  
-      //       window.Module._setUpDrawFlameGraph(-1, window.Module.addFunction(this.drawRectNode, 'viiiiiji'));
-      //       window.onresize = this.onWindowResize;
-      //       // let jsonStr = window.Module.cwrap('getMetricDesJsonStr', 'string')();
-      //       // console.log(jsonStr)
-      //       // this.state.metricTypesArray= JSON.parse(jsonStr);
-      //     //  this.state.global.messageDetails.innerHTML = window.Module.cwrap('getContextDetails', 'string', ['number'])(id);
-      //     console.log("1")
-           this.drawFlameGraph(this.state.focusNode.dataShowType, this.state.focusNode.metricIndex, this.state.focusNode.filterName);
+  componentDidUpdate(prevProps, prevState){ 
+     console.log(prevState)
+     console.log(this.state)
+    
+    if (prevState.dataShowType != this.state.dataShowType ) {
+           this.drawFlameGraph(this.state.dataShowType, prevState.metricIndex, prevState.filterName);
+    } 
+    
+    if (this.state.metricIndex != prevState.metricIndex) {
+      this.drawFlameGraph(prevState.dataShowType, this.state.metricIndex, prevState.filterName);
+    }
+    
+    if (this.state.filterName != prevState.filterName) {
+      this.drawFlameGraph(prevState.dataShowType, prevState.metricIndex, this.state.filterName);
     }
     
     
   } 
    drawFlameGraph(dataShowType, metricIndex, functionFilter) {
-    if (this.state.focusNode.dataShowType != dataShowType || this.state.focusNode.metricIndex != metricIndex
+    if (this.state.dataShowType != dataShowType || this.state.metricIndex != metricIndex
     ) {
-      this.state.focusNode.dataShowType = dataShowType;
-      this.state.focusNode.metricIndex = metricIndex;
+      this.state.dataShowType = dataShowType;
+      this.state.metricIndex = metricIndex;
       this.state.focusNode.id = 2;
       this.state.focusNode.x = 0;
       this.state.focusNode.y = 0;
@@ -288,6 +239,7 @@ export default class FlameGraph extends Component {
       //   this.state.global.messageDetails.innerHTML = window.Module.cwrap('getContextDetails', 'string', ['number'])(id);
       // };
       outline.mouseover = function (mouseData) {
+
         this.tint = 0x9F78D9;
         window.postMessage(
             {
@@ -364,23 +316,37 @@ export default class FlameGraph extends Component {
     this.state.global.textsRender.style.height = this.props.height + "px";
   }
   changeToTopDown=()=>{
-    //this.state.focusNode.dataShowType = 1;
-    //this.drawFlameGraph(0,  this.state.focusNode.metricIndex, "")
-    this.setState({focusNode:{dataShowType : 0}})
+    //this.state.dataShowType = 1;
+    //this.drawFlameGraph(0,  this.state.metricIndex, "")
+    this.state.focusNode.id = 2;
+    this.state.focusNode.x = 0;
+    this.state.focusNode.y = 0;
+    this.state.focusNode.hovorId = 2;
+    this.setState({dataShowType : 0})
   }
+
+
   changeToBottomUp=()=>{
-    //this.state.focusNode.dataShowType = 1;
- 
-    this.setState({focusNode:{dataShowType : 1}})
-   // console.log(this.state.focusNode.dataShowType)
+    //this.state.dataShowType = 1;
+    console.log(this)
+    this.state.focusNode.id = 2;
+    this.state.focusNode.x = 0;
+    this.state.focusNode.y = 0;
+    this.state.focusNode.hovorId = 2;
+    this.setState({dataShowType : 1});
+   // console.log(this.state.dataShowType)
    //  window.onresize = this.onWindowResize;
-    //this.drawFlameGraph(this.state.focusNode.dataShowType,  this.state.focusNode.metricIndex, "")
+    //this.drawFlameGraph(this.state.dataShowType,  this.state.metricIndex, "")
   }
 
   changeToFlat=()=>{
-    //this.state.focusNode.dataShowType = 1;
-   // this.drawFlameGraph(2,  this.state.focusNode.metricIndex, "")
-   this.setState({focusNode:{dataShowType : 2}})
+    //this.state.dataShowType = 1;
+   // this.drawFlameGraph(2,  this.state.metricIndex, "")
+   this.state.focusNode.id = 2;
+   this.state.focusNode.x = 0;
+   this.state.focusNode.y = 0;
+   this.state.focusNode.hovorId = 2;
+   this.setState({dataShowType : 2})
   }
 
   componentWillReceiveProps(nextProps) {
@@ -390,7 +356,7 @@ export default class FlameGraph extends Component {
 handleChangeMetricIndex=(event)=>{
  // console.log(event)
   //console.log(event.target.options.selectedIndex)
-  this.setState({focusNode:{metricIndex:event.target.options.selectedIndex}})
+  this.setState({metricIndex:event.target.options.selectedIndex})
 }
 
 // handleSubmit = (event) => {
@@ -409,7 +375,7 @@ handleChange(event) {
 }
 
 handleSubmit(event) {
-  this.setState({focusNode:{filterName:XEUtils.toValueString(this.state.value).trim()}})
+  this.setState({filterName:XEUtils.toValueString(this.state.value).trim()})
 //  XEUtils.toValueString(this.state.value).trim();
   event.preventDefault();
 }
