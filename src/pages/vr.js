@@ -309,7 +309,7 @@ function drawVertical2DView(ctx, data) {
 
 function updateD3(rootmap, selected) {
   var chart = flamegraph()
-    .width(960);
+    .width(500);
 
   const m = mapToD3Tree(rootmap[selected])
   d3.select("#chart")
@@ -415,38 +415,46 @@ export default class VR extends React.Component {
       //     <Entity primitive="a-cursor" animation__click={{property: 'scale', startEvents: 'click', from: '0.1 0.1 0.1', to: '1 1 1', dur: 150}}/>
       //   </Entity>
       // </Scene>
-      <div>
-        <canvas id="my-canvas" style={{ width: 500, height: 500 }} crossOrigin="anonymous"></canvas>
-        <div id="chart"></div>
+      // <div>
+      //   <canvas id="my-canvas" style={{ width: 500, height: 500 }} crossOrigin="anonymous"></canvas>
+      //   <div id="chart"></div>
 
-        <input type="file" onChange={(e) => this.onFile(e)}></input>
-        <button onClick={this.increasefg}>+</button>
-        <button onClick={this.decreasefg}>-</button>
-        <button onClick={this.nextFlameGraph}>Next flamegraph</button>
-        <button onClick={this.prevFlameGraph}>Prev flamegraph</button>
-        <button onClick={this.originalView}>Original view</button>
-        <button onClick={this.verticalView}>Vertical view</button>
-        <span>Now on flamegraph: </span><span>{this.num_graphs}</span>
+      //   <input type="file" onChange={(e) => this.onFile(e)}></input>
+      //   <button onClick={this.increasefg}>+</button>
+      //   <button onClick={this.decreasefg}>-</button>
+      //   <button onClick={this.nextFlameGraph}>Next flamegraph</button>
+      //   <button onClick={this.prevFlameGraph}>Prev flamegraph</button>
+      //   <button onClick={this.originalView}>Original view</button>
+      //   <button onClick={this.verticalView}>Vertical view</button>
+      //   <span>Now on flamegraph: </span><span>{this.num_graphs}</span>
 
-        <Scene embedded ortho>
-          <Entity primitive='a-sky' color="white"></Entity>
-          <Entity primitive='a-plane' color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></Entity>
+      //   <Scene embedded ortho>
+      //     <Entity primitive='a-sky' color="white"></Entity>
+      //     <Entity primitive='a-plane' color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></Entity>
 
-          <Entity wasd-controls
-            rotation={{ x: 0, y: 45, z: 0 }}
-            scale={{ x: 0, y: 0, z: -3 }}
-            position={{ x: 0, y: 0, z: -5 }}
-            animation={{ property: 'rotation', to: '0 -90 -90', startEvents: 'vertical' }}
-            animation__2={{ property: 'rotation', to: '20 -45 -20', startEvents: 'vertical' }}
-          >
-            {
-              this.state.rootMap && draw3DGraphs(this.state.rootMap).map((a, i) => drawAFrameGraph(a, i))
-            }
-          </Entity>
-          <Entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></Entity>
-          <Entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></Entity>
-        </Scene>
-      </div>
+      //     <Entity wasd-controls
+      //       rotation={{ x: 0, y: 45, z: 0 }}
+      //       scale={{ x: 0, y: 0, z: -3 }}
+      //       position={{ x: 0, y: 0, z: -5 }}
+      //       animation={{ property: 'rotation', to: '0 -90 -90', startEvents: 'vertical' }}
+      //       animation__2={{ property: 'rotation', to: '20 -45 -20', startEvents: 'vertical' }}
+      //     >
+      //       {
+      //         this.state.rootMap && draw3DGraphs(this.state.rootMap).map((a, i) => drawAFrameGraph(a, i))
+      //       }
+      //     </Entity>
+      //     <Entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></Entity>
+      //     <Entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></Entity>
+      //   </Scene>
+      // </div>
+      <iframe 
+        src="vr.html"
+        width="100%"
+        height="1500"
+        title="iframe"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+        scrolling="auto"
+        ></iframe>
     );
   }
 }
