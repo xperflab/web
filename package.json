@@ -2,6 +2,7 @@
   "name": "my-project",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://yliang123.github.io/demo",
   "dependencies": {
     "@ant-design/icons": "4.5.0",
     "@headlessui/react": "^1.6.1",
