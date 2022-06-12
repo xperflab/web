@@ -2,8 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import 'antd/dist/antd.css';
 import "../pages-css/sidebar.css"
-import Axios from 'axios';
-import fileDownload from 'js-file-download';
 import { Layout, Menu, Icon } from 'antd';
 import {
   DesktopOutlined,
@@ -15,7 +13,7 @@ import {
   FundOutlined,
   TableOutlined,
   ExclamationCircleOutlined,
-  ProfileOutlined 
+  ProfileOutlined
 } from "@ant-design/icons";
 const { Header, Sider, Content } = Layout;
 const { SubMenu } = Menu;
@@ -25,8 +23,8 @@ export default class sidebar extends React.Component {
   }
   state = {
     collapsed: false,
-    showCurrentProfile:this.props.showCurrentProfile,
-    selectKey:"1"
+    showCurrentProfile: this.props.showCurrentProfile,
+    selectKey: "1"
   };
 
   onCollapse = collapsed => {
@@ -34,58 +32,48 @@ export default class sidebar extends React.Component {
     this.setState({ collapsed });
   };
   openExampleProfile = () => {
-    // Axios.get('https://www.github.com/yliang123/Example-Profile/blob/master/pprof', {
-    //   responseType: 'blob',
-    // }).then(res => {
-    //   const file = fileDownload(res.data, filename);
-    //   console.log(file)
-    // });
-
-    // fetch('https://github.com/yliang123/Example-Profile/blob/master/pprof?raw=true',{mode: 'no-cors'})
-    // .then(function(response) {
-    //   return response.arrayBuffer();}
-    // )
-    // .then(data => console.log(data))
     fetch('example.ezview')
-    .then(e =>e.arrayBuffer())
-    .then(binaryStr =>{ let result = window.decodeProfile(binaryStr, "0")
-      console.log(result)
-       if (result == 0) {
-        let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
-         console.log(jsonStr)
-        let fileExistList = JSON.parse(jsonStr)
-        for (let i = 0; i < fileExistList.length; i++) {
-          window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
+      .then(e => e.arrayBuffer())
+      .then(binaryStr => {
+        let result = window.decodeProfile(binaryStr, "0")
+        console.log(result)
+        if (result == 0) {
+          let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
+          console.log(jsonStr)
+          let fileExistList = JSON.parse(jsonStr)
+          for (let i = 0; i < fileExistList.length; i++) {
+            window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
+          }
+          //window.navigate("/flame_graph");  
+          this.props.changeComponentToFlamegraph()
+          this.props.changeShowCurrentProfile()
+          this.setState({ selectKey: '3' })
         }
-      //window.navigate("/flame_graph");  
-        this.props.changeComponentToFlamegraph()
-        this.props.changeShowCurrentProfile()
-        this.setState({selectKey:'3'})
-      }})
+      })
   }
-  componentDidUpdate(prevProps, prevState){
-    if(prevProps.showCurrentProfile != this.props.showCurrentProfile) {
-      this.setState({showCurrentProfile:this.props.showCurrentProfile})
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.showCurrentProfile != this.props.showCurrentProfile) {
+      this.setState({ showCurrentProfile: this.props.showCurrentProfile })
     }
-    
+
   }
-  onClick=(e)=> {
-    this.setState({selectKey: e.key})
+  onClick = (e) => {
+    this.setState({ selectKey: e.key })
   }
   render() {
     return (
 
       <Sider style={{ minHeight: '100vh' }} collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
         <div className="logo" />
-        <Menu theme="dark"  mode="inline" onClick={this.onClick} selectedKeys={[this.state.selectKey]}    defaultOpenKeys={['sub1']}>
+        <Menu theme="dark" mode="inline" onClick={this.onClick} selectedKeys={[this.state.selectKey]} defaultOpenKeys={['sub1']}>
 
           <Menu.Item key="1" onClick={() => {
 
             this.props.changeComponentToDropzone();
           }}>
             {/* <Icon type="pie-chart" /> */}
-            <FileOutlined/>
-         
+            <FileOutlined />
+
             <span>Open File</span>
           </Menu.Item>
           {this.state.showCurrentProfile && <SubMenu
@@ -93,9 +81,9 @@ export default class sidebar extends React.Component {
             title={
               <span>
                 {/* <Icon type="user" /> */}
-          
+
                 <FundOutlined />
-               
+
                 <span>Current Profile</span>
               </span>
             }
@@ -103,13 +91,13 @@ export default class sidebar extends React.Component {
             <Menu.Item key="3" onClick={() => { this.props.changeComponentToFlamegraph() }}><ExclamationCircleOutlined /> Flame Graph</Menu.Item>
             <Menu.Item key="4" onClick={() => { this.props.changeComponentToTreetable() }} ><TableOutlined />Tree Table</Menu.Item>
           </SubMenu>}
-          
+
           <Menu.Item key="9" onClick={() => { this.props.changeComponentToVR() }}>
             {/* <Icon type="file" /> */}
             <FundViewOutlined />
             <span>VR Trace</span>
           </Menu.Item>
-          <Menu.Item key="10" onClick={() => {this.openExampleProfile()}}>
+          <Menu.Item key="10" onClick={() => { this.openExampleProfile() }}>
             {/* <Icon type="file" /> */}
             <ProfileOutlined />
             <span>Example Profile</span>

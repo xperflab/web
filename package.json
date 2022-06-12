@@ -2,6 +2,7 @@
   "name": "my-project",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://yliang123.github.io/demo",
   "dependencies": {
     "@ant-design/icons": "4.5.0",
     "@headlessui/react": "^1.6.1",
@@ -17,7 +18,6 @@
     "babel-polyfill": "^6.3.14",
     "cp-react-tree-table": "^1.0.0-beta.13",
     "deepmerge": "4.2.2",
-    "js-file-download": "^0.4.12",
     "lodash": "^4.17.21",
     "pixi.js": "^6.3.2",
     "react": "^18.1.0",

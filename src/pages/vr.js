@@ -1,11 +1,9 @@
 import 'aframe';
 import 'aframe-animation-component';
 import 'aframe-particle-system-component';
+import { Entity } from 'aframe-react';
 import 'babel-polyfill';
-import { Entity, Scene } from 'aframe-react';
-import { Disclosure } from '@headlessui/react'
 import React from 'react';
-import { blockStatement } from '@babel/types';
 const colorHue = 'warm'
 
 require('./orthoAframeComponent.js');
@@ -450,7 +448,7 @@ export default class VR extends React.Component {
       <iframe 
         src="vr.html"
         width="100%"
-        height="1500"
+        height={window.innerHeight}
         title="iframe"
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
         scrolling="auto"
