@@ -35,6 +35,7 @@ export default class TreetableFlat extends Component {
       this.setState({columns:this.props.cols})
     }
     if (prevProps.tableList != this.props.tableList) {
+      this.setState({columns:this.props.cols})
       this.setState({tableList:this.props.tableList})
     }
   }

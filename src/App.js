@@ -199,19 +199,11 @@ render() {
         changeShowCurrentProfile={this.changeShowCurrentProfile}
         />
       <Layout className="site-layout">
-        <Header
-          className="site-layout-background"
-          style={{
-            padding: 0,
-          }}
-        >
-
-        </Header>
         <Content
           className="site-layout-background"
           style={{
-            margin: '24px 16px',
-            padding: 24,
+            margin: '12px 8px',
+            padding: 12,
             minHeight: 280,
           }}
         >

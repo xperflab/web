@@ -32,20 +32,14 @@ export default class sidebar extends React.Component {
   onCollapse = collapsed => {
     console.log(collapsed);
     this.setState({ collapsed });
+    window.postMessage(
+      {
+          type: "Flamegraph resize",
+          data: ""
+      }
+  );
   };
   openExampleProfile = () => {
-    // Axios.get('https://www.github.com/yliang123/Example-Profile/blob/master/pprof', {
-    //   responseType: 'blob',
-    // }).then(res => {
-    //   const file = fileDownload(res.data, filename);
-    //   console.log(file)
-    // });
-
-    // fetch('https://github.com/yliang123/Example-Profile/blob/master/pprof?raw=true',{mode: 'no-cors'})
-    // .then(function(response) {
-    //   return response.arrayBuffer();}
-    // )
-    // .then(data => console.log(data))
     fetch('example.ezview')
     .then(e =>e.arrayBuffer())
     .then(binaryStr =>{ let result = window.decodeProfile(binaryStr, "0")
@@ -73,10 +67,22 @@ export default class sidebar extends React.Component {
     this.setState({selectKey: e.key})
   }
   render() {
+    let renderComponent;
+    if (this.state.collapsed === false) {
+      renderComponent = ( <img src="/easyview2.png" style={{height:40,width:150}}></img>)
+    } else  {
+      renderComponent = ( <img src="/new_logo.png" style={{height:48,width:48}}></img>)
+    }
     return (
 
       <Sider style={{ minHeight: '100vh' }} collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
-        <div className="logo" />
+        <div >
+        <div className="logo"style={{display:'inline-block'}} >
+      {renderComponent}
+       
+        </div>
+       </div>
+        {/* <span style={color}>Easy View</span> */}
         <Menu theme="dark"  mode="inline" onClick={this.onClick} selectedKeys={[this.state.selectKey]}    defaultOpenKeys={['sub1']}>
 
           <Menu.Item key="1" onClick={() => {

@@ -72,6 +72,7 @@ export default class TreetableTopDown extends Component {
       <TreeTable
         rowKey="id"
         size="small"
+        rowClassName={(record, index) => console.log(record)}
         expandedRowKeys={this.state.expandedKeys}
         onExpandedRowsChange={this.onExpandedRowsChange}
         dataSource={this.state.tableList}

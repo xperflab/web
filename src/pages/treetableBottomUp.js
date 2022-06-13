@@ -36,6 +36,7 @@ export default class TreetableBottomUp extends Component {
       this.setState({columns:this.props.cols})
     }
     if (prevProps.tableList != this.props.tableList) {
+      console.log(this.props.tableList)
       this.setState({tableList:this.props.tableList})
     }
   }
@@ -77,7 +78,7 @@ sort=(e)=> {
       <TreeTable
         rowKey="id"
         size="small"
-        rowClassName={(record, index) => console.log(index)}
+        rowClassName={(record, index) => console.log(record)}
         expandedRowKeys={this.state.expandedKeys}
         onExpandedRowsChange={this.onExpandedRowsChange}
         dataSource={this.state.tableList}
