@@ -2,8 +2,8 @@ const colorHue = 'warm'
 
 let cameraB = false
 let selected = 0
-var num_graphs = 20
-var data
+let num_graphs = 20
+let data
 
 function generateHash(name) {
     // Return a vector (0.0->1.0) that is a hash of the input string.
@@ -193,12 +193,12 @@ function handleStack(root, e, start_time, epoch_time) {
     }
 }
 
-// max level = 20
+// max level = 28
 function mapToD3Tree(root) {
     let res = {}
     res.name = root.name
     res.value = root.value
-    if (!root.descendants || root.level > 20)
+    if (!root.descendants || root.level > 28)
         return null
     let ch = Object.values(root.descendants).map(e => mapToD3Tree(e)).filter(x => !!x)
     if (ch.length) {
@@ -264,14 +264,14 @@ function drawAFrameGraph(boxes) {
 const default_depth = 0.2
 const default_height = 0.2
 const default_graph_gap = 0.1
-const max_width = 6
-// Suitable width with default viewpoint
+const max_width = 10
 
+// Suitable width with default viewpoint
 function draw3DGraphs(root) {
     const start_x = max_width / 2
 
     const start_y = default_height / 2
-    const start_z = -(root.length * default_depth + (root.length - 1) * default_graph_gap) / 2
+    const start_z = (root.length * default_depth + (root.length - 1) * default_graph_gap) / 2
 
     const bs = root.map(e => Object.values(e.descendants)[0].value)
     const width_list = bs.map(e => e / Math.max(...bs))
@@ -285,7 +285,7 @@ function draw3DGraphs(root) {
         const width = max_width * width_list[index]
 
         let boxes = drawSubBox(e,
-            start_x - width / 2, start_y, start_z + index * (default_depth + default_graph_gap),
+            start_x - width / 2, start_y, start_z - index * (default_depth + default_graph_gap),
             width)
 
         allBoxes.push(boxes)
@@ -325,23 +325,24 @@ function drawSubBox(ele, x, y, z, width) {
     return boxes
 }
 
-const max_pixel = 100;
-
 // from center and draw from center
 function drawRect(ctx, x, y, l, w, c) {
-
     ctx.fillStyle = c;
     ctx.fillRect(x - l, y - w, l * 2, w * 2);
 }
 
 function drawVertical2DView(ctx, data) {
+    const new_height = window.innerHeight / 5
+    const max_pixel = window.innerWidth / 2
+
 
     const all_data = data.flat().filter(d => d.top).sort((a, b) => a.y - b.y)
     for (d of all_data) {
-        drawRect(ctx, d.z / max_width * max_pixel + max_pixel / 2,
-            d.x / max_width * max_pixel + max_pixel / 2,
+        drawRect(ctx,
+            max_pixel - d.z / max_width * max_pixel,
+            d.x / max_width * new_height + new_height / 2,
             default_depth / 2 * max_pixel / max_width,
-            d.w / 2 * max_pixel / max_width,
+            d.w / 2 * new_height / max_width,
             d.c)
     }
 }
@@ -368,11 +369,16 @@ AFRAME.registerComponent('ortho', {
 
 let rootmap;
 
-function updateAFrame() { }
-
-function update2D() { }
-
 function updateD3() {
+    if (!data)
+        return
+
+    if (flamegraphWidth != currentFlamegraphWidth) {
+        chart = flamegraph().width(flamegraphWidth).height(500)
+        currentFlamegraphWidth = flamegraphWidth
+        console.log("Update to ", flamegraphWidth)
+    }
+
     const m = mapToD3Tree(rootmap[selected])
     d3.select("#chart")
         .datum(m)
@@ -381,7 +387,21 @@ function updateD3() {
     document.getElementById("numfg").innerHTML = selected
 }
 
+function updateCanvas() {
+    const all = draw3DGraphs(rootmap);
+
+    let canvas = document.getElementById('my-canvas')
+    canvas.width = canvas.width
+    canvas.height = window.innerHeight * 0.2
+    let ctx = canvas.getContext('2d');
+
+    drawVertical2DView(ctx, all)
+}
+
 function updateAll() {
+    if (!data)
+        return
+
     // Clear AFrame
     let ele = document.getElementById('root')
     ele.innerHTML = ''
@@ -407,11 +427,7 @@ function updateAll() {
     all.forEach(a => { ele.appendChild(drawAFrameGraph(a)) })
 
     // Draw Canvas
-    let canvas = document.getElementById('my-canvas')
-    canvas.width = canvas.width
-    let ctx = canvas.getContext('2d');
-
-    drawVertical2DView(ctx, all)
+    updateCanvas()
 }
 
 function increasefg() {
@@ -459,8 +475,10 @@ function originalView() {
     ele.emit('original')
 }
 
-var chart = flamegraph()
-    .width(600);
+let flamegraphWidth = 600;
+let currentFlamegraphWidth = 600;
+
+let chart = flamegraph().width(600).height(500);
 
 function onInputfile(e) {
     const reader = new FileReader()
@@ -474,7 +492,76 @@ function onInputfile(e) {
     reader.readAsText(e.target.files[0])
 }
 
+function useTrace() {
+    useFetchFile("trace.json")
+}
+
+function useTraceGcc() {
+    useFetchFile("trace_gcc.json")
+}
+
+function zoomIn() {
+    let root = document.getElementById('root')
+    let s = root.getAttribute("scale");
+    s.x += 0.02
+    s.y += 0.02
+    s.z += 0.02
+}
+
+function zoomOut() {
+    let root = document.getElementById('root')
+    let s = root.getAttribute("scale");
+    s.x -= 0.02
+    s.y -= 0.02
+    s.z -= 0.02
+}
+
+function useFetchFile(filepath) {
+    fetch(filepath).then(
+        r => r.json()
+    ).then(
+        d => data = d
+    ).then(
+        updateAll()
+    )
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    // load window size and init all prop
+    flamegraphWidth = window.innerWidth / 3;
+
+    let canvas = document.getElementById('my-canvas')
+    canvas.setAttribute("width", window.innerWidth);
+    canvas.setAttribute("height", window.innerHeight / 5);
+
+    // register input event
     let ipFile = document.getElementById('fileinput')
     ipFile.addEventListener('change', onInputfile)
+
+    // on resize, re-render all things.
+    window.addEventListener("resize", resizeThrottler, false);
+
+    var resizeTimeout;
+    function resizeThrottler() {
+        // ignore resize events as long as an actualResizeHandler execution is in the queue
+        if (!resizeTimeout) {
+            resizeTimeout = setTimeout(function () {
+                resizeTimeout = null;
+                actualResizeHandler();
+
+                // The actualResizeHandler will execute at a rate of 15fps
+            }, 66);
+        }
+    }
+
+    function actualResizeHandler() {
+        // handle the resize event
+        flamegraphWidth = window.innerWidth / 3;
+
+        updateD3()
+
+        let canvas = document.getElementById('my-canvas')
+        canvas.setAttribute("width", window.innerWidth);
+        updateCanvas()
+    }
 });

@@ -1,12 +1,13 @@
 import 'aframe';
 import 'aframe-animation-component';
 import 'aframe-particle-system-component';
-import { Entity } from 'aframe-react';
+import { Entity, Scene } from 'aframe-react';
 import 'babel-polyfill';
 import React from 'react';
-const colorHue = 'warm'
 
 require('./orthoAframeComponent.js');
+
+const colorHue = 'warm'
 
 function generateHash(name) {
   // Return a vector (0.0->1.0) that is a hash of the input string.
@@ -235,6 +236,9 @@ const max_width = 6
 // Suitable width with default viewpoint
 
 function draw3DGraphs(root) {
+  if (root.length == 0)
+    return []
+
   const start_x = max_width / 2
   const start_y = default_height / 2
   const start_z = -(root.length * default_depth + (root.length - 1) * default_graph_gap) / 2
@@ -323,13 +327,39 @@ function updateCanvas() {
   drawVertical2DView(ctx, all)
 }
 
+
+const VRComp = (prop) => {
+  return (
+    <Scene embedded>
+      <a-assets>
+        <img id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg" />
+        <img id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg" />
+      </a-assets>
+
+      <Entity primitive='a-sky' color="white"></Entity>
+      <Entity primitive='a-plane' color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></Entity>
+
+      <Entity particle-system={{ preset: 'snow', particleCount: 2000 }} />
+      <Entity text={{ value: 'Hello, A-Frame React!', align: 'center' }} position={{ x: 0, y: 2, z: -1 }} />
+
+      <Entity>
+        {
+          prop.rootMap && draw3DGraphs(prop.rootMap).map((a, i) => drawAFrameGraph(a, i))
+        }
+      </Entity>
+    </Scene>
+  )
+}
+
+
+
 export default class VR extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       selected: 0,
       num_graphs: 1,
-      rootMap: []
+      rootMap: [],
     };
   }
 
@@ -384,35 +414,22 @@ export default class VR extends React.Component {
   render() {
 
     return (
-      // <Scene>
-      //   <a-assets>
-      //     <img id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg"/>
-      //     <img id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg"/>
-      //   </a-assets>
 
-      //   <Entity primitive="a-plane" src="#groundTexture" rotation="-90 0 0" height="100" width="100"/>
-      //   <Entity primitive="a-light" type="ambient" color="#445451"/>
-      //   <Entity primitive="a-light" type="point" intensity="2" position="2 4 4"/>
-      //   <Entity primitive="a-sky" height="2048" radius="30" src="#skyTexture" theta-length="90" width="2048"/>
-      //   <Entity particle-system={{preset: 'snow', particleCount: 2000}}/>
-      //   <Entity text={{value: 'Hello, A-Frame React!', align: 'center'}} position={{x: 0, y: 2, z: -1}}/>
+      // <div style={{ height: '100%' }}>
+      //   <input type="file" onChange={(e) => this.onFile(e)}></input>
+      //   <button onClick={this.increasefg}>+</button>
+      //   <button onClick={this.decreasefg}>-</button>
+      //   <button onClick={this.nextFlameGraph}>Next flamegraph</button>
+      //   <button onClick={this.prevFlameGraph}>Prev flamegraph</button>
+      //   <button onClick={this.originalView}>Original view</button>
+      //   <button onClick={this.verticalView}>Vertical view</button>
+      //   <span>Now on flamegraph: </span><span>{this.num_graphs}</span>
 
-      //   <Entity id="box"
-      //     geometry={{primitive: 'box'}}
-      //     material={{color: this.state.color, opacity: 0.6}}
-      //     animation__rotate={{property: 'rotation', dur: 2000, loop: true, to: '360 360 360'}}
-      //     animation__scale={{property: 'scale', dir: 'alternate', dur: 100, loop: true, to: '1.1 1.1 1.1'}}
-      //     position={{x: 0, y: 1, z: -3}}
-      //     events={{click: this.changeColor.bind(this)}}>
-      //     <Entity animation__scale={{property: 'scale', dir: 'alternate', dur: 100, loop: true, to: '2 2 2'}}
-      //             geometry={{primitive: 'box', depth: 0.2, height: 0.2, width: 0.2}}
-      //             material={{color: '#24CAFF'}}/>
-      //   </Entity>
+      //   <VRComp rootMap={this.state.rootMap}></VRComp>
+      // </div>
 
-      //   <Entity primitive="a-camera">
-      //     <Entity primitive="a-cursor" animation__click={{property: 'scale', startEvents: 'click', from: '0.1 0.1 0.1', to: '1 1 1', dur: 150}}/>
-      //   </Entity>
-      // </Scene>
+
+
       // <div>
       //   <canvas id="my-canvas" style={{ width: 500, height: 500 }} crossOrigin="anonymous"></canvas>
       //   <div id="chart"></div>
@@ -445,14 +462,50 @@ export default class VR extends React.Component {
       //     <Entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></Entity>
       //   </Scene>
       // </div>
-      <iframe 
+
+      // <div style={{ height: '100%' }}>
+      //   <div className="col-auto">
+      //     <div>
+      //       <input type="file" onChange={(e) => this.onFile(e)}></input>
+      //     </div>
+      //     <button onClick={this.increasefg}>+</button>
+      //     <button onClick={this.decreasefg}>-</button>
+      //     <button onClick={this.nextFlameGraph}>Next flamegraph</button>
+      //     <button onClick={this.prevFlameGraph}>Prev flamegraph</button>
+      //     <button onClick={this.originalView}>Original view</button>
+      //     <button onClick={this.verticalView}>Vertical view</button>
+      //     <span>Now on flamegraph: </span><span>{this.num_graphs}</span>
+      //   </div>
+
+      //   <canvas id="my-canvas" style={{ width: '300px', height: '300px', display: 'inline' }} crossOrigin="anonymous" />
+      //   <span id="chart" />
+
+      //   <Scene embedded>
+      //     <Entity primitive='a-sky' color="white"></Entity>
+      //     <Entity primitive='a-plane' color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></Entity>
+
+      //     <Entity wasd-controls
+      //       rotation={{ x: 0, y: 45, z: 0 }}
+      //       scale={{ x: 0, y: 0, z: -3 }}
+      //       position={{ x: 0, y: 0, z: -5 }}
+      //       animation={{ property: 'rotation', to: '0 -90 -90', startEvents: 'vertical' }}
+      //       animation__2={{ property: 'rotation', to: '20 -45 -20', startEvents: 'vertical' }}
+      //     >
+
+      //     </Entity>
+      //     <Entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></Entity>
+      //     <Entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></Entity>
+      //   </Scene>
+      // </div>
+
+      <iframe
         src="vr.html"
         width="100%"
-        height={window.innerHeight}
+        height="100%"
         title="iframe"
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
         scrolling="auto"
-        ></iframe>
+      ></iframe>
     );
   }
 }

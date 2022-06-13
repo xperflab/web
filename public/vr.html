@@ -6,9 +6,6 @@
   <title>afdemo</title>
   <meta name="description" content="afdemo">
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-  <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
-  <script src="https://rawgit.com/rdub80/aframe-gui/master/dist/aframe-gui.min.js"></script>
-  <script src="https://unpkg.com/aframe-debug-cursor-component/dist/aframe-debug-cursor-component.min.js"></script>
   <link rel="stylesheet" type="text/css"
     href="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.1.3/dist/d3-flamegraph.css">
   <style>
@@ -36,45 +33,65 @@
   <!-- Script -->
   <script src="vr.js"></script>
 
-  <div class="container">
-    <canvas id="my-canvas" style="width:300px; height:300px; display: inline;" crossorigin="anonymous"></canvas>
-    <span id="chart"></span>
-    <div class="mb-3">
-      <input class="form-control form-control-sm" type="file" id="fileinput"></input>
+  <div class="container-fluid flex-fill">
+    <div class="row">
+      <span>
+        <input class="form-control form-control-sm" type="file" id="fileinput"
+          style="width: 220px; display: inline;"></input>
+
+        <button class="btn btn-primary btn-sm" onclick="useTraceGcc()">Use trace_gcc.json</button>
+        <button class="btn btn-primary btn-sm" onclick="useTrace()">Use trace.json</button>
+
+        <span>Now on flamegraph: </span><span id="numfg">0</span>
+      </span>
     </div>
-    <div class="col-auto">
-      <button class="btn btn-primary btn-sm" onclick="increasefg()">+</button>
-      <button class="btn btn-primary btn-sm" onclick="decreasefg()">-</button>
-      <button class="btn btn-primary btn-sm" onclick="rotate()">Rotate</button>
-      <button class="btn btn-primary btn-sm" onclick="reset()">Reset</button>
-      <button class="btn btn-primary btn-sm" onclick="nextFlameGraph()">Next flamegraph</button>
-      <button class="btn btn-primary btn-sm" onclick="prevFlameGraph()">Prev flamegraph</button>
-      <button class="btn btn-primary btn-sm" onclick="originalView()">Original view</button>
-      <button class="btn btn-primary btn-sm" onclick="verticalView()">Vertical view</button>
+
+    <div class="row">
+      <span class="btn-group">
+        <button type="button" class="btn btn-light btn-sm" onclick="increasefg()">+</button>
+        <button type="button" class="btn btn-light btn-sm" onclick="decreasefg()">-</button>
+        <button type="button" class="btn btn-light btn-sm" onclick="nextFlameGraph()">Next flamegraph</button>
+        <button type="button" class="btn btn-light btn-sm" onclick="prevFlameGraph()">Prev flamegraph</button>
+        <button type="button" class="btn btn-light btn-sm" onclick="originalView()">Original view</button>
+        <button type="button" class="btn btn-light btn-sm" onclick="verticalView()">Vertical view</button>
+        <button type="button" class="btn btn-light btn-sm" onclick="zoomIn()">Zoom In</button>
+        <button type="button" class="btn btn-light btn-sm" onclick="zoomOut()">Zoom Out</button>
+      </span>
     </div>
-    <div>Now on flamegraph: </span><span id="numfg">0</div>
 
-    <a-scene load-data debug embedded ortho
-      inspector="https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js">
-      <!-- Sky -->
-      <a-sky color="white"></a-sky>
+    <div class="row">
+      <canvas id="my-canvas" style="display: inline;" crossorigin="anonymous"></canvas>
+    </div>
 
-      <!-- Ground -->
-      <a-plane color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></a-plane>
+    <div class="row">
+      <div class="col-8 p-0">
+        <a-scene embedded ortho>
+          <!-- Sky -->
+          <a-sky color="white"></a-sky>
 
-      <!-- Camera -->
-      <a-entity camera="active: true" position="0 4 0.75" rotation="-40 0 0"></a-entity>
+          <!-- Ground -->
+          <a-plane color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></a-plane>
 
-      <!-- Root of elements -->
-      <a-entity id="root" wasd-controls animation="property: rotation; to: 0 -90 -90; startEvents: vertical"
-        animation__2="property: rotation; to: 20 -45 -20; startEvents: original">
-      </a-entity>
+          <!-- Camera -->
+          <a-entity camera="active: true" position="0 4 0.75" rotation="-40 0 0"></a-entity>
 
-      <!--Tracked controls. -->
-      <a-entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></a-entity>
-      <a-entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></a-entity>
+          <!-- Root of elements -->
+          <a-entity id="root" wasd-controls animation="property: rotation; to: 0 -90 -90; startEvents: vertical"
+            animation__2="property: rotation; to: 20 -45 -20; startEvents: original">
+          </a-entity>
 
-    </a-scene>
+          <!--Tracked controls. -->
+          <a-entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></a-entity>
+          <a-entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></a-entity>
+
+        </a-scene>
+      </div>
+
+      <div class="col-4 p-0">
+        <span class="align-middle" id="chart"></span>
+      </div>
+
+    </div>
   </div>
 </body>
 
