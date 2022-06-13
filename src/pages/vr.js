@@ -5,7 +5,7 @@ import { Entity, Scene } from 'aframe-react';
 import 'babel-polyfill';
 import React from 'react';
 
-require('./orthoAframeComponent.js');
+// require('./orthoAframeComponent.js');
 
 const colorHue = 'warm'
 

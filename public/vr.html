@@ -17,24 +17,17 @@
 </head>
 
 <body>
-
-  <!-- Bootstrap for development... -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
-    crossorigin="anonymous"></script>
+  <!-- Use this -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- D3 flamegraph -->
   <script type="text/javascript" src="https://d3js.org/d3.v7.js"></script>
   <script type="text/javascript"
     src="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.1.3/dist/d3-flamegraph.min.js"></script>
 
-  <!-- Script -->
-  <script src="vr.js"></script>
 
-  <div class="container-fluid flex-fill">
-    <div class="row">
+  <div class="container m-0 w-screen">
+    <div class="flex flex-row">
       <span>
         <input class="form-control form-control-sm" type="file" id="fileinput"
           style="width: 220px; display: inline;"></input>
@@ -46,7 +39,7 @@
       </span>
     </div>
 
-    <div class="row">
+    <div class="flex flex-row pt-2">
       <span class="btn-group">
         <button type="button" class="btn btn-light btn-sm" onclick="increasefg()">+</button>
         <button type="button" class="btn btn-light btn-sm" onclick="decreasefg()">-</button>
@@ -59,12 +52,12 @@
       </span>
     </div>
 
-    <div class="row">
+    <div class="flex flex-row pt-2">
       <canvas id="my-canvas" style="display: inline;" crossorigin="anonymous"></canvas>
     </div>
 
-    <div class="row">
-      <div class="col-8 p-0">
+    <div class="flex flex-row pt-2">
+      <div class="basis-2/3">
         <a-scene embedded ortho>
           <!-- Sky -->
           <a-sky color="white"></a-sky>
@@ -87,12 +80,16 @@
         </a-scene>
       </div>
 
-      <div class="col-4 p-0">
+      <div class="basis-1/3">
         <span class="align-middle" id="chart"></span>
       </div>
 
     </div>
   </div>
+
+
+  <!-- Script -->
+  <script src="vr.js"></script>
 </body>
 
 </html>

@@ -2,39 +2,13 @@ import 'antd/dist/antd.css';
 import { Component } from 'react';
 import TreeTable, { useLazyloadPlugin } from 'react-antd-treetable';
 
+
 export default class TreetableTopDown extends Component {
   constructor(props) {
     super(props);
     this.state = {
       expandedKeys: [],
-      tableList: [],
-      columns: [],
-      dataShowType: 0,
-      metricIndex: 0
     };
-  }
-
-  componentDidMount() {
-    console.log(this.props)
-    window.Module._updateValueTree(1, this.state.dataShowType, this.state.metricIndex);
-    let jsonStr = Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
-    let tableData = JSON.parse(jsonStr);
-    let jsonStr2 = window.Module.cwrap('getMetricDesJsonStr', 'string')();
-    let MetricTypesArray = JSON.parse(jsonStr2)
-    console.log(MetricTypesArray)
-    this.setState({ tableList: tableData })
-    console.log(this.state.tableList)
-    this.setState({ columns: this.props.cols })
-    console.log(this.state.columns)
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.cols != this.props.cols) {
-      this.setState({ columns: this.props.cols })
-    }
-    if (prevProps.tableList != this.props.tableList) {
-      this.setState({ tableList: this.props.tableList })
-    }
   }
 
   onExpandedRowsChange = (data) => {
@@ -46,7 +20,6 @@ export default class TreetableTopDown extends Component {
   onLoadMore = async record => {
     console.log(record)
     const res = await this.loadData(record);
-    console.log(res)
     return res;
   };
   
@@ -67,11 +40,10 @@ export default class TreetableTopDown extends Component {
       <TreeTable
         rowKey="id"
         size="small"
-        rowClassName={(record, index) => console.log(record)}
         expandedRowKeys={this.state.expandedKeys}
         onExpandedRowsChange={this.onExpandedRowsChange}
-        dataSource={this.state.tableList}
-        columns={this.state.columns}
+        dataSource={this.props.tableList}
+        columns={this.props.cols}
         plugins={[
           useLazyloadPlugin({
             onLoad: this.onLoadMore,

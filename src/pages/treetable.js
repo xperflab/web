@@ -1,21 +1,7 @@
 
 import 'antd/dist/antd.css';
-// const columns = [
-//   {
-//     title: '函数名',
-//     dataIndex: 'name',
-//     width: 700,
-//   },
-//   {
-//     title: '上报次数',
-//     dataIndex: 'name',
-//     width: 120,
-//   },
-// ];
 import { Select } from "antd";
 import { Component } from 'react';
-import TreetableBottomUp from './treetableBottomUp';
-import TreetableFlat from './treetableFlat';
 import TreetableTopDown from './treetableTopDown';
 const { Option } = Select;
 
@@ -31,7 +17,8 @@ export default class treetable extends Component {
       metricIndex: 0,
       children: [],
       metricArray: [],
-      defaultSelects: []
+      defaultSelects: [],
+      tablekey: 0,
     };
   }
 
@@ -60,7 +47,7 @@ export default class treetable extends Component {
               let jsonStr = window.Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
               let dataList = JSON.parse(jsonStr)
               console.log(dataList)
-              this.setState({ tableList: dataList })
+              this.setState({ tableList: dataList, tablekey: this.state.tablekey + 1 })
             }
           };
         }
@@ -81,7 +68,7 @@ export default class treetable extends Component {
               let jsonStr = window.Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
               let dataList = JSON.parse(jsonStr)
               console.log(dataList)
-              this.setState({ tableList: dataList })
+              this.setState({ tableList: dataList, tablekey: this.state.tablekey + 1 })
             }
           };
         }
@@ -89,16 +76,29 @@ export default class treetable extends Component {
       });
     });
     this.setState({ metricArray: MetricTypesArray })
-    //setColumns(cols)
     this.setState({ columns: cols })
     for (let i = 1; i < cols.length; i++) {
       temp.push(<Option key={cols[i].dataIndex}>{cols[i].title}</Option>);
     }
     this.setState({ children: temp })
     this.setState({ defaultSelects: temp })
-    console.log(temp)
+
+    window.Module._updateValueTree(1, this.state.dataShowType, 0);
+    let jsonStr = Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
+    const tableData = JSON.parse(jsonStr);
+
+    this.setState({ tableList: tableData, tablekey: this.state.tablekey + 1 })
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.dataShowType != this.state.dataShowType) {
+      window.Module._updateValueTree(1, this.state.dataShowType, 0);
+      let jsonStr = Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
+      const tableData = JSON.parse(jsonStr);
+
+      this.setState({ tableList: tableData, tablekey: this.state.tablekey + 1 })
+    }
+  }
 
 
   changeToTopDown = () => {
@@ -148,7 +148,7 @@ export default class treetable extends Component {
                 window.Module._sortContextTreeByMetricIdx(valueType, metricIdx);
                 let jsonStr = window.Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
                 let dataList = JSON.parse(jsonStr)
-                this.setState({ tableList: dataList })
+                this.setState({ tableList: dataList, tablekey: this.state.tablekey + 1 })
               }
             };
           }
@@ -172,7 +172,7 @@ export default class treetable extends Component {
                 let jsonStr = window.Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
                 let dataList = JSON.parse(jsonStr)
                 console.log(dataList)
-                this.setState({ tableList: dataList })
+                this.setState({ tableList: dataList, tablekey: this.state.tablekey + 1 })
               }
             };
           }
@@ -186,15 +186,6 @@ export default class treetable extends Component {
   };
 
   render() {
-    let renderComponent;
-    if (this.state.dataShowType === 0) {
-      renderComponent = (<TreetableTopDown cols={this.state.columns} tableList={this.state.tableList} />)
-    } else if (this.state.dataShowType === 1) {
-      renderComponent = (<TreetableBottomUp cols={this.state.columns} tableList={this.state.tableList} />)
-    } else if (this.state.dataShowType === 2) {
-      renderComponent = (<TreetableFlat cols={this.state.columns} tableList={this.state.tableList} />)
-    }
-
     return (
       <div>
         <button
@@ -230,7 +221,7 @@ export default class treetable extends Component {
         >
           {this.state.children}
         </Select>
-        <div>{renderComponent}</div>
+        <div><TreetableTopDown key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={this.state.columns} tableList={this.state.tableList} /></div>
 
       </div>
     );
