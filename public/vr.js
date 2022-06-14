@@ -555,11 +555,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function actualResizeHandler() {
+        // do not update if no data
+        if(!data)
+            return
+
         // handle the resize event
         flamegraphWidth = window.innerWidth / 3;
 
         updateD3()
-
         let canvas = document.getElementById('my-canvas')
         canvas.setAttribute("width", window.innerWidth);
         updateCanvas()
