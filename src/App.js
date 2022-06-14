@@ -12,7 +12,7 @@ import './pages-css/header.css'
 import './pages-css/table.css'
 import './pages-css/responsive.css'
 
-import "antd/dist/antd.css";
+import "antd/dist/antd.min.css";
 import { InboxOutlined } from "@ant-design/icons";
 import { message, Upload,Layout} from "antd";
 
