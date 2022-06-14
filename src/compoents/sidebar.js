@@ -71,7 +71,7 @@ export default class sidebar extends React.Component {
     if (this.state.collapsed === false) {
       renderComponent = ( <img src="/easyview2.png" style={{height:40,width:150}}></img>)
     } else  {
-      renderComponent = ( <img src="/new_logo.png" style={{height:48,width:48}}></img>)
+      renderComponent = ( <img src="/new_logo.png" style={{height:40,width:40}}></img>)
     }
     return (
 
@@ -90,8 +90,9 @@ export default class sidebar extends React.Component {
             this.props.changeComponentToDropzone();
           }}>
             {/* <Icon type="pie-chart" /> */}
-            <FileOutlined />
-
+            <div>
+            <FileOutlined  />
+            </div>
             <span>Open File</span>
           </Menu.Item>
           {this.state.showCurrentProfile && <SubMenu
