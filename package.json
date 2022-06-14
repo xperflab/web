@@ -16,7 +16,6 @@
     "aframe-react": "^4.0.x",
     "antd": "4.13.0",
     "babel-polyfill": "^6.3.14",
-    "cp-react-tree-table": "^1.0.0-beta.13",
     "deepmerge": "4.2.2",
     "lodash": "^4.17.21",
     "pixi.js": "^6.3.2",
