@@ -14,7 +14,7 @@ import './pages-css/responsive.css'
 
 import "antd/dist/antd.css";
 import { InboxOutlined } from "@ant-design/icons";
-import { message, Upload,Layout } from "antd";
+import { message, Upload,Layout} from "antd";
 
 // const { Dragger } = Upload;
 // const props = {
@@ -96,21 +96,22 @@ function MyDropzone(props) {
   const { getRootProps, getInputProps } = useDropzone({ onDrop
   })
 
-  return (
-    <div>
+//   return (
+//     <div>
 
-<Dragger {...getRootProps()}>
-    <p className="ant-upload-drag-icon">
-      <InboxOutlined />
-    </p>
-    <p className="ant-upload-text">Click or drag file to this area to upload</p>
-    <p className="ant-upload-hint">
-      Support for a single or bulk upload. Strictly prohibit from uploading
-      company data or other band files
-    </p>
-  </Dragger>
-    </div>
-  )
+// <Dragger {...getRootProps()}>
+    // <p className="ant-upload-drag-icon">
+    //   <InboxOutlined />
+    // </p>
+    // <p className="ant-upload-text">Click or drag file to this area to upload</p>
+    // <p className="ant-upload-hint">
+    //   Support for a single or bulk upload. Strictly prohibit from uploading
+    //   company data or other band files
+    // </p>
+//   </Dragger>
+//     </div>
+    
+//   )
   return (
     <div>
 
@@ -120,11 +121,17 @@ function MyDropzone(props) {
             {/* Replace with your content */}
             <div className="px-4 py-8 sm:px-0">
 
-              <div className="border-4 border-dashed border-gray-200 rounded-lg h-96" >
+              <div className="border-4 border-dashed border-gray-200 rounded-lg h-96" style={{     display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',}}>
 
                 <input {...getInputProps()} />
-                <p>Drag 'n' drop some files here, or click to select files</p>
-
+         
+                <p >
+             <InboxOutlined style={{color:"#40A9FF", fontSize:106, textAlign: 'center'}}/>
+              </p>
+    <p>Click or drag file to this area to upload</p>
+            
               </div>
             </div>
             {/* /End replace */}
@@ -145,6 +152,20 @@ class App extends Component {
     showCurrentProfile:false
     
   };
+  }
+  componentDidMount() {
+    
+    window.addEventListener("message", (event) => {
+      const msg = event.data; // The json data that the extension sent
+      switch (msg.type) {
+        case "Runtime Ready": {
+          console.log("ready")
+          setTimeout(() =>{
+            message.success("Runtime Ready")
+          },200)
+        }
+      }
+    })
   }
   changeShowCurrentProfile=() =>{
     console.log("changetotrue")

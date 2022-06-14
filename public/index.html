@@ -13,7 +13,13 @@
     <script src="pako.js"></script>
     <script>
       Module['onRuntimeInitialized'] = () =>{
-          console.log("Runtime ready")
+          console.log("Runtime Ready")
+          window.postMessage(
+      {
+          type: "Runtime Ready",
+          data: ""
+      }
+  );
       }
   function decodeProfile(buffer, mime) {
   let data = new Uint8Array(buffer);

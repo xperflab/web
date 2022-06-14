@@ -30,7 +30,11 @@ export default class treetable extends Component {
     let cols = []
     cols.push({
       dataIndex: "name",
-      title: "name"
+      title: "name",
+      fixed:"left",
+      width:"300",
+      ellipsis: true,
+
     });
     MetricTypesArray.forEach(element => {
       cols.push({
@@ -129,7 +133,12 @@ export default class treetable extends Component {
     let cols = []
     cols.push({
       dataIndex: "name",
-      title: "name"
+      title: "name",
+
+    });
+    cols.push({
+      dataIndex: "abb",
+      title: "123",
 
     });
     this.state.metricArray.forEach(element => {

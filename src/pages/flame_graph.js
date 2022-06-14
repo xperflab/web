@@ -448,7 +448,7 @@ export default class FlameGraph extends Component {
             <div className="details"></div>
           </div>
           <div id="viewContainer" className="col-start-2 col-span-4">
-            <canvas id="renderView"></canvas>
+            <canvas id="renderView" ></canvas>
           </div>
           <div className="col-start-2 col-span-4">
             <div style={{ position: "relative", height: 0 }}>

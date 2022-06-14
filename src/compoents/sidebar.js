@@ -75,7 +75,7 @@ export default class sidebar extends React.Component {
     }
     return (
 
-      <Sider style={{ minHeight: '100vh' }} collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
+      <Sider style={{ minHeight: '100vh', color:"#111827" }} collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
         <div >
         <div className="logo"style={{display:'inline-block'}} >
       {renderComponent}
@@ -90,10 +90,11 @@ export default class sidebar extends React.Component {
             this.props.changeComponentToDropzone();
           }}>
             {/* <Icon type="pie-chart" /> */}
-            <div>
-            <FileOutlined  />
-            </div>
-            <span>Open File</span>
+      
+            <FileOutlined   />
+     
+            <span >Open File</span>
+          
           </Menu.Item>
           {this.state.showCurrentProfile && <SubMenu
             key="sub1"
@@ -107,7 +108,7 @@ export default class sidebar extends React.Component {
               </span>
             }
           >
-            <Menu.Item key="3" onClick={() => { this.props.changeComponentToFlamegraph() }}><ExclamationCircleOutlined /> Flame Graph</Menu.Item>
+            <Menu.Item key="3" onClick={() => { this.props.changeComponentToFlamegraph() }}><ExclamationCircleOutlined />Flame Graph</Menu.Item>
             <Menu.Item key="4" onClick={() => { this.props.changeComponentToTreetable() }} ><TableOutlined />Tree Table</Menu.Item>
           </SubMenu>}
 
