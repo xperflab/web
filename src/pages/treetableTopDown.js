@@ -1,4 +1,4 @@
-import 'antd/dist/antd.css';
+import 'antd/dist/antd.min.css';
 import { Component } from 'react';
 import TreeTable, { useLazyloadPlugin } from 'react-antd-treetable';
 
