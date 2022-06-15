@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component, useState, useEffect} from "react";
 import { useCallback } from "react";
 import Search from "./compoents/search";
 import Sidebar from "./compoents/sidebar";
@@ -11,63 +11,31 @@ import Treetable from "./pages/treetable";
 import './pages-css/header.css'
 import './pages-css/table.css'
 import './pages-css/responsive.css'
-
 import "antd/dist/antd.css";
 import { InboxOutlined } from "@ant-design/icons";
-import { message, Upload,Layout} from "antd";
-
-// const { Dragger } = Upload;
-// const props = {
-//   name: "file",
-//   multiple: true,
-
-//   onChange(info) {
-//     const { status } = info.file;
-
-//     if (status !== "uploading") {
-//       console.log(info.file, info.fileList);
-//     }
-
-//     if (status === "done") {
-//       message.success(`${info.file.name} file uploaded successfully.`);
-//     } else if (status === "error") {
-//       message.error(`${info.file.name} file upload failed.`);
-//     }
-//   },
-
-//   onDrop(e) {
-//     console.log("Dropped files", e.dataTransfer);
-//   }
-// };
-
-// const MyDropzone = () => (
-  // <Dragger {...props}>
-  //   <p className="ant-upload-drag-icon">
-  //     <InboxOutlined />
-  //   </p>
-  //   <p className="ant-upload-text">Click or drag file to this area to upload</p>
-  //   <p className="ant-upload-hint">
-  //     Support for a single or bulk upload. Strictly prohibit from uploading
-  //     company data or other band files
-  //   </p>
-  // </Dragger>
-// );
+import { message, Upload,Layout, Spin} from "antd";
 
 
 function MyDropzone(props) {
   const { Dragger } = Upload;
+  const [loading, setLoading] = useState(false)
   const {changeComponentToFlamegraph, changeShowCurrentProfile} = props
   //   onDrop(e) {
 //     console.log("Dropped files", e.dataTransfer);
 //   }
+useEffect(() => {
+  console.log(loading);
+}, [loading]);
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader()
-
+      
       reader.onabort = () => console.log('file reading was aborted')
       reader.onerror = () => console.log('file reading has failed')
       reader.onload = () => {
         // Do whatever you want with the file contents
+        setLoading(true)
+        
         const binaryStr = reader.result
         console.log(binaryStr)
         let result = window.decodeProfile(binaryStr, file.type)
@@ -82,6 +50,12 @@ function MyDropzone(props) {
         //window.navigate("/flame_graph");  
           changeComponentToFlamegraph()
           changeShowCurrentProfile()
+          window.postMessage(
+            {
+                type: "Select Flamegraph",
+                data: ""
+            }
+        );
         }
       }
       reader.readAsArrayBuffer(file)
@@ -96,47 +70,53 @@ function MyDropzone(props) {
   const { getRootProps, getInputProps } = useDropzone({ onDrop
   })
 
-//   return (
-//     <div>
-
-// <Dragger {...getRootProps()}>
-    // <p className="ant-upload-drag-icon">
-    //   <InboxOutlined />
-    // </p>
-    // <p className="ant-upload-text">Click or drag file to this area to upload</p>
-    // <p className="ant-upload-hint">
-    //   Support for a single or bulk upload. Strictly prohibit from uploading
-    //   company data or other band files
-    // </p>
-//   </Dragger>
-//     </div>
-    
-//   )
   return (
+    
     <div>
 
       <div {...getRootProps()}>
-        <main>
+      {loading? <Spin> <main>
           <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
             {/* Replace with your content */}
             <div className="px-4 py-8 sm:px-0">
 
               <div className="border-4 border-dashed border-gray-200 rounded-lg h-96" style={{     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',}}>
+    justifyContent: 'center',flexDirection:'column'}}>
 
                 <input {...getInputProps()} />
          
                 <p >
-             <InboxOutlined style={{color:"#40A9FF", fontSize:106, textAlign: 'center'}}/>
-              </p>
-    <p>Click or drag file to this area to upload</p>
+             <InboxOutlined style={{color:"#B73C93", fontSize:106}}/>
+              </p><br/>
+    <div style={{fontSize:26, color:"#262626"}}>Click or drag file to this area to decode</div>
             
               </div>
             </div>
             {/* /End replace */}
           </div>
-        </main>
+        </main> </Spin>:  <main>
+          <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            {/* Replace with your content */}
+            <div className="px-4 py-8 sm:px-0">
+
+              <div className="border-4 border-dashed border-gray-200 rounded-lg h-96" style={{     display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',flexDirection:'column'}}>
+
+                <input {...getInputProps()} />
+         
+                <p >
+             <InboxOutlined style={{color:"#B73C93", fontSize:106}}/>
+              </p><br/>
+    <div style={{fontSize:26, color:"#262626"}}>Click or drag file to this area to decode</div>
+            
+              </div>
+            </div>
+            {/* /End replace */}
+          </div>
+        </main>}
+       
       </div>
     </div>
   )
@@ -153,19 +133,41 @@ class App extends Component {
     
   };
   }
+  componentWillUnmount() {
+    sessionStorage.setItem('runtimeReady',false);
+  }
+  componentWillMount() {
+      //     Module['onRuntimeInitialized'] = () =>{
+  //         console.log("Runtime Ready")
+  //         runtimeReady = true
+  //         window.postMessage(
+  //     {
+  //         type: "Runtime Ready",
+  //         data: ""
+  //     }
+  // );
+  //     }
+  }
   componentDidMount() {
-    
-    window.addEventListener("message", (event) => {
-      const msg = event.data; // The json data that the extension sent
-      switch (msg.type) {
-        case "Runtime Ready": {
-          console.log("ready")
-          setTimeout(() =>{
-            message.success("Runtime Ready")
-          },200)
-        }
-      }
-    })
+    console.log(sessionStorage.getItem('runtimeReady'))
+    if (sessionStorage.getItem('runtimeReady')) {
+      console.log("ready")
+      setTimeout(() =>{
+        message.success("Runtime Ready")
+      },200)
+    }
+    // window.addEventListener("message", (event) => {
+    //   const msg = event.data; // The json data that the extension sent
+    //   switch (msg.type) {
+    //     case "Runtime Ready": {
+    //       window.reciveMessage = true
+    //       console.log("ready")
+    //       setTimeout(() =>{
+    //         message.success("Runtime Ready")
+    //       },200)
+    //     }
+    //   }
+    // })
   }
   changeShowCurrentProfile=() =>{
     console.log("changetotrue")

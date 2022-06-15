@@ -25,3 +25,7 @@
     font-style: oblique;
     color: var(--vscode-editor-foreground);
 }
+/* .canvas{
+    display: flex;
+    width: 100%;
+} */

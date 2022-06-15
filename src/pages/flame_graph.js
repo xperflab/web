@@ -1,11 +1,13 @@
 import {
   SearchIcon
 } from '@heroicons/react/solid';
+import React from 'react';
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import { Component } from "react";
 import XEUtils from "xe-utils";
 import '../pages-css/flame_graph.css';
+import { useResizeObserver } from 'react-use-observer'
 function str2ab(str) {
   var buf = new ArrayBuffer(str.length);
   var bufView = new Uint8Array(buf);
@@ -34,10 +36,12 @@ export default class FlameGraph extends Component {
       dataShowType: 0,
       metricIndex: 0,
       filterName: '',
-      value: ''
+      value: '',
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.viewContainer = React.createRef()
+    this.renderview = React.createRef()
   }
 
   static propTypes = {
@@ -49,7 +53,7 @@ export default class FlameGraph extends Component {
 
   componentDidMount() {
     console.log(this)
-
+    console.log(this.viewContainer)
 
     // this.state.dataShowType = 0;
     // this.state.metricIndex = 0;
@@ -59,6 +63,8 @@ export default class FlameGraph extends Component {
     this.state.focusNode.hovorId = 2;
     this.state.global.messageDetails = document.getElementById("details");
     this.state.global.container = document.getElementById("viewContainer");
+    console.log(this.state.global.container)
+    this.state.global.renderview = document.getElementById("renderView");
     this.state.global.textsRender = document.getElementById("renderContainer");
     this.state.global.viewStyle = window.getComputedStyle(
       this.state.global.container,
@@ -115,6 +121,15 @@ export default class FlameGraph extends Component {
     console.log("3")
     this.drawFlameGraph(this.state.dataShowType, this.state.metricIndex, "");
 
+    this.resizeObserver = new ResizeObserver(entries => {
+      console.log("resize")
+      this.state.global.renderview.width= this.viewContainer.current.offsetWidth
+      this.update()
+      this.onDraw()
+
+   });
+   this.resizeObserver.observe(document.getElementById("viewContainer"));
+
     window.addEventListener("message", (event) => {
       const message = event.data; // The json data that the extension sent
       switch (message.type) {
@@ -139,6 +154,18 @@ export default class FlameGraph extends Component {
           this.state.global.messageDetails.innerHTML = Module.cwrap('getContextDetails', 'string', ['number'])(this.state.focusNode.hovorId);
           break;
         }
+        // case"Flamegraph resize":{
+        //   console.log(this.renderview)
+        //   var width = this.viewContainer.current.offsetWidth;
+        //   console.log(width)
+        //   console.log(this.state.global.renderview)
+        //   console.log( this.state.global.container)
+        //   this.state.global.renderview.width = width
+        //   //console.log (this.state.global.renderview)
+        //   // myDiv = document.getElementById("viewContainer").width;
+
+
+        // }
       }
     }
     )
@@ -146,7 +173,6 @@ export default class FlameGraph extends Component {
   componentDidUpdate(prevProps, prevState) {
     console.log(prevState)
     console.log(this.state)
-
     if (prevState.dataShowType != this.state.dataShowType) {
       this.drawFlameGraph(this.state.dataShowType, prevState.metricIndex, prevState.filterName);
     }
@@ -159,6 +185,10 @@ export default class FlameGraph extends Component {
       this.drawFlameGraph(prevState.dataShowType, prevState.metricIndex, this.state.filterName);
     }
 
+
+  }
+  componentWillUnmount() {
+    this.resizeObserver.disconnect();
 
   }
   drawFlameGraph(dataShowType, metricIndex, functionFilter) {
@@ -347,16 +377,6 @@ export default class FlameGraph extends Component {
     this.setState({ metricIndex: event.target.options.selectedIndex })
   }
 
-  // handleSubmit = (event) => {
-
-  //   console.log(this.state.filterValue)
-  //   event.preventDefault();
-  // }
-
-  // handleChange=(event)=> {
-  //   console.log(event.target.value)
-  //   this.setState({filterValue: event.target.value});
-  // }
   handleChange(event) {
     console.log(event.target.value)
     this.setState({ value: event.target.value });
@@ -447,8 +467,9 @@ export default class FlameGraph extends Component {
           <div className="col-start-2 col-span-4">
             <div className="details"></div>
           </div>
-          <div id="viewContainer" className="col-start-2 col-span-4">
-            <canvas id="renderView" ></canvas>
+          <div id="viewContainer"  ref={this.viewContainer} className="col-start-2 col-span-4"style={{height:1500}} >
+            <canvas id="renderView" ref ={this.renderview} className="canvas">
+</canvas>
           </div>
           <div className="col-start-2 col-span-4">
             <div style={{ position: "relative", height: 0 }}>

@@ -3,6 +3,7 @@ import 'antd/dist/antd.css';
 import { Select } from "antd";
 import { Component } from 'react';
 import TreetableTopDown from './treetableTopDown';
+import { LeftCircleFilled } from '@ant-design/icons';
 const { Option } = Select;
 
 export default class treetable extends Component {
@@ -22,8 +23,9 @@ export default class treetable extends Component {
     };
   }
 
-  componentDidMount() {
+  componentWillMount() {
     let temp = []
+    let defaultSelect =[]
     let jsonStr2 = window.Module.cwrap('getMetricDesJsonStr', 'string')();
     let MetricTypesArray = JSON.parse(jsonStr2)
     console.log(MetricTypesArray)
@@ -31,10 +33,8 @@ export default class treetable extends Component {
     cols.push({
       dataIndex: "name",
       title: "name",
-      fixed:"left",
-      width:"300",
+      width:600,
       ellipsis: true,
-
     });
     MetricTypesArray.forEach(element => {
       cols.push({
@@ -83,9 +83,11 @@ export default class treetable extends Component {
     this.setState({ columns: cols })
     for (let i = 1; i < cols.length; i++) {
       temp.push(<Option key={cols[i].dataIndex}>{cols[i].title}</Option>);
+      defaultSelect.push(cols[i].dataIndex)
     }
     this.setState({ children: temp })
-    this.setState({ defaultSelects: temp })
+     this.setState({ defaultSelects: defaultSelect})
+    console.log(temp)
 
     window.Module._updateValueTree(1, this.state.dataShowType, 0);
     let jsonStr = Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
@@ -134,12 +136,8 @@ export default class treetable extends Component {
     cols.push({
       dataIndex: "name",
       title: "name",
-
-    });
-    cols.push({
-      dataIndex: "abb",
-      title: "123",
-
+      width:600,
+      ellipsis: true,
     });
     this.state.metricArray.forEach(element => {
       let index = "i" + element.id;

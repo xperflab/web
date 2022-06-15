@@ -44,10 +44,7 @@ export default class TreetableTopDown extends Component {
         onExpandedRowsChange={this.onExpandedRowsChange}
         dataSource={this.props.tableList}
         columns={this.props.cols}
-        scroll={{
-          x: 1000,
-          y: 550
-        }}
+        scroll={{y:550,x:1000}}
         plugins={[
           useLazyloadPlugin({
             onLoad: this.onLoadMore,

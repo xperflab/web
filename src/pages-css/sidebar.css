@@ -6,3 +6,6 @@
   margin: 16px;
 }
 svg { vertical-align: baseline; }
+.ant-menu-item-selected {
+  background-color: #B73C93 !important;
+}
