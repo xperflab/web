@@ -408,12 +408,14 @@ function resetAll() {
         return
 
     // Clear AFrame
-    let ele = document.getElementById('root')
-    ele.innerHTML = ''
-
+    let ele = document.getElementById('root-base')
     ele.setAttribute('rotation', "20 -45 -20")
     ele.setAttribute('position', "2 -0.3 -4")
     ele.setAttribute('scale', "0.3 0.3 0.3")
+
+    let root = document.getElementById('root')
+    root.setAttribute('mixin', 'moveBack')
+    root.innerHTML = ''
 
     // Handle Data
     const rootMap = handleData(data, num_graphs)
@@ -437,7 +439,7 @@ function resetAll() {
 
     // Draw 3d flamegraphs
     const all = draw3DGraphs(rootMap);
-    all.forEach(a => { ele.appendChild(drawAFrameGraph(a)) })
+    all.forEach(a => { root.appendChild(drawAFrameGraph(a)) })
 
     // Draw Canvas
     updateCanvas()
@@ -453,28 +455,13 @@ function decreasefg() {
     resetAll()
 }
 
-// function nextFlameGraph() {
-//     if (selected < num_graphs - 1) {
-//         selected++
-//         updateD3()
-//     }
-// }
-
-// function prevFlameGraph() {
-//     if (selected > 0) {
-
-//         selected--
-//         updateD3()
-//     }
-// }
-
 function verticalView() {
-    let ele = document.getElementById('root')
+    let ele = document.getElementById('root-base')
     ele.emit('vertical')
 }
 
 function originalView() {
-    let ele = document.getElementById('root')
+    let ele = document.getElementById('root-base')
     ele.emit('original')
 }
 
@@ -503,7 +490,7 @@ function useTraceGcc() {
 }
 
 function zoomIn() {
-    let root = document.getElementById('root')
+    let root = document.getElementById('root-base')
     let s = root.getAttribute("scale");
     s.x += 0.02
     s.y += 0.02
@@ -511,7 +498,7 @@ function zoomIn() {
 }
 
 function zoomOut() {
-    let root = document.getElementById('root')
+    let root = document.getElementById('root-base')
     let s = root.getAttribute("scale");
     s.x -= 0.02
     s.y -= 0.02
@@ -534,10 +521,18 @@ function loadFile(d) {
 }
 
 function enableControl(max) {
+    let c = document.getElementById('control')
+    c.removeAttribute('hidden')
+
     let e = document.getElementById('fginput')
     e.removeAttribute('disabled')
     e.setAttribute('max', max)
     e.value = 0
+
+    let p = document.getElementById('posinput')
+    p.removeAttribute('disabled')
+    p.setAttribute('max', max)
+    p.value = Math.floor(max / 2)
 
     let s = document.getElementById('show')
     s.removeAttribute('disabled')
@@ -553,13 +548,23 @@ function onInputRangeChange(e) {
     updateD3()
 }
 
+function onPosRangeChange(e) {
+    selected = e.target.value
+
+    let a = document.getElementById('moveToPos')
+    let an = a.getAttribute('animation')
+    an.to = `0 0 ${(Math.floor(num_graphs / 2) - selected) * 0.5}`
+    console.log(an.to)
+
+    let root = document.getElementById('root')
+    root.setAttribute('mixin', 'moveToPos')
+}
+
 function onShowSelected(e) {
     let ele = document.getElementById('root')
     if (e.target.checked) {
-        // ele.emit('show')
         highlightFg(selected)
     } else {
-        // ele.emit('back')
         for (const n of ele.children) {
             n.setAttribute('mixin', 'moveBack')
         }
@@ -569,7 +574,7 @@ function onShowSelected(e) {
 function highlightFg(index) {
     let fgs = document.getElementById('root').children
     for (let i = 0; i < fgs.length; i++) {
-        if (i < index) fgs[i].setAttribute('mixin', 'moveToZ10')
+        if (i < index) fgs[i].setAttribute('mixin', 'moveFar')
         else fgs[i].setAttribute('mixin', 'moveBack')
     }
 }
@@ -579,7 +584,7 @@ document.addEventListener('DOMContentLoaded', function () {
     flamegraphWidth = window.innerWidth / 3;
 
     updateCanvas()
-    
+
     // register input file event
     let ipFile = document.getElementById('fileinput')
     ipFile.addEventListener('change', onInputfile)
@@ -587,6 +592,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // register input range event
     let e = document.getElementById('fginput')
     e.addEventListener('change', onInputRangeChange)
+
+    // register position range event
+    let p = document.getElementById('posinput')
+    p.addEventListener('change', onPosRangeChange)
 
     // register on selected event
     let s = document.getElementById('show')
