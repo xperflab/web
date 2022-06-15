@@ -85,9 +85,9 @@ export default class sidebar extends React.Component {
   render() {
     let renderComponent;
     if (this.state.collapsed === false) {
-      renderComponent = ( <img src="/easyview2.png" style={{height:40,width:150}}></img>)
+      renderComponent = ( <img src="https://www.xperflab.org/web/easyview2.png" style={{height:40,width:150}}></img>)
     } else  {
-      renderComponent = ( <img src="/new_logo.png" style={{height:40,width:40}}></img>)
+      renderComponent = ( <img src="https://www.xperflab.org/web/new_logo.png" style={{height:40,width:40}}></img>)
     }
     return (
 
