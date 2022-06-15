@@ -53,7 +53,22 @@
             class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             onclick="useTrace()">Use trace.json</button>
 
-          <span>Now on flamegraph: </span><span id="numfg">0</span>
+          <span>
+            <input type="checkbox" id="show" name="show" disabled>
+            <label for="show">Show Selected</label>
+          </span>
+
+          <span>
+            <input type="range" id="fginput" name="fginput" min="0" max="0" disabled>
+            <label for="fginput">Flamegraph: </label>
+          </span>
+          <span id="numfg" class="font-bold">0</span>
+          <div>
+            <span>Start: </span><span id="startTime" class="font-bold"></span>
+            <span>End: </span><span id="endTime" class="font-bold"></span>
+            <span>Epoch: </span><span id="timeSlice" class="font-bold"></span>
+            <span>Max stack depth: </span><span id="maxStackDepth" class="font-bold"></span>
+          </div>
         </span>
       </div>
 
@@ -65,12 +80,12 @@
           <button type="button"
             class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
             onclick="decreasefg()">-</button>
-          <button type="button"
+          <!-- <button type="button"
             class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
             onclick="nextFlameGraph()">Next flamegraph</button>
           <button type="button"
             class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-            onclick="prevFlameGraph()">Prev flamegraph</button>
+            onclick="prevFlameGraph()">Prev flamegraph</button> -->
           <button type="button"
             class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
             onclick="originalView()">Original view</button>
@@ -87,7 +102,7 @@
       </div>
 
       <div class="flex flex-row pt-2">
-        <canvas id="my-canvas" style="display: inline;" crossorigin="anonymous"></canvas>
+        <canvas id="my-canvas" style="display: inline; width: 100%; height: 100%;" crossorigin="anonymous"></canvas>
       </div>
 
       <div class="flex flex-row pt-2 grow">
@@ -96,6 +111,10 @@
             <!-- Sky -->
             <a-sky color="white"></a-sky>
 
+            <a-mixin id="moveToZ-3" animation="property: position; to: 0 0 -3"></a-mixin>
+            <a-mixin id="moveToZ10" animation="property: position; to: 0 0 10"></a-mixin>
+            <a-mixin id="moveBack" animation="property: position; to: 0 0 0"></a-mixin>
+
             <!-- Ground -->
             <a-plane color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></a-plane>
 
@@ -103,8 +122,11 @@
             <a-entity camera="active: true" position="0 4 0.75" rotation="-40 0 0"></a-entity>
 
             <!-- Root of elements -->
-            <a-entity id="root" wasd-controls animation="property: rotation; to: 0 -90 -90; startEvents: vertical"
-              animation__2="property: rotation; to: 20 -45 -20; startEvents: original">
+            <a-entity id="root" rotation="20 -45 -20" scale="0.3 0.3 0.3" position="2 -0.3 -4"
+              animation="property: rotation; to: 0 -90 -90; startEvents: vertical"
+              animation__2="property: rotation; to: 20 -45 -20; startEvents: original"
+              animation__3="property: position; to: 2.2 0.5 -4; startEvents: show"
+              animation__4="property: position; to: 2 -0.3 -4; startEvents: back">
             </a-entity>
 
             <!--Tracked controls. -->
