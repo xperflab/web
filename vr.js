@@ -1,6 +1,5 @@
 const colorHue = 'warm'
 
-let cameraB = false
 let selected = 0
 let num_graphs = 20
 let data
@@ -128,17 +127,17 @@ function stringHash(s) {
     return hash;
 };
 
-function nameToColor(name) {
-    return colorHash(name)
-}
+let traceStartTime;
+let traceEndTime;
+let maxStackDepth;
 
 function handleData(trace, num_graph) {
     // trace should be a array and not null
     if (trace.length <= 0) return
 
-    let traceStartTime = trace[0].start
-    let traceEndTime = Math.max(...trace.map(e => e.start + e.dur))
-    let maxStackDepth = Math.max(...trace.map(e => e.stack.length))
+    traceStartTime = trace[0].start
+    traceEndTime = Math.max(...trace.map(e => e.start + e.dur))
+    maxStackDepth = Math.max(...trace.map(e => e.stack.length))
 
     const epoch_time = (traceEndTime - traceStartTime) / num_graph
 
@@ -193,12 +192,12 @@ function handleStack(root, e, start_time, epoch_time) {
     }
 }
 
-// max level = 28
+const d3MaxLevel = 28
 function mapToD3Tree(root) {
     let res = {}
     res.name = root.name
     res.value = root.value
-    if (!root.descendants || root.level > 28)
+    if (!root.descendants || root.level > d3MaxLevel)
         return null
     let ch = Object.values(root.descendants).map(e => mapToD3Tree(e)).filter(x => !!x)
     if (ch.length) {
@@ -297,7 +296,7 @@ function draw3DGraphs(root) {
 function drawSubBox(ele, x, y, z, width) {
     let boxes = [];
 
-    const color = nameToColor(ele.name)
+    const color = colorHash(ele.name)
     // draw translucent if level is too high..
 
     let opacity = 1
@@ -336,15 +335,7 @@ function drawVertical2DView(ctx, data) {
     const max_pixel = window.innerWidth / 2
 
 
-    const all_data = data.flat().filter(d => d.top).sort((a, b) => a.y - b.y)
-    for (d of all_data) {
-        drawRect(ctx,
-            max_pixel - d.z / max_width * max_pixel,
-            d.x / max_width * new_height + new_height / 2,
-            default_depth / 2 * max_pixel / max_width,
-            d.w / 2 * new_height / max_width,
-            d.c)
-    }
+
 }
 
 AFRAME.registerComponent('ortho', {
@@ -388,36 +379,58 @@ function updateD3() {
 }
 
 function updateCanvas() {
+    let canvas = document.getElementById('my-canvas')
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    if (!rootmap) return
+
     const all = draw3DGraphs(rootmap);
 
-    let canvas = document.getElementById('my-canvas')
-    canvas.width = canvas.width
-    canvas.height = window.innerHeight * 0.2
     let ctx = canvas.getContext('2d');
 
-    drawVertical2DView(ctx, all)
+    const new_height = canvas.offsetHeight
+    const max_pixel = canvas.offsetWidth / 2
+
+    const all_data = all.flat().filter(d => d.top).sort((a, b) => a.y - b.y)
+    for (d of all_data) {
+        drawRect(ctx,
+            max_pixel - d.z / max_width * max_pixel,
+            d.x / max_width * new_height + new_height / 2,
+            default_depth / 2 * max_pixel / max_width,
+            d.w / 2 * new_height / max_width,
+            d.c)
+    }
 }
 
-function updateAll() {
+function resetAll() {
     if (!data)
         return
 
     // Clear AFrame
     let ele = document.getElementById('root')
     ele.innerHTML = ''
-    if (cameraB) {
-        ele.setAttribute('rotation', "20 -45 -20")
-        ele.setAttribute('position', "2 -0.3 -4")
-        ele.setAttribute('scale', "0.3 0.3 0.3")
-    } else {
-        ele.setAttribute('rotation', "20 -45 -20")
-        ele.setAttribute('position', "2 -0.3 -4")
-        ele.setAttribute('scale', "0.3 0.3 0.3")
-    }
+
+    ele.setAttribute('rotation', "20 -45 -20")
+    ele.setAttribute('position', "2 -0.3 -4")
+    ele.setAttribute('scale', "0.3 0.3 0.3")
 
     // Handle Data
     const rootMap = handleData(data, num_graphs)
     rootmap = rootMap
+
+    selected = 0
+    enableControl(rootMap.length - 1)
+
+    let start = document.getElementById('startTime')
+    start.innerHTML = traceStartTime
+    let end = document.getElementById('endTime')
+    end.innerHTML = traceEndTime
+    let slice = document.getElementById('timeSlice')
+    slice.innerHTML = (traceEndTime - traceStartTime) / num_graphs
+    let msd = document.getElementById('maxStackDepth')
+    msd.innerHTML = maxStackDepth
+
 
     // Regenerate D3
     updateD3()
@@ -432,38 +445,28 @@ function updateAll() {
 
 function increasefg() {
     num_graphs++
-    updateAll()
+    resetAll()
 }
 
 function decreasefg() {
     num_graphs--
-    updateAll()
+    resetAll()
 }
 
-function rotate() {
-    cameraB = true
-    updateAll()
-}
+// function nextFlameGraph() {
+//     if (selected < num_graphs - 1) {
+//         selected++
+//         updateD3()
+//     }
+// }
 
-function reset() {
-    cameraB = false
-    updateAll()
-}
+// function prevFlameGraph() {
+//     if (selected > 0) {
 
-function nextFlameGraph() {
-    if (selected < num_graphs - 1) {
-        selected++
-        updateD3()
-    }
-}
-
-function prevFlameGraph() {
-    if (selected > 0) {
-
-        selected--
-        updateD3()
-    }
-}
+//         selected--
+//         updateD3()
+//     }
+// }
 
 function verticalView() {
     let ele = document.getElementById('root')
@@ -486,8 +489,7 @@ function onInputfile(e) {
         const text = (e.target.result)
         const d = JSON.parse(text)
 
-        data = d
-        updateAll()
+        loadFile(d)
     }
     reader.readAsText(e.target.files[0])
 }
@@ -520,23 +522,75 @@ function useFetchFile(filepath) {
     fetch(filepath).then(
         r => r.json()
     ).then(
-        d => data = d
-    ).then(
-        updateAll()
+        d => loadFile(d)
     )
+}
+
+function loadFile(d) {
+    data = d
+    resetAll()
+    console.log("Loading data...")
+    console.log(d)
+}
+
+function enableControl(max) {
+    let e = document.getElementById('fginput')
+    e.removeAttribute('disabled')
+    e.setAttribute('max', max)
+    e.value = 0
+
+    let s = document.getElementById('show')
+    s.removeAttribute('disabled')
+    s.removeAttribute('checked')
+}
+
+function onInputRangeChange(e) {
+    selected = e.target.value
+
+    let s = document.getElementById('show')
+    if (s.checked)
+        highlightFg(selected)
+    updateD3()
+}
+
+function onShowSelected(e) {
+    let ele = document.getElementById('root')
+    if (e.target.checked) {
+        // ele.emit('show')
+        highlightFg(selected)
+    } else {
+        // ele.emit('back')
+        for (const n of ele.children) {
+            n.setAttribute('mixin', 'moveBack')
+        }
+    }
+}
+
+function highlightFg(index) {
+    let fgs = document.getElementById('root').children
+    for (let i = 0; i < fgs.length; i++) {
+        if (i < index) fgs[i].setAttribute('mixin', 'moveToZ10')
+        else fgs[i].setAttribute('mixin', 'moveBack')
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
     // load window size and init all prop
     flamegraphWidth = window.innerWidth / 3;
 
-    let canvas = document.getElementById('my-canvas')
-    canvas.setAttribute("width", window.innerWidth);
-    canvas.setAttribute("height", window.innerHeight / 5);
-
-    // register input event
+    updateCanvas()
+    
+    // register input file event
     let ipFile = document.getElementById('fileinput')
     ipFile.addEventListener('change', onInputfile)
+
+    // register input range event
+    let e = document.getElementById('fginput')
+    e.addEventListener('change', onInputRangeChange)
+
+    // register on selected event
+    let s = document.getElementById('show')
+    s.addEventListener('change', onShowSelected)
 
     // on resize, re-render all things.
     window.addEventListener("resize", resizeThrottler, false);
@@ -555,13 +609,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function actualResizeHandler() {
+        // do not update if no data
+        if (!data)
+            return
+
         // handle the resize event
         flamegraphWidth = window.innerWidth / 3;
 
         updateD3()
-
-        let canvas = document.getElementById('my-canvas')
-        canvas.setAttribute("width", window.innerWidth);
         updateCanvas()
     }
 });
