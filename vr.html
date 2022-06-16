@@ -57,7 +57,7 @@
   <!-- Script -->
   <script src="vr.js"></script>
 
-  <div class="container-xl m-0 w-full h-screen">
+  <div class="container-xl m-0 w-full h-screen px-2 py-2">
     <div class="flex flex-col h-full">
       <div class="flex flex-row">
         <input class="form-controlblock
@@ -85,20 +85,20 @@
 
       </div>
 
-      <div class="flex flex-row pt-2">
+      <div class="flex flex-row mt-2 bg-[#F6F8FA] overflow-hidden shadow rounded-lg">
         <button type="button"
-          class="-ml-px relative inline-flex items-center px-4 py-2 bg-[#111827] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
+          class="-ml-px relative inline-flex items-center px-4 py-2 bg-[#959DA6] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
           onclick="decreasefg()">-</button>
         <span class="flex grow inline w-full h-full">
           <canvas id="my-canvas" class="w-full h-full" crossorigin="anonymous"></canvas>
         </span>
         <button type="button"
-          class="relative inline-flex items-center px-4 py-2 bg-[#111827] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
+          class="relative inline-flex items-center px-4 py-2 bg-[#959DA6] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
           onclick="increasefg()">+</button>
       </div>
 
       <div class="flex flex-row pt-2 grow">
-        <div class="basis-3/5 pr-2">
+        <div class="basis-3/5 mr-2 bg-white overflow-hidden shadow rounded-lg">
           <div id="control" class="floatbox" hidden>
             <span>
               <input type="checkbox" id="show" name="show" disabled>
@@ -152,7 +152,7 @@
           </a-scene>
         </div>
 
-        <div class="flex flex-col basis-2/5">
+        <div class="basis-2/5 flex flex-col bg-white overflow-hidden shadow rounded-lg">
           <span class="h-full basis-4/5" id="chart"></span>
         </div>
       </div>
