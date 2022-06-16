@@ -4,6 +4,7 @@ import { Select } from "antd";
 import { Component } from 'react';
 import TreetableTopDown from './treetableTopDown';
 import { LeftCircleFilled } from '@ant-design/icons';
+import '../pages-css/treetable.css';
 const { Option } = Select;
 
 export default class treetable extends Component {
@@ -35,6 +36,7 @@ export default class treetable extends Component {
       title: "name",
       width:600,
       ellipsis: true,
+      
     });
     MetricTypesArray.forEach(element => {
       cols.push({
