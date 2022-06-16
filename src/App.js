@@ -226,7 +226,7 @@ render() {
           className="site-layout-background"
           style={{
             margin: '12px 8px',
-            padding: 12,
+            padding: 1,
             minHeight: 280,
           }}
         >
