@@ -24,6 +24,7 @@ export default class sidebar extends React.Component {
   state = {
     collapsed: false,
     showCurrentProfile: this.props.showCurrentProfile,
+    showCurrentVRTrace: false,
     selectKey: "1"
   };
 
@@ -32,10 +33,10 @@ export default class sidebar extends React.Component {
     this.setState({ collapsed });
     window.postMessage(
       {
-          type: "Flamegraph resize",
-          data: ""
+        type: "Flamegraph resize",
+        data: ""
       }
-  );
+    );
   };
   openExampleProfile = () => {
     fetch('example.ezview')
@@ -56,19 +57,28 @@ export default class sidebar extends React.Component {
           this.setState({ selectKey: '3' })
         }
       })
+    this.setState({ showCurrentProfile: true })
+    this.setState({ showCurrentVRTrace: false })
   }
-  componentDidMount(){
+  openVRExampleTrace = () => {
+    this.setState({ showCurrentVRTrace: true })
+    this.setState({ showCurrentProfile: false })
+    this.props.changeComponentToVR()
+    this.setState({ selectKey: '8' })
+
+  }
+  componentDidMount() {
     window.addEventListener("message", (event) => {
       const message = event.data; // The json data that the extension sent
       console.log(message)
-   
+
       switch (message.type) {
         case "Select Flamegraph": {
           console.log(this)
           this.setState({ selectKey: '3' })
         }
- 
-   
+
+
       }
     }
     )
@@ -80,38 +90,30 @@ export default class sidebar extends React.Component {
 
   }
   onClick = (e) => {
-    this.setState({ selectKey: e.key })
+    console.log(e)
+    if (e.key != '9') {
+      this.setState({ selectKey: e.key })
+    }
+   
   }
   render() {
     let renderComponent;
     if (this.state.collapsed === false) {
-      renderComponent = ( <img src="https://www.xperflab.org/web/easyview2.png" style={{height:40,width:150}}></img>)
-    } else  {
-      renderComponent = ( <img src="https://www.xperflab.org/web/new_logo.png" style={{height:40,width:40}}></img>)
+      renderComponent = (<img src="https://www.xperflab.org/web/easyview2.png" style={{ height: 40, width: 150 }}></img>)
+    } else {
+      renderComponent = (<img src="https://www.xperflab.org/web/new_logo.png" style={{ height: 40, width: 40 }}></img>)
     }
     return (
 
-      <Sider style={{ minHeight: '100vh', color:"#111827" }} collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
+      <Sider style={{ minHeight: '100vh', color: "#111827" }} collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
         <div >
-        <div className="logo"style={{display:'inline-block'}} >
-      {renderComponent}
-       
+          <div className="logo" style={{ display: 'inline-block' }} >
+            {renderComponent}
+
+          </div>
         </div>
-       </div>
         {/* <span style={color}>Easy View</span> */}
-        <Menu theme="dark"  mode="inline" onClick={this.onClick} selectedKeys={[this.state.selectKey]}    defaultOpenKeys={['sub1']}>
-
-          <Menu.Item key="1" onClick={() => {
-
-            this.props.changeComponentToDropzone();
-          }}>
-            {/* <Icon type="pie-chart" /> */}
-      
-            <FileOutlined   />
-     
-            <span >Open File</span>
-          
-          </Menu.Item>
+        <Menu theme="dark" mode="inline" onClick={this.onClick} selectedKeys={[this.state.selectKey]} defaultOpenKeys={['sub1']}>
           {this.state.showCurrentProfile && <SubMenu
             key="sub1"
             title={
@@ -128,16 +130,63 @@ export default class sidebar extends React.Component {
             <Menu.Item key="4" onClick={() => { this.props.changeComponentToTreetable() }} ><TableOutlined />Tree Table</Menu.Item>
           </SubMenu>}
 
-          <Menu.Item key="9" onClick={() => { this.props.changeComponentToVR() }}>
+          {this.state.showCurrentVRTrace && <Menu.Item key="8" onClick={() => { this.props.changeComponentToVR() }}>
             {/* <Icon type="file" /> */}
             <FundViewOutlined />
-            <span>VR Trace</span>
-          </Menu.Item>
-          <Menu.Item key="10" onClick={() => { this.openExampleProfile() }}>
-            {/* <Icon type="file" /> */}
-            <ProfileOutlined />
-            <span>Example Profile</span>
-          </Menu.Item>
+            <span>Current VR Trace</span>
+          </Menu.Item>}
+
+          <SubMenu
+            key="sub2"
+            title={
+              <span>
+                {/* <Icon type="user" /> */}
+
+                <FundOutlined />
+
+                <span>Profile</span>
+              </span>
+            }
+          >
+            <Menu.Item key="1" onClick={() => {
+
+              this.props.changeComponentToDropzone();
+            }}>
+              {/* <Icon type="pie-chart" /> */}
+
+              <FileOutlined />
+
+              <span >Open File</span>
+
+            </Menu.Item>
+            <Menu.Item key="10" onClick={() => { this.openExampleProfile() }}>
+              {/* <Icon type="file" /> */}
+              <ProfileOutlined />
+              <span>Example Profile</span>
+            </Menu.Item>
+          </SubMenu>
+
+
+          <SubMenu
+            key="sub3"
+            title={
+              <span>
+
+                <FundOutlined />
+                <span>VR Profile</span>
+              </span>
+            }
+          >
+            <Menu.Item key="9" onClick={() => { this.openVRExampleTrace() }}>
+              {/* <Icon type="file" /> */}
+              <FundViewOutlined />
+              <span>Example VR Trace</span>
+            </Menu.Item>
+          </SubMenu>
+
+
+
+
         </Menu>
       </Sider>
     );
