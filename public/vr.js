@@ -1,7 +1,7 @@
 const colorHue = 'warm'
 
 let selected = 0
-let num_graphs = 20
+let num_graphs = 50
 let data
 
 function generateHash(name) {
@@ -364,11 +364,8 @@ function updateD3() {
     if (!data)
         return
 
-    if (flamegraphWidth != currentFlamegraphWidth) {
-        chart = flamegraph().width(flamegraphWidth).height(500)
-        currentFlamegraphWidth = flamegraphWidth
-        console.log("Update to ", flamegraphWidth)
-    }
+    const ct = document.getElementById('chart')
+    chart = flamegraph().width(ct.offsetWidth).height(ct.offsetHeight)
 
     const m = mapToD3Tree(rootmap[selected])
     d3.select("#chart")
@@ -621,9 +618,6 @@ document.addEventListener('DOMContentLoaded', function () {
         // do not update if no data
         if (!data)
             return
-
-        // handle the resize event
-        flamegraphWidth = window.innerWidth / 3;
 
         updateD3()
         updateCanvas()
