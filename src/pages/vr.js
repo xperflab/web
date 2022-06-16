@@ -1,11 +1,11 @@
 import 'aframe';
-import 'aframe-animation-component';
-import 'aframe-particle-system-component';
-import { Entity, Scene } from 'aframe-react';
+import { Entity, Scene } from "../compoents/aframe-react";
 import 'babel-polyfill';
-import React from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { flamegraph } from 'd3-flame-graph';
+import * as d3 from 'd3';
 
-// require('./orthoAframeComponent.js');
+import '../compoents/orthoAframeComponent';
 
 const colorHue = 'warm'
 
@@ -123,7 +123,8 @@ function colorHash(name, libtype) {
 
 function handleData(trace, num_graph) {
   // trace should be a array and not null
-  if (trace.length <= 0) return
+  if (trace.length <= 0)
+    return
 
   let traceStartTime = trace[0].start
   let traceEndTime = Math.max(...trace.map(e => e.start + e.dur))
@@ -139,7 +140,7 @@ function handleData(trace, num_graph) {
     handleStack(root, e, traceStartTime, epoch_time)
   }
 
-  return root.map(v => Object.values(v.descendants)[0])
+  return [root.map(v => Object.values(v.descendants)[0]), traceStartTime, traceEndTime, maxStackDepth]
 }
 
 function handleStack(root, e, start_time, epoch_time) {
@@ -232,27 +233,27 @@ function drawAFrameGraph(boxes, index) {
 const default_depth = 0.2
 const default_height = 0.2
 const default_graph_gap = 0.1
-const max_width = 6
-// Suitable width with default viewpoint
+const max_width = 10
 
+// Suitable width with default viewpoint
 function draw3DGraphs(root) {
   if (root.length == 0)
     return []
 
   const start_x = max_width / 2
   const start_y = default_height / 2
-  const start_z = -(root.length * default_depth + (root.length - 1) * default_graph_gap) / 2
+  const start_z = (root.length * default_depth + (root.length - 1) * default_graph_gap) / 2
+
   const bs = root.map(e => Object.values(e.descendants)[0].value)
   const width_list = bs.map(e => e / Math.max(...bs))
 
   let allBoxes = []
   for (let index = 0; index < root.length; index++) {
     const e = root[index];
-
     const width = max_width * width_list[index]
 
     let boxes = drawSubBox(e,
-      start_x - width / 2, start_y, start_z + index * (default_depth + default_graph_gap),
+      start_x - width / 2, start_y, start_z - index * (default_depth + default_graph_gap),
       width)
 
     allBoxes.push(boxes)
@@ -289,223 +290,349 @@ function drawSubBox(ele, x, y, z, width) {
   return boxes
 }
 
-const max_pixel = 100;
+function resizeCanvasToDisplaySize(canvas) {
+  const { width, height } = canvas.getBoundingClientRect()
+
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width
+    canvas.height = height
+    return true // here you can return some usefull information like delta width and delta height instead of just true
+    // this information can be used in the next redraw...
+  }
+
+  return false
+}
 
 // from center and draw from center
 function drawRect(ctx, x, y, l, w, c) {
-
   ctx.fillStyle = c;
   ctx.fillRect(x - l, y - w, l * 2, w * 2);
 }
 
-function drawVertical2DView(ctx, data) {
-  const all_data = data.flat().filter(d => d.top).sort((a, b) => a.y - b.y)
-  for (d of all_data) {
-    drawRect(ctx, d.z / max_width * max_pixel + max_pixel / 2,
-      d.x / max_width * max_pixel + max_pixel / 2,
+function drawPreview(ctx, all) {
+  // reset canvas
+  ctx.canvas.height = ctx.canvas.height
+  console.log(ctx.canvas.width, ctx.canvas.height)
+
+  const new_height = ctx.canvas.offsetHeight
+  const max_pixel = ctx.canvas.offsetWidth / 2
+
+  const all_data = all.flat().filter(d => d.top).sort((a, b) => a.y - b.y)
+  for (const d of all_data) {
+    drawRect(ctx,
+      max_pixel - d.z / max_width * max_pixel,
+      d.x / max_width * new_height + new_height / 2,
       default_depth / 2 * max_pixel / max_width,
-      d.w / 2 * max_pixel / max_width,
+      d.w / 2 * new_height / max_width,
       d.c)
   }
 }
 
-function updateD3(rootmap, selected) {
-  var chart = flamegraph()
-    .width(500);
+const Preview = props => {
+  const canvasRef = useRef(null)
+  const [scale, setScale] = useState({ x: 0, y: 0 })
 
-  const m = mapToD3Tree(rootmap[selected])
-  d3.select("#chart")
-    .datum(m)
-    .call(chart);
-}
+  const all = draw3DGraphs(props.data);
 
-function updateCanvas() {
-  let canvas = document.getElementById('my-canvas')
-  canvas.width = canvas.width
-  let ctx = canvas.getContext('2d');
+  // Set up resize handler once 
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const actualResizeHandler = () => {
+      setScale({ x: canvas.clientWidth, y: canvas.clientHeight })
+    }
 
-  drawVertical2DView(ctx, all)
-}
-
-
-const VRComp = (prop) => {
-  return (
-    <Scene embedded>
-      <a-assets>
-        <img id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg" />
-        <img id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg" />
-      </a-assets>
-
-      <Entity primitive='a-sky' color="white"></Entity>
-      <Entity primitive='a-plane' color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></Entity>
-
-      <Entity particle-system={{ preset: 'snow', particleCount: 2000 }} />
-      <Entity text={{ value: 'Hello, A-Frame React!', align: 'center' }} position={{ x: 0, y: 2, z: -1 }} />
-
-      <Entity>
-        {
-          prop.rootMap && draw3DGraphs(prop.rootMap).map((a, i) => drawAFrameGraph(a, i))
-        }
-      </Entity>
-    </Scene>
-  )
-}
-
-
-
-export default class VR extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      selected: 0,
-      num_graphs: 1,
-      rootMap: [],
+    let resizeTimeout;
+    const handleResize = e => {
+      if (!resizeTimeout) {
+        resizeTimeout = setTimeout(function () {
+          resizeTimeout = null;
+          actualResizeHandler();
+          // The actualResizeHandler will execute at a rate of 15fps
+        }, 66);
+      }
     };
-  }
 
-  componentDidMount() {
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  }
+  // when prop update 
+  useEffect(() => {
+    const canvas = canvasRef.current
+    resizeCanvasToDisplaySize(canvas)
+    if (!props.data)
+      return
 
-  increasefg = () => {
-    this.setState({ num_graphs: this.state.num_graphs + 1 })
-  }
-  decreasefg = () => {
-    this.setState({ num_graphs: this.state.num_graphs - 1 })
-  }
+    const ctx = canvas.getContext('2d')
+    drawPreview(ctx, all)
+  }, [scale, props.data])
 
-  nextFlameGraph = () => {
-    if (this.state.selected < this.state.num_graphs - 1) {
-      this.setState({ selected: this.state.selected + 1 })
+  return <canvas ref={canvasRef} {...props} />
+}
+
+const D3 = props => {
+  const d3Ref = useRef(null)
+  const [scale, setScale] = useState({ x: 0, y: 0 })
+
+  // Set up resize handler once 
+  useEffect(() => {
+    const ref = d3Ref.current
+    const actualResizeHandler = () => {
+      setScale({ x: ref.clientWidth, y: ref.clientHeight });
     }
-  }
 
-  prevFlameGraph = () => {
-    if (this.state.selected > 0) {
-      this.setState({ selected: this.state.selected - 1 })
-    }
-  }
+    let resizeTimeout;
+    const handleResize = e => {
+      if (!resizeTimeout) {
+        resizeTimeout = setTimeout(function () {
+          resizeTimeout = null;
+          actualResizeHandler();
+          // The actualResizeHandler will execute at a rate of 15fps
+        }, 66);
+      }
+    };
 
-  originalView = () => {
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  }
+  useEffect(() => {
+    const ct = d3Ref.current
+    const chart = flamegraph()
+      .width(ct.offsetWidth)
+      .height(ct.offsetHeight)
+      .inverted(true)
 
-  verticalView = () => {
+    if (!props.data)
+      return
 
-  }
+    const m = mapToD3Tree(props.data)
+    d3.select(ct)
+      .datum(m)
+      .call(chart);
+  }, [props.data, scale])
 
-  handleFileFinish = (e) => {
-    const text = (e.target.result)
-    const data = JSON.parse(text)
-    let rm = handleData(data, this.state.num_graphs)
+  return <span className="h-full" ref={d3Ref} />
+}
 
-    console.log(data, this.state.num_graphs)
-    this.setState({ rootMap: rm })
-    console.log("Set state", rm)
-  };
+const VR = props => {
+  const rootRef = useRef(null)
 
-  onFile = (e) => {
+  // Load data
+  const [data, setData] = useState(null);
+  const onFile = e => {
     e.preventDefault()
     const reader = new FileReader()
-    reader.onload = this.handleFileFinish
+    reader.onload = e => {
+      const text = (e.target.result)
+      const data = JSON.parse(text)
+
+      setData(data)
+    };
     reader.readAsText(e.target.files[0])
   }
-
-  render() {
-
-    return (
-
-      // <div style={{ height: '100%' }}>
-      //   <input type="file" onChange={(e) => this.onFile(e)}></input>
-      //   <button onClick={this.increasefg}>+</button>
-      //   <button onClick={this.decreasefg}>-</button>
-      //   <button onClick={this.nextFlameGraph}>Next flamegraph</button>
-      //   <button onClick={this.prevFlameGraph}>Prev flamegraph</button>
-      //   <button onClick={this.originalView}>Original view</button>
-      //   <button onClick={this.verticalView}>Vertical view</button>
-      //   <span>Now on flamegraph: </span><span>{this.num_graphs}</span>
-
-      //   <VRComp rootMap={this.state.rootMap}></VRComp>
-      // </div>
-
-
-
-      // <div>
-      //   <canvas id="my-canvas" style={{ width: 500, height: 500 }} crossOrigin="anonymous"></canvas>
-      //   <div id="chart"></div>
-
-      //   <input type="file" onChange={(e) => this.onFile(e)}></input>
-      //   <button onClick={this.increasefg}>+</button>
-      //   <button onClick={this.decreasefg}>-</button>
-      //   <button onClick={this.nextFlameGraph}>Next flamegraph</button>
-      //   <button onClick={this.prevFlameGraph}>Prev flamegraph</button>
-      //   <button onClick={this.originalView}>Original view</button>
-      //   <button onClick={this.verticalView}>Vertical view</button>
-      //   <span>Now on flamegraph: </span><span>{this.num_graphs}</span>
-
-      //   <Scene embedded ortho>
-      //     <Entity primitive='a-sky' color="white"></Entity>
-      //     <Entity primitive='a-plane' color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></Entity>
-
-      //     <Entity wasd-controls
-      //       rotation={{ x: 0, y: 45, z: 0 }}
-      //       scale={{ x: 0, y: 0, z: -3 }}
-      //       position={{ x: 0, y: 0, z: -5 }}
-      //       animation={{ property: 'rotation', to: '0 -90 -90', startEvents: 'vertical' }}
-      //       animation__2={{ property: 'rotation', to: '20 -45 -20', startEvents: 'vertical' }}
-      //     >
-      //       {
-      //         this.state.rootMap && draw3DGraphs(this.state.rootMap).map((a, i) => drawAFrameGraph(a, i))
-      //       }
-      //     </Entity>
-      //     <Entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></Entity>
-      //     <Entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></Entity>
-      //   </Scene>
-      // </div>
-
-      // <div style={{ height: '100%' }}>
-      //   <div className="col-auto">
-      //     <div>
-      //       <input type="file" onChange={(e) => this.onFile(e)}></input>
-      //     </div>
-      //     <button onClick={this.increasefg}>+</button>
-      //     <button onClick={this.decreasefg}>-</button>
-      //     <button onClick={this.nextFlameGraph}>Next flamegraph</button>
-      //     <button onClick={this.prevFlameGraph}>Prev flamegraph</button>
-      //     <button onClick={this.originalView}>Original view</button>
-      //     <button onClick={this.verticalView}>Vertical view</button>
-      //     <span>Now on flamegraph: </span><span>{this.num_graphs}</span>
-      //   </div>
-
-      //   <canvas id="my-canvas" style={{ width: '300px', height: '300px', display: 'inline' }} crossOrigin="anonymous" />
-      //   <span id="chart" />
-
-      //   <Scene embedded>
-      //     <Entity primitive='a-sky' color="white"></Entity>
-      //     <Entity primitive='a-plane' color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></Entity>
-
-      //     <Entity wasd-controls
-      //       rotation={{ x: 0, y: 45, z: 0 }}
-      //       scale={{ x: 0, y: 0, z: -3 }}
-      //       position={{ x: 0, y: 0, z: -5 }}
-      //       animation={{ property: 'rotation', to: '0 -90 -90', startEvents: 'vertical' }}
-      //       animation__2={{ property: 'rotation', to: '20 -45 -20', startEvents: 'vertical' }}
-      //     >
-
-      //     </Entity>
-      //     <Entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></Entity>
-      //     <Entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></Entity>
-      //   </Scene>
-      // </div>
-
-      <iframe
-        src="vr.html"
-        width="100%"
-        height="100%"
-        title="iframe"
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-        scrolling="auto"
-      ></iframe>
-    );
+  const useFetchFile = filepath => {
+    fetch(filepath).then(
+      r => r.json()
+    ).then(
+      d => setData(d)
+    )
   }
+
+  // Handle slice number
+  const initN = 50
+  const [n, setN] = useState(initN);
+  const decreaseFg = () => { if (n > 0) { setN(i => i - 1); setUpdateCounter(!updateCounter) } }
+  const increaseFg = () => { setN(i => i + 1); setUpdateCounter(!updateCounter) }
+
+  // Handle file, build 3D
+  const [stat, setStat] = useState({
+    start: 0,
+    end: 0,
+    epoch: 0,
+    maxStackDepth: 0
+  });
+
+  const [updateCounter, setUpdateCounter] = useState(true);
+  let rootmap = useMemo(
+    () => {
+      if (!data) return []
+      else {
+        const [d, traceStartTime, traceEndTime, maxStackDepth] = handleData(data, n)
+        setStat({
+          start: traceStartTime,
+          end: traceEndTime,
+          epoch: (traceEndTime - traceStartTime) / n,
+          maxStackDepth: maxStackDepth
+        })
+        return d
+      }
+    }, [n, data])
+
+  // Handle selected event
+  const [selected, setSelected] = useState(0);
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const fgs = rootRef.current.children
+    if (fgs.length == 0)
+      return
+
+    for (let i = 0; i < fgs.length; i++) {
+      if (show && i < selected) fgs[i].setAttribute('mixin', 'moveFar')
+      else fgs[i].setAttribute('mixin', 'moveBack')
+    }
+  }, [selected, show])
+  const onShowSelected = e => { setShow(e.target.checked) }
+  const onSelectRangeChange = e => { setSelected(e.target.value) }
+
+  // Handle pos event
+  const posDefault = n => Math.floor(n / 2)
+  const [pos, setPos] = useState(posDefault(n));
+  useEffect(() => {
+    rootRef.current.setAttribute('animation', `property: position; to: 0 0 ${(Math.floor(n / 2) - pos) * 0.5}`)
+  }, [pos])
+  const onPosRangeChange = e => { setPos(e.target.value) }
+
+  // Handle zoom
+  const initScale = 0.3
+  const [scale, setScale] = useState(initScale);
+  useEffect(() => {
+    rootRef.current.setAttribute('animation__2', `property: scale; to: ${scale} ${scale} ${scale}`)
+  }, [scale])
+  const zoomIn = () => { if (n > 0) setScale(i => i - 0.05) }
+  const zoomOut = () => { setScale(i => i + 0.05) }
+
+  // Handle viewpoint switch
+  const [vertical, setVertical] = useState(false);
+  useEffect(() => {
+    rootRef.current.parentNode.emit(vertical ? 'vertical' : 'original')
+  }, [vertical])
+  const originalView = () => { setVertical(false) }
+  const verticalView = () => { setVertical(true) }
+
+  // Handle reset
+  const onReset = () => {
+    setSelected(0)
+    setShow(false)
+    setN(initN)
+    setPos(posDefault(initN))
+    setScale(initScale)
+    setVertical(false)
+    setUpdateCounter(!updateCounter)
+  }
+
+  const useTrace = () => { useFetchFile('trace.json'); onReset() }
+  const useTraceGcc = () => { useFetchFile('trace_gcc.json'); onReset() }
+
+  return (
+    <div className="container-xl m-0 w-full h-screen px-2 py-2">
+      <div className="flex flex-col h-full">
+        <div className="flex flex-row">
+          <input className="form-controlblock
+        basis-1/3
+        w-full
+        px-2
+        py-1
+        text-sm
+        font-normal
+        text-white
+        bg-clip-padding
+        transition
+        ease-in-out
+        bg-[#111827]
+        m-0
+        focus:text-white focus:bg-[#B73C93] focus:border-blue-600 focus:outline-none"
+            type="file" style={{ width: '220px', display: 'inline' }} id="fileinput" />
+          <button className="basis-1/3 justify-center inline-flex items-center px-2.5 py-1.5 border-transparent text-xs font-medium text-white bg-[#111827] hover:bg-[#B73C93] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:bg-[#B73C93]"
+            onClick={useTraceGcc}>Use trace_gcc.json</button>
+          <button className="basis-1/3 justify-center inline-flex items-center px-2.5 py-1.5  border-transparent text-xs font-medium text-white bg-[#111827] hover:bg-[#B73C93] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:bg-[#B73C93]"
+            onClick={useTrace}>Use trace.json</button>
+        </div>
+        <div className="flex flex-col grow">
+          <div className="flex flex-row mt-2 bg-[#F6F8FA] overflow-hidden shadow rounded-lg basis-1/6">
+            <button type="button" className="-ml-px relative inline-flex items-center px-4 py-2 bg-[#959DA6] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
+              onClick={decreaseFg}>-</button>
+            <span className="flex grow inline w-full h-full">
+              <Preview className="w-full h-full" data={rootmap} />
+            </span>
+            <button type="button" className="relative inline-flex items-center px-4 py-2 bg-[#959DA6] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
+              onClick={increaseFg}>+</button>
+          </div>
+          <div className="flex flex-row pt-2 basis-5/6">
+            <div className="basis-3/5 mr-2 bg-white overflow-hidden shadow rounded-lg">
+              {
+                rootmap.length != 0 &&
+
+                <div id="control" className="relative float-left z-10 top-5 bg-[#111827] opacity-80 text-neutral-100 text-xs ml-2 p-1">
+                  <span>
+                    <input type="checkbox" checked={show} name="show" onChange={onShowSelected} />
+                    <label htmlFor="show">Show Selected Flamegraph</label>
+                  </span>
+                  <div>
+                    <input type="range" name="fginput" min={0} max={n} value={selected} onChange={onSelectRangeChange} />
+                    <span>Flamegraph: </span>
+                    <span className="font-bold">{selected}</span>
+                  </div>
+                  <div className="flex">
+                    <button type="button" className="p-[1px] m-[1px] border-[1px] disabled:border-transparent text-white hover:bg-black enabled:active:border-black basis-1/2"
+                      onClick={originalView} disabled={vertical ? "" : true}>Original view</button>
+                    <button type="button" className="p-[1px] m-[1px] border-[1px] disabled:border-transparent text-white hover:bg-black enabled:active:border-black basis-1/2"
+                      onClick={verticalView} disabled={!vertical ? "" : true}>Vertical view</button>
+                  </div>
+                  <div className="flex">
+                    <button type="button" className="p-[1px] m-[1px] border-[1px] disabled:border-transparent text-white hover:bg-black enabled:active:border-black basis-1/2"
+                      onClick={zoomIn}>Zoom In</button>
+                    <button type="button" className="p-[1px] m-[1px] border-[1px] disabled:border-transparent text-white hover:bg-black enabled:active:border-black basis-1/2"
+                      onClick={zoomOut}>Zoom Out</button>
+                  </div>
+                  <button type="button" className="p-[1px] m-[1px] border-[1px] disabled:border-transparent text-white hover:bg-black enabled:active:border-black w-full"
+                    onClick={onReset}>Reset</button>
+                  <div>
+                    <input type="range" name="posinput" min={0} max={n} value={pos} onChange={onPosRangeChange} />
+                    <span>Position</span>
+                  </div>
+                </div>
+              }
+
+              <Scene embedded ortho wasd-controls>
+                <Entity primitive='a-sky' color="white"></Entity>
+                <Entity primitive='a-plane' color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></Entity>
+
+                <Entity primitive='a-mixin' id="moveToPos" animation="property: position; to: 0 0 0" />
+                <Entity primitive='a-mixin' id="moveFar" animation="property: position; to: 0 0 15" />
+                <Entity primitive='a-mixin' id="moveBack" animation="property: position; to: 0 0 0" />
+
+                <Entity rotation="20 -45 -20" position="2 -0.3 -4"
+                  animation="property: rotation; to: 0 -90 -90; startEvents: vertical"
+                  animation__2="property: rotation; to: 20 -45 -20; startEvents: original">
+                  <Entity scale={{ x: scale, y: scale, z: scale }} ref={rootRef} key={updateCounter}>
+                    {
+                      draw3DGraphs(rootmap).map((a, i) => drawAFrameGraph(a, i))
+                    }
+                  </Entity>
+                </Entity>
+
+                <Entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></Entity>
+                <Entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></Entity>
+              </Scene>
+
+            </div>
+            <div className="basis-2/5 flex flex-col bg-white overflow-hidden shadow rounded-lg">
+              <D3 className="h-full" data={rootmap[selected]} />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-row bg-[#111827] text-white opacity-80 overflow-hidden shadow">
+          <div className="flex-auto"><span>Start: </span><span className="font-bold" />{stat.start}</div>
+          <div className="flex-auto"><span>End: </span><span className="font-bold" />{stat.end}</div>
+          <div className="flex-auto"><span>Epoch: </span><span className="font-bold" />{stat.epoch}</div>
+          <div className="flex-auto"><span>Max stack depth: </span><span className="font-bold" />{stat.maxStackDepth}</div>
+        </div>
+      </div>
+    </div>
+  );
 }
+
+export default VR

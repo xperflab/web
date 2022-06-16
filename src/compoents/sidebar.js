@@ -70,15 +70,11 @@ export default class sidebar extends React.Component {
   componentDidMount() {
     window.addEventListener("message", (event) => {
       const message = event.data; // The json data that the extension sent
-      console.log(message)
-
       switch (message.type) {
         case "Select Flamegraph": {
           console.log(this)
           this.setState({ selectKey: '3' })
         }
-
-
       }
     }
     )
