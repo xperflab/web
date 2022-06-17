@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>afdemo</title>
+  <meta name="description" content="afdemo">
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+  <script src="https://rawgit.com/rdub80/aframe-gui/master/dist/aframe-gui.min.js"></script>
+  <script src="https://unpkg.com/aframe-debug-cursor-component/dist/aframe-debug-cursor-component.min.js"></script>
+  <link rel="stylesheet" type="text/css"
+    href="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.1.3/dist/d3-flamegraph.css">
+  <style>
+    a-scene {
+      height: 800px;
+      width: 1000px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- D3 flamegraph -->
+  <script type="text/javascript" src="https://d3js.org/d3.v7.js"></script>
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.1.3/dist/d3-flamegraph.min.js"></script>
+
+  <!-- Script -->
+  <script src="vr.js"></script>
+
+
+  <canvas id="my-canvas" style="width:300px; height:300px; display: inline;" crossorigin="anonymous"></canvas>
+  <span id="chart"></span>
+  <br>
+  <input type="file" id="fileinput" }></input>
+  <button onclick="increasefg()">+</button>
+  <button onclick="decreasefg()">-</button>
+  <button onclick="rotate()">Rotate</button>
+  <button onclick="reset()">Reset</button>
+  <button onclick="nextFlameGraph()">Next flamegraph</button>
+  <button onclick="prevFlameGraph()">Prev flamegraph</button>
+  <button onclick="originalView()">Original view</button>
+  <button onclick="verticalView()">Vertical view</button>
+  <div>Now on flamegraph: </span><span id="numfg">0</div>
+
+  <a-scene load-data debug embedded ortho
+    inspector="https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js">
+
+    <!-- Assets -->
+    <a-assets>
+      <!-- 1000 * 1000 canvas to draw the flamegraph vertical view -->
+
+      <a-mixin id="frame" geometry="primitive: plane; width: 0.5783552; height: 0.8192"
+        material="color: white; shader: flat"
+        animation__scale="property: scale; to: 1.2 1.2 1.2; dur: 200; startEvents: mouseenter"
+        animation__scale_reverse="property: scale; to: 1 1 1; dur: 200; startEvents: mouseleave"></a-mixin>
+      <a-mixin id="poster" geometry="primitive: plane; width: 0.544768; height: 0.786432"
+        material="color: white; shader: flat" material="shader: flat" position="0 0 0.005"></a-mixin>
+      <a-mixin id="movieImage" geometry="primitive: plane; width: 1.5; height: 0.81"
+        material="src: #ponyo; shader: flat; transparent: true" position="0 0.495 0.002"></a-mixin>
+    </a-assets>
+
+    <!-- Sky -->
+    <a-sky color="white"></a-sky>
+
+    <!-- Ground -->
+    <a-plane color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30"></a-plane>
+
+    <!-- Camera -->
+    <a-entity camera="active: true" position="0 4 0.75" rotation="-40 0 0"></a-entity>
+
+    <!-- Root of elements -->
+    <a-entity id="root" wasd-controls animation="property: rotation; to: 0 -90 -90; startEvents: vertical"
+      animation__2="property: rotation; to: 20 -45 -20; startEvents: original">
+    </a-entity>
+
+    <!--Tracked controls. -->
+    <a-entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></a-entity>
+    <a-entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></a-entity>
+
+    <!-- <a-plane position="0 4 -5" material="src: #my-canvas" draw-canvas="my-canvas" width="4" height="2"></a-plane> -->
+  </a-scene>
+</body>
+
+</html>
