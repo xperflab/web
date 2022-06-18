@@ -109,7 +109,7 @@ export default class sidebar extends React.Component {
           </div>
         </div>
         {/* <span style={color}>Easy View</span> */}
-        <Menu theme="dark" mode="inline" onClick={this.onClick} selectedKeys={[this.state.selectKey]} defaultOpenKeys={['sub1']}>
+        <Menu theme="dark" mode="inline" onClick={this.onClick} selectedKeys={[this.state.selectKey]} defaultOpenKeys={['sub1','sub2','sub3']}>
           {this.state.showCurrentProfile && <SubMenu
             key="sub1"
             title={
@@ -168,7 +168,7 @@ export default class sidebar extends React.Component {
             title={
               <span>
 
-                <FundOutlined />
+<FundViewOutlined />
                 <span>VR Profile</span>
               </span>
             }
