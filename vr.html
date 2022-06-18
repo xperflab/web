@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>afdemo</title>
+    <meta name="description" content="afdemo">
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.1.3/dist/d3-flamegraph.css">
+    <style>
+        a-scene {
+            height: 100%;
+            width: 100%;
+        }
+
+        .floatbox {
+            float: left;
+            opacity: .85;
+            position: relative;
+            z-index: 10000;
+            top: 20px;
+            background-color: #333;
+            color: #fafafa;
+            font: 10px monospace;
+            margin-left: 10px;
+            padding: 5px;
+        }
+
+        .default-btn {
+            padding: 3px;
+            margin: 1px;
+            border: 1px solid white;
+            color: white;
+            text-decoration: none;
+        }
+
+        .default-btn:hover {
+            background-color: black;
+        }
+
+        .default-btn:active {
+            border-color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Use this -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- D3 flamegraph -->
+    <script type="text/javascript" src="https://d3js.org/d3.v7.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.1.3/dist/d3-flamegraph.min.js"></script>
+
+    <!-- Script -->
+    <script src="vr.js"></script>
+
+    <div class="container-xl m-0 w-full h-screen px-2 py-2">
+        <div class="flex flex-col h-full">
+            <!-- <div class="flex flex-row">
+                <input class="form-controlblock
+        basis-1/3
+        w-full
+        px-2
+        py-1
+        text-sm
+        font-normal
+        text-white
+        bg-clip-padding
+        transition
+        ease-in-out
+        bg-[#111827]
+        m-0
+        focus:text-white focus:bg-[#B73C93] focus:border-blue-600 focus:outline-none" type="file"
+                    style="width: 220px; display: inline;" id="fileinput"></input>
+
+                <button
+                    class="basis-1/3 justify-center inline-flex items-center px-2.5 py-1.5 border-transparent text-xs font-medium text-white bg-[#111827] hover:bg-[#B73C93] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:bg-[#B73C93]"
+                    onclick="useTraceGcc()">Use trace_gcc.json</button>
+                <button
+                    class="basis-1/3 justify-center inline-flex items-center px-2.5 py-1.5  border-transparent text-xs font-medium text-white bg-[#111827] hover:bg-[#B73C93] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:bg-[#B73C93]"
+                    onclick="useTrace()">Use trace.json</button>
+
+            </div> -->
+
+            <div class="flex flex-row mt-2 bg-[#F6F8FA] overflow-hidden shadow rounded-lg">
+                <button type="button"
+                    class="-ml-px relative inline-flex items-center px-4 py-2 bg-[#959DA6] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
+                    onclick="decreasefg()">-</button>
+                <span class="flex grow inline w-full h-full">
+                    <canvas id="my-canvas" class="w-full h-full" crossorigin="anonymous"></canvas>
+                </span>
+                <button type="button"
+                    class="relative inline-flex items-center px-4 py-2 bg-[#959DA6] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
+                    onclick="increasefg()">+</button>
+            </div>
+
+            <div class="flex flex-row pt-2 grow">
+                <div class="basis-3/5 mr-2 bg-white overflow-hidden shadow rounded-lg">
+                    <div id="control" class="floatbox" hidden>
+                        <span>
+                            <input type="checkbox" id="show" name="show" disabled>
+                            <label for="show">Show Selected Flamegraph</label>
+                        </span>
+                        <div>
+                            <input type="range" id="fginput" name="fginput" min="0" max="0" disabled>
+                            <span>Flamegraph: </span>
+                            <span id="numfg" class="font-bold">0</span>
+                        </div>
+                        <div class="flex">
+                            <button type="button" class="default-btn basis-1/2" onclick="originalView()">Original
+                                view</button>
+                            <button type="button" class="default-btn basis-1/2" onclick="verticalView()">Vertical
+                                view</button>
+                        </div>
+                        <div class="flex">
+                            <button type="button" class="default-btn basis-1/2" onclick="zoomIn()">Zoom In</button>
+                            <button type="button" class="default-btn basis-1/2" onclick="zoomOut()">Zoom Out</button>
+                        </div>
+                        <div class="flex">
+                            <button type="button" class="default-btn w-full" onclick="resetAll()">Reset</button>
+                        </div>
+                        <span>
+                            <input type="range" id="posinput" name="posinput" min="0" max="0" disabled>
+                            <span>Position</span>
+                        </span>
+                    </div>
+
+                    <a-scene embedded ortho wasd-controls>
+                        <!-- Sky -->
+                        <a-sky color="white"></a-sky>
+
+                        <a-mixin id="moveToPos" animation="property: position; to: 0 0 0"></a-mixin>
+                        <a-mixin id="moveFar" animation="property: position; to: 0 0 15"></a-mixin>
+                        <a-mixin id="moveBack" animation="property: position; to: 0 0 0"></a-mixin>
+
+                        <!-- Ground -->
+                        <a-plane color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30">
+                        </a-plane>
+
+                        <!-- Camera -->
+                        <a-entity camera="active: true" position="0 4 0.75" rotation="-40 0 0"></a-entity>
+
+                        <!-- Root of elements -->
+                        <a-entity id="root-base" rotation="20 -45 -20" scale="0.3 0.3 0.3" position="2 -0.3 -4"
+                            animation="property: rotation; to: 0 -90 -90; startEvents: vertical"
+                            animation__2="property: rotation; to: 20 -45 -20; startEvents: original">
+                            <a-entity id="root">
+                            </a-entity>
+                        </a-entity>
+
+                        <!--Tracked controls. -->
+                        <a-entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></a-entity>
+                        <a-entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></a-entity>
+
+                    </a-scene>
+                </div>
+
+                <div class="basis-2/5 flex flex-col bg-white overflow-hidden shadow rounded-lg">
+                    <span class="h-full basis-4/5" id="chart"></span>
+                </div>
+            </div>
+            <div class="flex flex-row bg-[#111827] text-white opacity-80 overflow-hidden shadow">
+                <div class="flex-auto"><span>Start: </span><span id="startTime" class="font-bold"></span></div>
+                <div class="flex-auto"><span>End: </span><span id="endTime" class="font-bold"></span></div>
+                <div class="flex-auto"><span>Epoch: </span><span id="timeSlice" class="font-bold"></span></div>
+                <div class="flex-auto"><span>Max stack depth: </span><span id="maxStackDepth" class="font-bold"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
