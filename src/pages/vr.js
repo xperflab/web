@@ -635,4 +635,17 @@ const VR = props => {
   );
 }
 
-export default VR
+const VRIFrame = () =>
+(
+  <iframe
+    src="vr.html"
+    width="100%"
+    height="100%"
+    title="iframe"
+    sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+    scrolling="auto"
+  ></iframe>
+)
+
+
+export default VRIFrame
