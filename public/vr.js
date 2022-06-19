@@ -365,7 +365,7 @@ function updateD3() {
         return
 
     const ct = document.getElementById('chart')
-    chart = flamegraph().width(ct.offsetWidth).height(ct.offsetHeight)
+    chart = flamegraph().width(ct.offsetWidth).height(ct.offsetHeight).inverted(true)
 
     const m = mapToD3Tree(rootmap[selected])
     d3.select("#chart")
@@ -408,7 +408,7 @@ function resetAll() {
     let ele = document.getElementById('root-base')
     ele.setAttribute('rotation', "20 -45 -20")
     ele.setAttribute('position', "2 -0.3 -4")
-    ele.setAttribute('scale', "0.24 0.24 0.24")
+    ele.setAttribute('scale', "0.3 0.3 0.3")
 
     let root = document.getElementById('root')
     root.setAttribute('mixin', 'moveBack')
