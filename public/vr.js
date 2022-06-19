@@ -408,7 +408,7 @@ function resetAll() {
     let ele = document.getElementById('root-base')
     ele.setAttribute('rotation', "20 -45 -20")
     ele.setAttribute('position', "2 -0.3 -4")
-    ele.setAttribute('scale', "0.3 0.3 0.3")
+    ele.setAttribute('scale', "0.22 0.22 0.22")
 
     let root = document.getElementById('root')
     root.setAttribute('mixin', 'moveBack')
