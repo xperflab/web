@@ -365,7 +365,7 @@ function updateD3() {
         return
 
     const ct = document.getElementById('chart')
-    chart = flamegraph().width(ct.offsetWidth).height(ct.offsetHeight)
+    chart = flamegraph().width(ct.offsetWidth).height(ct.offsetHeight).inverted(true)
 
     const m = mapToD3Tree(rootmap[selected])
     d3.select("#chart")

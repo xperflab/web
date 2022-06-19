@@ -84,82 +84,84 @@
                     onclick="useTrace()">Use trace.json</button>
 
             </div> -->
-
-            <div class="flex flex-row mt-2 bg-[#F6F8FA] overflow-hidden shadow rounded-lg">
-                <button type="button"
-                    class="-ml-px relative inline-flex items-center px-4 py-2 bg-[#959DA6] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
-                    onclick="decreasefg()">-</button>
-                <span class="flex grow inline w-full h-full">
-                    <canvas id="my-canvas" class="w-full h-full" crossorigin="anonymous"></canvas>
-                </span>
-                <button type="button"
-                    class="relative inline-flex items-center px-4 py-2 bg-[#959DA6] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
-                    onclick="increasefg()">+</button>
-            </div>
-
-            <div class="flex flex-row pt-2 grow">
-                <div class="basis-3/5 mr-2 bg-white overflow-hidden shadow rounded-lg">
-                    <div id="control" class="floatbox" hidden>
-                        <span>
-                            <input type="checkbox" id="show" name="show" disabled>
-                            <label for="show">Show Selected Flamegraph</label>
-                        </span>
-                        <div>
-                            <input type="range" id="fginput" name="fginput" min="0" max="0" disabled>
-                            <span>Flamegraph: </span>
-                            <span id="numfg" class="font-bold">0</span>
-                        </div>
-                        <div class="flex">
-                            <button type="button" class="default-btn basis-1/2" onclick="originalView()">Original
-                                view</button>
-                            <button type="button" class="default-btn basis-1/2" onclick="verticalView()">Vertical
-                                view</button>
-                        </div>
-                        <div class="flex">
-                            <button type="button" class="default-btn basis-1/2" onclick="zoomIn()">Zoom In</button>
-                            <button type="button" class="default-btn basis-1/2" onclick="zoomOut()">Zoom Out</button>
-                        </div>
-                        <div class="flex">
-                            <button type="button" class="default-btn w-full" onclick="resetAll()">Reset</button>
-                        </div>
-                        <span>
-                            <input type="range" id="posinput" name="posinput" min="0" max="0" disabled>
-                            <span>Position</span>
-                        </span>
-                    </div>
-
-                    <a-scene embedded ortho wasd-controls>
-                        <!-- Sky -->
-                        <a-sky color="white"></a-sky>
-
-                        <a-mixin id="moveToPos" animation="property: position; to: 0 0 0"></a-mixin>
-                        <a-mixin id="moveFar" animation="property: position; to: 0 0 15"></a-mixin>
-                        <a-mixin id="moveBack" animation="property: position; to: 0 0 0"></a-mixin>
-
-                        <!-- Ground -->
-                        <a-plane color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30">
-                        </a-plane>
-
-                        <!-- Camera -->
-                        <a-entity camera="active: true" position="0 4 0.75" rotation="-40 0 0"></a-entity>
-
-                        <!-- Root of elements -->
-                        <a-entity id="root-base" rotation="20 -45 -20" scale="0.3 0.3 0.3" position="2 -0.3 -4"
-                            animation="property: rotation; to: 0 -90 -90; startEvents: vertical"
-                            animation__2="property: rotation; to: 20 -45 -20; startEvents: original">
-                            <a-entity id="root">
-                            </a-entity>
-                        </a-entity>
-
-                        <!--Tracked controls. -->
-                        <a-entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></a-entity>
-                        <a-entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></a-entity>
-
-                    </a-scene>
+            <div class="flex flex-col grow">
+                <div class="flex flex-row mt-2 bg-[#F6F8FA] overflow-hidden shadow rounded-lg">
+                    <button type="button"
+                        class="-ml-px relative inline-flex items-center px-4 py-2 bg-[#959DA6] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
+                        onclick="decreasefg()">-</button>
+                    <span class="flex grow inline w-full h-full">
+                        <canvas id="my-canvas" class="w-full h-full" crossorigin="anonymous"></canvas>
+                    </span>
+                    <button type="button"
+                        class="relative inline-flex items-center px-4 py-2 bg-[#959DA6] text-sm font-medium text-white hover:bg-[#B73C93] focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-[#B73C93]"
+                        onclick="increasefg()">+</button>
                 </div>
 
-                <div class="basis-2/5 flex flex-col bg-white overflow-hidden shadow rounded-lg">
-                    <span class="h-full basis-4/5" id="chart"></span>
+                <div class="flex flex-row pt-2 basis-5/6">
+                    <div class="basis-3/5 mr-2 bg-white overflow-hidden shadow rounded-lg">
+                        <div id="control" class="floatbox" hidden>
+                            <span>
+                                <input type="checkbox" id="show" name="show" disabled>
+                                <label for="show">Show Selected Flamegraph</label>
+                            </span>
+                            <div>
+                                <input type="range" id="fginput" name="fginput" min="0" max="0" disabled>
+                                <span>Flamegraph: </span>
+                                <span id="numfg" class="font-bold">0</span>
+                            </div>
+                            <div class="flex">
+                                <button type="button" class="default-btn basis-1/2" onclick="originalView()">Original
+                                    view</button>
+                                <button type="button" class="default-btn basis-1/2" onclick="verticalView()">Vertical
+                                    view</button>
+                            </div>
+                            <div class="flex">
+                                <button type="button" class="default-btn basis-1/2" onclick="zoomIn()">Zoom In</button>
+                                <button type="button" class="default-btn basis-1/2" onclick="zoomOut()">Zoom
+                                    Out</button>
+                            </div>
+                            <div class="flex">
+                                <button type="button" class="default-btn w-full" onclick="resetAll()">Reset</button>
+                            </div>
+                            <span>
+                                <input type="range" id="posinput" name="posinput" min="0" max="0" disabled>
+                                <span>Position</span>
+                            </span>
+                        </div>
+
+                        <a-scene embedded ortho wasd-controls>
+                            <!-- Sky -->
+                            <a-sky color="white"></a-sky>
+
+                            <a-mixin id="moveToPos" animation="property: position; to: 0 0 0"></a-mixin>
+                            <a-mixin id="moveFar" animation="property: position; to: 0 0 15"></a-mixin>
+                            <a-mixin id="moveBack" animation="property: position; to: 0 0 0"></a-mixin>
+
+                            <!-- Ground -->
+                            <a-plane color="grey" material="opacity: 0.5" rotation="-90 0 0" width="30" height="30">
+                            </a-plane>
+
+                            <!-- Camera -->
+                            <a-entity camera="active: true" position="0 4 0.75" rotation="-40 0 0"></a-entity>
+
+                            <!-- Root of elements -->
+                            <a-entity id="root-base" rotation="20 -45 -20" scale="0.3 0.3 0.3" position="2 -0.3 -4"
+                                animation="property: rotation; to: 0 -90 -90; startEvents: vertical"
+                                animation__2="property: rotation; to: 20 -45 -20; startEvents: original">
+                                <a-entity id="root">
+                                </a-entity>
+                            </a-entity>
+
+                            <!--Tracked controls. -->
+                            <a-entity laser-controls="hand: left" raycaster="objects: .raycastable; far: 5"></a-entity>
+                            <a-entity laser-controls="hand: right" raycaster="objects: .raycastable; far: 5"></a-entity>
+
+                        </a-scene>
+                    </div>
+
+                    <div class="basis-2/5 flex flex-col bg-white overflow-hidden shadow rounded-lg">
+                        <span class="h-full basis-4/5" id="chart"></span>
+                    </div>
                 </div>
             </div>
             <div class="flex flex-row bg-[#111827] text-white opacity-80 overflow-hidden shadow">
