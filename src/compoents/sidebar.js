@@ -87,7 +87,7 @@ export default class sidebar extends React.Component {
   }
   onClick = (e) => {
     console.log(e)
-    if (e.key != '9') {
+    if (e.key != '9' && e.key != '10') {
       this.setState({ selectKey: e.key })
     }
    
