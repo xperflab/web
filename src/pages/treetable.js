@@ -5,6 +5,7 @@ import { Component } from 'react';
 import TreetableTopDown from './treetableTopDown';
 import { LeftCircleFilled } from '@ant-design/icons';
 import '../pages-css/treetable.css';
+import React from 'react';
 const { Option } = Select;
 
 export default class treetable extends Component {
@@ -21,7 +22,11 @@ export default class treetable extends Component {
       metricArray: [],
       defaultSelects: [],
       tablekey: 0,
+      tableHeight: 550,
     };
+    this.viewContainer = React.createRef()
+    this.buttons = React.createRef()
+    this.select = React.createRef()
   }
 
   componentWillMount() {
@@ -96,6 +101,14 @@ export default class treetable extends Component {
     const tableData = JSON.parse(jsonStr);
 
     this.setState({ tableList: tableData, tablekey: this.state.tablekey + 1 })
+  }
+  componentDidMount() {
+    console.log(this.viewContainer.current.clientHeight)
+    console.log(this.buttons.current.clientHeight)
+    console.log(this.select.current.clientHeight)
+    let tableHeight = this.viewContainer.current.clientHeight - this.buttons.current.clientHeight-this.select.current.clientHeight
+    this.setState({tableHeight : tableHeight})
+
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -196,7 +209,8 @@ export default class treetable extends Component {
 
   render() {
     return (
-      <div>
+      <div   ref={this.viewContainer}  className='h-full w-full'>
+        <div  ref={this.buttons} >
         <button
           type="button"
           onClick={this.changeToTopDown}
@@ -218,7 +232,10 @@ export default class treetable extends Component {
         >
           Flat
         </button>
+        </div>
+        <div  ref={this.select}>
         <Select
+         
           mode="multiple"
           allowClear
           style={{
@@ -230,7 +247,8 @@ export default class treetable extends Component {
         >
           {this.state.children}
         </Select>
-        <div><TreetableTopDown key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={this.state.columns} tableList={this.state.tableList} /></div>
+        </div>
+        <div><TreetableTopDown tableHeight ={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={this.state.columns} tableList={this.state.tableList} /></div>
 
       </div>
     );
