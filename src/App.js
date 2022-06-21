@@ -6,7 +6,7 @@ import FlameGraph from "./components/flame_graph";
 import Treetable from "./components/treetable";
 import { InboxOutlined } from "@ant-design/icons";
 import { message, Upload, Layout, Spin } from "antd";
-
+import { BsChevronDown} from "react-icons/bs";
 
 function MyDropzone(props) {
   const { Dragger } = Upload;
@@ -176,7 +176,8 @@ class App extends Component {
 
 
       <>
-        <Layout>
+      <div className="flex">
+     
           <Sidebar changeComponentToDropzone={this.changeComponentToDropzone}
             changeComponentToVR={this.changeComponentToVR}
             changeComponentToFlamegraph={this.changeComponentToFlamegraph}
@@ -184,35 +185,17 @@ class App extends Component {
             showCurrentProfile={this.state.showCurrentProfile}
             changeShowCurrentProfile={this.changeShowCurrentProfile}
           />
-          <Layout className="site-layout">
-            <Content
-              className="site-layout-background"
-              style={{
-                // margin: '12px 8px',
-                // padding: 1,
-                minHeight: 280,
-              }}
-            >
-              {
+ 
+       
+            
+        
+        
+        <div className="h-screen flex-1 p-7">
+        {
                 renderComponent
               }
-            </Content>
-          </Layout>
-        </Layout>
-        <div className="min-h-full flex">
-
-
-          {/* <div className="lg:pl-64 flex flex-col w-0 flex-1"> */}
-
-
-
-
-
-
-
-
-
-        </div>
+       </div>
+       </div>
 
 
       </>
