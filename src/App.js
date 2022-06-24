@@ -1,17 +1,16 @@
-import React, { Component, useState, useEffect } from "react";
-import { useCallback } from "react";
-import Sidebar from "./components/sidebar";
-import { useDropzone } from 'react-dropzone';
-import FlameGraph from "./components/flame_graph";
-import Treetable from "./components/treetable";
-import { InboxOutlined } from "@ant-design/icons";
-import { message, Upload, Layout, Spin } from "antd";
-import { BsChevronDown} from "react-icons/bs";
+import React, {Component, useState, useEffect} from 'react';
+import {useCallback} from 'react';
+import Sidebar from './components/sidebar';
+import {useDropzone} from 'react-dropzone';
+import FlameGraph from './components/flame_graph';
+import Treetable from './components/treetable';
+import {InboxOutlined} from '@ant-design/icons';
+import {Upload, Layout, Spin} from 'antd';
+import {BsChevronDown} from 'react-icons/bs';
 
 function MyDropzone(props) {
-  const { Dragger } = Upload;
-  const [loading, setLoading] = useState(false)
-  const { changeComponentToFlamegraph, changeShowCurrentProfile } = props
+  const [loading, setLoading] = useState(false);
+  const {changeComponentToFlamegraph, changeShowCurrentProfile} = props;
   //   onDrop(e) {
   //     console.log("Dropped files", e.dataTransfer);
   //   }
@@ -20,44 +19,43 @@ function MyDropzone(props) {
   }, [loading]);
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
-      const reader = new FileReader()
+      const reader = new FileReader();
 
-      reader.onabort = () => console.log('file reading was aborted')
-      reader.onerror = () => console.log('file reading has failed')
+      reader.onabort = () => console.log('file reading was aborted');
+      reader.onerror = () => console.log('file reading has failed');
       reader.onload = () => {
         // Do whatever you want with the file contents
-        setLoading(true)
+        setLoading(true);
 
-        const binaryStr = reader.result
-        console.log(binaryStr)
-        let result = window.decodeProfile(binaryStr, file.type)
-        console.log(result)
+        const binaryStr = reader.result;
+        console.log(binaryStr);
+        const result = window.decodeProfile(binaryStr, file.type);
+        console.log(result);
         if (result == 0) {
-          let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
-          console.log(jsonStr)
-          let fileExistList = JSON.parse(jsonStr)
+          const jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')();
+          console.log(jsonStr);
+          const fileExistList = JSON.parse(jsonStr);
           for (let i = 0; i < fileExistList.length; i++) {
             window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
           }
-          //window.navigate("/flame_graph");  
-          changeComponentToFlamegraph()
-          changeShowCurrentProfile()
+          // window.navigate("/flame_graph");
+          changeComponentToFlamegraph();
+          changeShowCurrentProfile();
           window.postMessage(
-            {
-              type: "Select Flamegraph",
-              data: ""
-            }
+              {
+                type: 'Select Flamegraph',
+                data: '',
+              },
           );
         }
-      }
-      reader.readAsArrayBuffer(file)
+      };
+      reader.readAsArrayBuffer(file);
       //  reader.readAsBinaryString(file)
-    })
-
-  }, [])
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop
-  })
+    });
+  }, []);
+  const {getRootProps, getInputProps} = useDropzone({
+    onDrop,
+  });
 
   return (
 
@@ -72,15 +70,15 @@ function MyDropzone(props) {
               <div className="border-4 border-dashed border-gray-200 rounded-lg h-96" style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center', flexDirection: 'column'
+                justifyContent: 'center', flexDirection: 'column',
               }}>
 
                 <input {...getInputProps()} />
 
                 <p >
-                  <InboxOutlined style={{ color: "#B73C93", fontSize: 106 }} />
+                  <InboxOutlined style={{color: '#B73C93', fontSize: 106}} />
                 </p><br />
-                <div style={{ fontSize: 26, color: "#262626" }}>Click or drag file to this area to decode</div>
+                <div style={{fontSize: 26, color: '#262626'}}>Click or drag file to this area to decode</div>
 
               </div>
             </div>
@@ -94,15 +92,15 @@ function MyDropzone(props) {
               <div className="border-4 border-dashed border-gray-200 rounded-lg h-96" style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center', flexDirection: 'column'
+                justifyContent: 'center', flexDirection: 'column',
               }}>
 
                 <input {...getInputProps()} />
 
                 <p >
-                  <InboxOutlined style={{ color: "#B73C93", fontSize: 106 }} />
+                  <InboxOutlined style={{color: '#B73C93', fontSize: 106}} />
                 </p><br />
-                <div style={{ fontSize: 26, color: "#262626" }}>Click or drag file to this area to decode</div>
+                <div style={{fontSize: 26, color: '#262626'}}>Click or drag file to this area to decode</div>
 
               </div>
             </div>
@@ -112,18 +110,16 @@ function MyDropzone(props) {
 
       </div>
     </div>
-  )
+  );
 }
-
-
 
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      showComponent: "dropzone",
-      showCurrentProfile: false
+      showComponent: 'dropzone',
+      showCurrentProfile: false,
 
     };
   }
@@ -133,51 +129,49 @@ class App extends Component {
 
   }
   changeShowCurrentProfile = () => {
-    console.log("changetotrue")
+    console.log('changetotrue');
     this.setState({
-      showCurrentProfile: true
-    })
-  }
+      showCurrentProfile: true,
+    });
+  };
   changeComponentToFlamegraph = () => {
     this.setState({
-      showComponent: "flamegraph"
-    })
-  }
+      showComponent: 'flamegraph',
+    });
+  };
   changeComponentToDropzone = () => {
     this.setState({
-      showComponent: "dropzone"
-    })
-  }
+      showComponent: 'dropzone',
+    });
+  };
   changeComponentToVR = () => {
     this.setState({
-      showComponent: "VR"
-    })
-  }
+      showComponent: 'VR',
+    });
+  };
   changeComponentToTreetable = () => {
     this.setState({
-      showComponent: "treetable"
-    })
-  }
+      showComponent: 'treetable',
+    });
+  };
   render() {
-
-
     let renderComponent;
-    if (this.state.showComponent === "dropzone") {
-      renderComponent = (<MyDropzone changeComponentToFlamegraph={this.changeComponentToFlamegraph} changeShowCurrentProfile={this.changeShowCurrentProfile} />)
-    } else if (this.state.showComponent === "flamegraph") {
-      renderComponent = (<FlameGraph isShow={true} />)
-    } else if (this.state.showComponent === "VR") {
-      renderComponent = (<VR />)
-    } else if (this.state.showComponent === "treetable") {
-      renderComponent = (<Treetable />)
+    if (this.state.showComponent === 'dropzone') {
+      renderComponent = (<MyDropzone changeComponentToFlamegraph={this.changeComponentToFlamegraph} changeShowCurrentProfile={this.changeShowCurrentProfile} />);
+    } else if (this.state.showComponent === 'flamegraph') {
+      renderComponent = (<FlameGraph isShow={true} />);
+    } else if (this.state.showComponent === 'VR') {
+      renderComponent = (<VR />);
+    } else if (this.state.showComponent === 'treetable') {
+      renderComponent = (<Treetable />);
     }
-    const { Header, Sider, Content } = Layout;
+    const {Header, Sider, Content} = Layout;
     return (
 
 
       <>
-      <div className="flex">
-     
+        <div className="flex">
+
           <Sidebar changeComponentToDropzone={this.changeComponentToDropzone}
             changeComponentToVR={this.changeComponentToVR}
             changeComponentToFlamegraph={this.changeComponentToFlamegraph}
@@ -185,17 +179,14 @@ class App extends Component {
             showCurrentProfile={this.state.showCurrentProfile}
             changeShowCurrentProfile={this.changeShowCurrentProfile}
           />
- 
-       
-            
-        
-        
-        <div className="h-screen flex-1 p-7">
-        {
-                renderComponent
-              }
-       </div>
-       </div>
+
+
+          <div className="h-screen flex-1 p-7">
+            {
+              renderComponent
+            }
+          </div>
+        </div>
 
 
       </>
