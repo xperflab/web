@@ -12,7 +12,7 @@ import '../components-css/flame_graph.css';
 export default class FlameGraph extends Component {
   /**
    *
-   * @param {*} props 
+   * @param {*} props
    */
   constructor(props) {
     super(props);
@@ -30,6 +30,8 @@ export default class FlameGraph extends Component {
       value: '',
     };
   }
+
+  // eslint-disable-next-line require-jsdoc
   render() {
     return (
       <div>
@@ -74,16 +76,10 @@ export default class FlameGraph extends Component {
             id="location"
             name="location"
             onChange={this.handleChangeMetricIndex}
-            className="mt-1 block w-200 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-          >
-
+            className="mt-1 block w-200 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
             {this.state.metricTypesArray.map((metricType) => <option key={metricType.id}>{metricType.name}</option>)}
-
           </select>
-          {/* <Select options={this.state.focusNode.metricTypesArray[0].name} /> */}
-
         </div>
-        {/* <div className="grid grid-cols-6 gap-x-1 "> */}
         <div >
           <div className="col-start-2 col-span-4">
             <div id="details" className="details">
