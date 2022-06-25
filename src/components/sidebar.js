@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  *
  * @param  {...any} classes
- * @return {fixMe}
+ * @return {FIXME}
  */
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
