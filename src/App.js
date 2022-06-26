@@ -58,9 +58,7 @@ function MyDropzone(props) {
   });
 
   return (
-
     <div>
-
       <div {...getRootProps()}>
         {loading ? <Spin> <main>
           <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -172,7 +170,7 @@ class App extends Component {
     } else if (this.state.showComponent === 'flamegraph') {
       renderComponent = (<FlameGraph isShow={true} />);
     } else if (this.state.showComponent === 'VR') {
-      renderComponent = (<VR/>);
+      renderComponent = (<VR />);
     } else if (this.state.showComponent === 'treetable') {
       renderComponent = (<Treetable />);
     }
