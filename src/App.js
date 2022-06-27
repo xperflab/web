@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, {Component, useState, useEffect} from 'react';
 import {useCallback} from 'react';
 import Sidebar from './components/sidebar';
@@ -8,6 +9,18 @@ import {InboxOutlined} from '@ant-design/icons';
 import {Spin} from 'antd';
 import VR from './components/vr';
 import PropTypes from 'prop-types';
+import {
+  BellIcon,
+  CalendarIcon,
+  ChartBarIcon,
+  FolderIcon,
+  HomeIcon,
+  InboxIcon,
+  MenuAlt2Icon,
+  UsersIcon,
+  XIcon,
+  SearchIcon,
+} from '@heroicons/react/outline';
 /**
  *
  * @param {*} props
@@ -58,7 +71,9 @@ function MyDropzone(props) {
   });
 
   return (
+
     <div>
+
       <div {...getRootProps()}>
         {loading ? <Spin> <main>
           <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -170,12 +185,12 @@ class App extends Component {
     } else if (this.state.showComponent === 'flamegraph') {
       renderComponent = (<FlameGraph isShow={true} />);
     } else if (this.state.showComponent === 'VR') {
-      renderComponent = (<VR />);
+      renderComponent = (<VR/>);
     } else if (this.state.showComponent === 'treetable') {
       renderComponent = (<Treetable />);
     }
     return (
-      <div className="flex">
+      <div>
         <Sidebar changeComponentToDropzone={this.changeComponentToDropzone}
           changeComponentToVR={this.changeComponentToVR}
           changeComponentToFlamegraph={this.changeComponentToFlamegraph}
@@ -183,14 +198,33 @@ class App extends Component {
           showCurrentProfile={this.state.showCurrentProfile}
           changeShowCurrentProfile={this.changeShowCurrentProfile}
         />
-        <div className="h-screen flex-1 p-7">
-          {
-            renderComponent
-          }
+
+        <div className="md:pl-64 flex flex-col flex-1">
+          <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow">
+            <button
+              type="button"
+              className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <span className="sr-only">Open sidebar</span>
+              <MenuAlt2Icon className="h-6 w-6" aria-hidden="true" />
+            </button>
+            <div className="flex-1 px-4 flex justify-between">
+              <div className="flex-1 flex">
+
+              </div>
+            </div>
+          </div>
+
+          <main className="flex-1">
+            <div className="h-screen flex-1 p-7">
+              {
+                renderComponent
+              }
+            </div>
+          </main>
         </div>
       </div>
-
-
     );
   }
 }

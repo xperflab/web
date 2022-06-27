@@ -19,9 +19,5 @@
         "import"
     ],
     "rules": {
-        "linebreak-style": [0, "windows"],
-        "max-len": [0, 100, 4],
-        "import/default": 2,
-        "import/export": 2
     }
 }
