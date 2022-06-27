@@ -7,7 +7,7 @@ import TreetableComponent from '../components/treetable_component';
  * Treetable component can show three different types: BottomUp, TopDown, and Flat,
  * which control by  dataShowType
  */
-export default class treetable extends Component {
+export default class Treetable extends Component {
   /**
    *
    * @param {*} props
