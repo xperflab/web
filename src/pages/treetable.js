@@ -47,6 +47,7 @@ export default class treetable extends Component {
       cols.push({
         dataIndex: "i" + element.id,
         title: element.name + " [INC]",
+        width:100,
         onHeaderCell: (column) => {
           return {
             onClick: () => {
@@ -67,6 +68,7 @@ export default class treetable extends Component {
       cols.push({
         dataIndex: "e" + element.id,
         title: element.name + " [EXC]",
+        width:100,
         onHeaderCell: (column) => {
           return {
             onClick: () => {
@@ -160,6 +162,7 @@ export default class treetable extends Component {
         cols.push({
           dataIndex: "i" + element.id,
           title: element.name + " [INC]",
+          width:100,
           onHeaderCell: (column) => {
             return {
               onClick: () => {
@@ -182,6 +185,7 @@ export default class treetable extends Component {
         cols.push({
           dataIndex: "e" + element.id,
           title: element.name + " [EXC]",
+          width:100,
           onHeaderCell: (column) => {
             return {
               onClick: () => {
