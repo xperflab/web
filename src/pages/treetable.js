@@ -110,7 +110,12 @@ export default class treetable extends Component {
     console.log(this.select.current.clientHeight)
     let tableHeight = this.viewContainer.current.clientHeight - this.buttons.current.clientHeight-this.select.current.clientHeight
     this.setState({tableHeight : tableHeight})
-
+    this.resizeObserver = new ResizeObserver(entries => {
+      console.log("resize")
+      let tableHeight = this.viewContainer.current.clientHeight - this.buttons.current.clientHeight-this.select.current.clientHeight
+      this.setState({tableHeight : tableHeight})
+   });
+   this.resizeObserver.observe(document.getElementById("select"));
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -122,7 +127,9 @@ export default class treetable extends Component {
       this.setState({ tableList: tableData, tablekey: this.state.tablekey + 1 })
     }
   }
-
+  componentWillUnmount() {
+    this.resizeObserver.disconnect();
+  }
 
   changeToTopDown = () => {
     //this.state.dataShowType = 1;
@@ -237,7 +244,7 @@ export default class treetable extends Component {
           Flat
         </button>
         </div>
-        <div  ref={this.select}>
+        <div  id= "select"ref={this.select}>
         <Select
          
           mode="multiple"
