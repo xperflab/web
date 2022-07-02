@@ -210,7 +210,11 @@ export default function Homepage() {
 
         {/* Static sidebar for desktop */}
         {/* <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0"> */}
-        <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
+        <div
+          className={` ${
+          showSidebar ? 'md:w-64' : 'w-0'
+          } hidden md:flex md:flex-col md:fixed md:inset-y-0`}
+        >
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="flex flex-col flex-grow border-r border-gray-200 pt-5 bg-white overflow-y-auto">
             <div className="flex items-center flex-shrink-0 px-4">
@@ -304,7 +308,12 @@ export default function Homepage() {
             </div>
           </div>
         </div>
-        <div className="md:pl-64 flex flex-col flex-1">
+        <div
+          className={` ${
+          showSidebar ? 'md:pl-64' : 'pl-0 '
+          } flex flex-col flex-1`}
+        >
+
           <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow">
             <button
               type="button"
@@ -315,6 +324,13 @@ export default function Homepage() {
               <MenuAlt2Icon className="h-6 w-6" aria-hidden="true" />
             </button>
             <div className="flex-1 px-4 flex justify-between">
+              { !showSidebar && <button
+                onClick={() =>setShowSiderbar(true)}
+                type="button"
+                data-mdb-ripple="true"
+                data-mdb-ripple-color="light"
+                className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
+              >Click me</button>}
               <div className="flex-1 flex">
                 <form className="w-full flex md:ml-0" action="#" method="GET">
                   <label htmlFor="search-field" className="sr-only">
