@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import {useDropzone} from 'react-dropzone';
 import {Disclosure} from '@headlessui/react';
 import {React, Fragment, useState} from 'react';
@@ -36,12 +35,11 @@ const navigation = [
   }];
 
 /**
- *
+ * Combine the className in if condition render
  * @param  {...any} classes
- * @return {Array}
+ * @return {String}
  */
 function classNames(...classes) {
-  console.log(classes.filter(Boolean).join(' '));
   return classes.filter(Boolean).join(' ');
 }
 /**
@@ -61,6 +59,9 @@ function MyDropzone(props) {
         console.log(binaryStr);
         const result = window.decodeProfile(binaryStr, file.type);
         console.log(result);
+        /**
+         * decode success
+         */
         if (result == 0) {
           const jsonStr =
           window.module.cwrap('getSourceFileJsonStr', 'string')();
@@ -69,14 +70,6 @@ function MyDropzone(props) {
           for (let i = 0; i < fileExistList.length; i++) {
             window.module._updateSourceFileExistStatus(i, fileExistList[i]);
           }
-          changeComponentToFlamegraph();
-          changeShowCurrentProfile();
-          window.postMessage(
-              {
-                type: 'Select Flamegraph',
-                data: '',
-              },
-          );
         }
       };
       reader.readAsArrayBuffer(file);
@@ -101,13 +94,11 @@ function MyDropzone(props) {
                 alignItems: 'center',
                 justifyContent: 'center', flexDirection: 'column',
               }}>
-
                 <input {...getInputProps()} />
                 <p >
                 </p><br />
                 <div style={{fontSize: 26, color: '#262626'}}>
                   Click or drag file to this area to decode</div>
-
               </div>
             </div>
             {/* /End replace */}
@@ -119,7 +110,8 @@ function MyDropzone(props) {
   );
 }
 /**
- * Include sidebar and dropzone
+ * Include sidebar and dropzone. If the width is
+ * less than 768px will trigger the responsive design
  * @return {Homepage}
  */
 export default function Homepage() {
@@ -225,7 +217,9 @@ export default function Homepage() {
                         'hover:text-gray-900',
                         'group w-full flex',
                         'items-center pl-2 pr-1 py-2',
-                        'text-left text-sm font-medium rounded-md', 'focus:outline-none focus:ring-2 focus:ring-indigo-500',
+                        'text-left text-sm',
+                        'font-medium rounded-md',
+                        'focus:outline-none focus:ring-2 focus:ring-indigo-500',
                       )}
                     >
                       <item.icon
@@ -237,7 +231,9 @@ export default function Homepage() {
                       <svg
                         className={classNames(
                           open ? 'text-gray-400 rotate-90' : 'text-gray-300',
-                          'ml-3 flex-shrink-0 h-5 w-5 transform group-hover:text-gray-400 transition-colors ease-in-out duration-150',
+                          'ml-3 flex-shrink-0 h-5 w-5 transform',
+                          'group-hover:text-gray-400',
+                          'transition-colors ease-in-out duration-150',
                         )}
                         viewBox="0 0 20 20"
                         aria-hidden="true"
@@ -333,7 +329,8 @@ export default function Homepage() {
                   <item.icon
                     className={classNames(
                       item.current ?
-                      'text-gray-500' : 'text-gray-400 group-hover:text-gray-500',
+                      'text-gray-500' :
+                      'text-gray-400 group-hover:text-gray-500',
                       'mr-3 flex-shrink-0 h-6 w-6',
                     )}
                     aria-hidden="true"
@@ -349,8 +346,12 @@ export default function Homepage() {
                       className={classNames(
                         item.current ?
                           'bg-gray-100 text-gray-900' :
-                          'bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                        'group w-full flex items-center pl-2 pr-1 py-2 text-left text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500',
+                          'bg-white text-gray-600',
+                        'hover:bg-gray-50 hover:text-gray-900',
+                        'group w-full flex items-center',
+                        'pl-2 pr-1 py-2 text-left',
+                        'text-sm font-medium rounded-md',
+                        'focus:outline-none focus:ring-2 focus:ring-indigo-500',
                       )}
                     >
                       <item.icon
@@ -362,7 +363,9 @@ export default function Homepage() {
                       <svg
                         className={classNames(
                           open ? 'text-gray-400 rotate-90' : 'text-gray-300',
-                          'ml-3 flex-shrink-0 h-5 w-5 transform group-hover:text-gray-400 transition-colors ease-in-out duration-150',
+                          'ml-3 flex-shrink-0 h-5 w-5 transform',
+                          'group-hover:text-gray-400',
+                          'transition-colors ease-in-out duration-150',
                         )}
                         viewBox="0 0 20 20"
                         aria-hidden="true"
