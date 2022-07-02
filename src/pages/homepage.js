@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {useDropzone} from 'react-dropzone';
 import {Disclosure} from '@headlessui/react';
 import {React, Fragment, useState} from 'react';
@@ -353,7 +354,8 @@ export default function Homepage() {
                       )}
                     >
                       <item.icon
-                        className="mr-3 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-gray-500"
+                        className="mr-3 flex-shrink-0 h-6 w-6
+                         text-gray-400 group-hover:text-gray-500"
                         aria-hidden="true"
                       />
                       <span className="flex-1">{item.name}</span>
@@ -409,7 +411,7 @@ export default function Homepage() {
               <span className="sr-only">Open sidebar</span>
               <MenuAlt2Icon className="h-6 w-6" aria-hidden="true" />
             </button>
-            <div className="flex-1 px-4 flex justify-between">
+            <div className="flex-1 px-0 flex justify-between">
               { !showSidebar && <button
                 onClick={() =>setShowSiderbar(true)}
                 type="button"
