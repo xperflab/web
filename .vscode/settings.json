@@ -4,5 +4,6 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
-    "files.autoSave": "afterDelay"
+    "files.autoSave": "afterDelay",
+    "files.eol": "\n",
 }
