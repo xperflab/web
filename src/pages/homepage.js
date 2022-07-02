@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable valid-jsdoc */
 import {useDropzone} from 'react-dropzone';
 import {Disclosure} from '@headlessui/react';
 import {React, Fragment, useState} from 'react';
@@ -16,15 +14,6 @@ import {
 import 'tw-elements';
 import {SearchIcon} from '@heroicons/react/solid';
 import {useCallback} from 'react';
-
-// const navigation = [
-//   {name: 'Dashboard', href: '#', icon: HomeIcon, current: true},
-//   {name: 'Team', href: '#', icon: UsersIcon, current: false},
-//   {name: 'Projects', href: '#', icon: FolderIcon, current: false},
-//   {name: 'Calendar', href: '#', icon: CalendarIcon, current: false},
-//   {name: 'Documents', href: '#', icon: InboxIcon, current: false},
-//   {name: 'Reports', href: '#', icon: ChartBarIcon, current: false},
-// ];
 const navigation = [
   {name: 'Dashboard', icon: HomeIcon, current: true, href: '#'},
   {
@@ -48,20 +37,18 @@ const navigation = [
 /**
  *
  * @param  {...any} classes
- * @returns
+ * @return {Array}
  */
 function classNames(...classes) {
+  console.log(classes.filter(Boolean).join(' '));
   return classes.filter(Boolean).join(' ');
 }
 /**
  *
  * @param {*} props
- * @returns
+ * @return {Dropzone}
  */
 function MyDropzone(props) {
-  //   onDrop(e) {
-  //     console.log("Dropped files", e.dataTransfer);
-  //   }
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
@@ -69,9 +56,6 @@ function MyDropzone(props) {
       reader.onabort = () => console.log('file reading was aborted');
       reader.onerror = () => console.log('file reading has failed');
       reader.onload = () => {
-        // Do whatever you want with the file contents
-        setLoading(true);
-
         const binaryStr = reader.result;
         console.log(binaryStr);
         const result = window.decodeProfile(binaryStr, file.type);
@@ -84,7 +68,6 @@ function MyDropzone(props) {
           for (let i = 0; i < fileExistList.length; i++) {
             window.module._updateSourceFileExistStatus(i, fileExistList[i]);
           }
-          // window.navigate("/flame_graph");
           changeComponentToFlamegraph();
           changeShowCurrentProfile();
           window.postMessage(
@@ -96,13 +79,8 @@ function MyDropzone(props) {
         }
       };
       reader.readAsArrayBuffer(file);
-      //  reader.readAsBinaryString(file)
     });
   }, []);
-  // const { getRootProps, getInputProps } = useDropzone({ onDrop,accept: {
-  //   'image/jpeg': [],
-  //   'image/png': []
-  // } })
   const {getRootProps, getInputProps} = useDropzone({
     onDrop,
   });
@@ -116,7 +94,6 @@ function MyDropzone(props) {
           <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
             {/* Replace with your content */}
             <div className="px-4 py-8 sm:px-0">
-
               <div className="border-4 border-dashed border-gray-200
               rounded-lg h-35" style={{
                 display: 'flex',
@@ -141,22 +118,14 @@ function MyDropzone(props) {
   );
 }
 /**
- *
- * @returns
+ * Include sidebar and dropzone
+ * @return {Homepage}
  */
 export default function Homepage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSidebar, setShowSiderbar] = useState(true);
   return (
     <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full">
-        <body class="h-full">
-        ```
-      */}
       <div>
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog as="div" className="relative z-40 md:hidden"
@@ -227,7 +196,8 @@ export default function Homepage() {
                     item.current ?
                       'bg-gray-100 text-gray-900' :
                   'bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                    'group w-fullflex                                                                                                                                  items-centerpl-2 py-2 text-sm font-medium rounded-md',
+                    'group w-fullflex items-centerpl-2',
+                    'py-2 text-sm font-medium rounded-md',
                   )}
                 >
                   <item.icon
@@ -250,12 +220,16 @@ export default function Homepage() {
                       className={classNames(
                         item.current ?
                           'bg-gray-100 text-gray-900' :
-                          'bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                        'group w-full flex items-center pl-2 pr-1 py-2 text-left text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500',
+                          'bg-white text-gray-600 hover:bg-gray-50',
+                        'hover:text-gray-900',
+                        'group w-full flex',
+                        'items-center pl-2 pr-1 py-2',
+                        'text-left text-sm font-medium rounded-md', 'focus:outline-none focus:ring-2 focus:ring-indigo-500',
                       )}
                     >
                       <item.icon
-                        className="mr-3 flex-shrink-0 h-6 w-6 text-gray-400 group-hover:text-gray-500"
+                        className="mr-3 flex-shrink-0
+                        h-6 w-6 text-gray-400 group-hover:text-gray-500"
                         aria-hidden="true"
                       />
                       <span className="flex-1">{item.name}</span>
@@ -276,7 +250,10 @@ export default function Homepage() {
                           key={subItem.name}
                           as="a"
                           href={subItem.href}
-                          className="group w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50"
+                          className="group w-full flex items-center pl-11
+                          pr-2 py-2 text-sm font-medium
+                          text-gray-600 rounded-md
+                          hover:text-gray-900 hover:bg-gray-50"
                         >
                           {subItem.name}
                         </Disclosure.Button>
@@ -292,21 +269,21 @@ export default function Homepage() {
                 </Dialog.Panel>
               </Transition.Child>
               <div className="flex-shrink-0 w-14" aria-hidden="true">
-                {/* Dummy element to force sidebar to shrink to fit close icon */}
+                {/* Dummy element to force
+                 sidebar to shrink to fit close icon */}
               </div>
             </div>
           </Dialog>
         </Transition.Root>
 
         {/* Static sidebar for desktop */}
-        {/* <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0"> */}
         <div
           className={` ${
           showSidebar ? 'md:w-64' : 'w-0'
           } hidden md:flex md:flex-col md:fixed md:inset-y-0 duration-200`}
         >
-          {/* Sidebar component, swap this element with another sidebar if you like */}
-          <div className="flex flex-col flex-grow border-r border-gray-200 pt-5 bg-white overflow-y-auto">
+          <div className="flex flex-col flex-grow border-r
+          border-gray-200 pt-5 bg-white overflow-y-auto">
             <div className="flex items-center flex-shrink-0 px-4">
               <img
                 className="h-8 w-auto"
@@ -320,14 +297,24 @@ export default function Homepage() {
                   type="button"
                   data-mdb-ripple="true"
                   data-mdb-ripple-color="light"
-                  className="inline-block px-6 py-2.5 ml-7  text-black font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-5000 ease-in-out"
-                  data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"
+                  className="inline-block px-6 py-2.5 ml-7
+                   text-black font-medium text-xs leading-tight
+                    uppercase rounded shadow-md
+                    hover:bg-blue-700 hover:shadow-lg
+                    focus:bg-blue-700 focus:shadow-lg
+                    focus:outline-none focus:ring-0
+                    active:bg-blue-800
+                    active:shadow-lg transition duration-5000 ease-in-out"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseExample"
+                  aria-expanded="false" aria-controls="collapseExample"
                 ><ChevronLeftIcon className="h-6 w-6"/></button>
               </div>
 
             </div>
             <div className="mt-5 flex-grow flex flex-col">
-              <nav className="flex-1 px-2 space-y-1 bg-white" aria-label="Sidebar">
+              <nav className="flex-1 px-2
+              space-y-1 bg-white" aria-label="Sidebar">
                 {navigation.map((item) =>
             !item.children ? (
               <div key={item.name}>
@@ -336,13 +323,16 @@ export default function Homepage() {
                   className={classNames(
                     item.current ?
                       'bg-gray-100 text-gray-900' :
-                      'bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                    'group w-full flex items-center pl-2 py-2 text-sm font-medium rounded-md',
+                      'bg-white text-gray-600',
+                    'hover:bg-gray-50 hover:text-gray-900',
+                    'group w-full flex items-center',
+                    'pl-2 py-2 text-sm font-medium rounded-md',
                   )}
                 >
                   <item.icon
                     className={classNames(
-                      item.current ? 'text-gray-500' : 'text-gray-400 group-hover:text-gray-500',
+                      item.current ?
+                      'text-gray-500' : 'text-gray-400 group-hover:text-gray-500',
                       'mr-3 flex-shrink-0 h-6 w-6',
                     )}
                     aria-hidden="true"
@@ -384,7 +374,10 @@ export default function Homepage() {
                           key={subItem.name}
                           as="a"
                           href={subItem.href}
-                          className="group w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50"
+                          className="group w-full flex
+                          items-center pl-11 pr-2 py-2
+                          text-sm font-medium text-gray-600
+                           rounded-md hover:text-gray-900 hover:bg-gray-50"
                         >
                           {subItem.name}
                         </Disclosure.Button>
@@ -404,10 +397,13 @@ export default function Homepage() {
           showSidebar ? 'md:pl-64' : 'pl-0 '
           } flex flex-col flex-1`}
         >
-          <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow">
+          <div className="sticky top-0 z-10
+          flex-shrink-0 flex h-16 bg-white shadow">
             <button
               type="button"
-              className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
+              className="px-4 border-r border-gray-200
+              text-gray-500 focus:outline-none
+               focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
               onClick={() => setSidebarOpen(true)}
             >
               <span className="sr-only">Open sidebar</span>
@@ -419,22 +415,40 @@ export default function Homepage() {
                 type="button"
                 data-mdb-ripple="true"
                 data-mdb-ripple-color="light"
-                className="inline-block px-6 py-2.5 h-12 mt-4 text-black font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out hidden md:flex"
+                className="inline-block px-6
+                py-2.5 h-12 mt-4 text-black font-medium
+                 text-xs leading-tight uppercase
+                 rounded shadow-md hover:bg-blue-700
+                 hover:shadow-lg focus:bg-blue-700
+                 focus:shadow-lg focus:outline-none
+                 focus:ring-0 active:bg-blue-800
+                 active:shadow-lg transition
+                 duration-150 ease-in-out hidden md:flex"
 
-                data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseExample"
+                aria-expanded="false"
+                aria-controls="collapseExample"
               ><ChevronRightIcon className="h-6 w-6"/></button>}
               <div className="flex-1 flex">
                 <form className="w-full flex md:ml-0" action="#" method="GET">
                   <label htmlFor="search-field" className="sr-only">
                     Search
                   </label>
-                  <div className="relative w-full text-gray-400 focus-within:text-gray-600">
-                    <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
+                  <div className="relative w-full
+                  text-gray-400 focus-within:text-gray-600">
+                    <div className="absolute inset-y-0
+                    left-0 flex items-center pointer-events-none">
                       <SearchIcon className="h-5 w-5" aria-hidden="true" />
                     </div>
                     <input
                       id="search-field"
-                      className="block w-full h-full pl-8 pr-3 py-2 border-transparent text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent sm:text-sm"
+                      className="block w-full h-full pl-8
+                      pr-3 py-2 border-transparent
+                      text-gray-900 placeholder-gray-500
+                      focus:outline-none
+                      focus:placeholder-gray-400
+                      focus:ring-0 focus:border-transparent sm:text-sm"
                       placeholder="Search"
                       type="search"
                       name="search"
@@ -458,9 +472,7 @@ export default function Homepage() {
 
                     {/* /End replace */}
                   </div>
-
                 </div>
-
               </div>
             </div>
             <div className="flex justify-center">
