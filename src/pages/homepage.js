@@ -145,8 +145,8 @@ export default function Homepage() {
                 leaveFrom="translate-x-0"
                 leaveTo="-translate-x-full"
               >
-                <Dialog.Panel className="relative flex-1 flex
-                flex-col max-w-xs w-full pt-5 pb-4 bg-white">
+                <Dialog.Panel className="relative flex-1
+                flex flex-col max-w-xs w-full pt-5 pb-4 bg-white">
                   <Transition.Child
                     as={Fragment}
                     enter="ease-in-out duration-300"
@@ -159,9 +159,10 @@ export default function Homepage() {
                     <div className="absolute top-0 right-0 -mr-12 pt-2">
                       <button
                         type="button"
-                        className="ml-1 flex items-center justify-center
-                        h-10 w-10 rounded-full focus:outline-none
-                        focus:ring-2 focus:ring-inset focus:ring-white"
+                        className="ml-1 flex items-center
+                        justify-center h-10 w-10
+                         rounded-full focus:outline-none
+                         focus:ring-2 focus:ring-inset focus:ring-white"
                         onClick={() => setSidebarOpen(false)}
                       >
                         <span className="sr-only">Close sidebar</span>
@@ -178,8 +179,7 @@ export default function Homepage() {
                     />
                   </div>
                   <div className="mt-5 flex-1 h-0 overflow-y-auto">
-                    <nav className="flex-1 px-2
-                    space-y-1 bg-white" aria-label="Sidebar">
+                    <nav className="px-2 space-y-1">
                       {navigation.map((item) =>
             !item.children ? (
               <div key={item.name}>
@@ -188,9 +188,10 @@ export default function Homepage() {
                   className={classNames(
                     item.current ?
                       'bg-gray-100 text-gray-900' :
-                  'bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                    'group w-fullflex items-centerpl-2',
-                    'py-2 text-sm font-medium rounded-md',
+                      'bg-white text-gray-600',
+                    'hover:bg-gray-50 hover:text-gray-900',
+                    'group w-full flex items-center',
+                    'pl-2 py-2 text-sm font-medium rounded-md',
                   )}
                 >
                   <item.icon
@@ -213,18 +214,17 @@ export default function Homepage() {
                       className={classNames(
                         item.current ?
                           'bg-gray-100 text-gray-900' :
-                          'bg-white text-gray-600 hover:bg-gray-50',
-                        'hover:text-gray-900',
-                        'group w-full flex',
-                        'items-center pl-2 pr-1 py-2',
-                        'text-left text-sm',
-                        'font-medium rounded-md',
+                          'bg-white text-gray-600',
+                        'hover:bg-gray-50 hover:text-gray-900',
+                        'group w-full flex items-center',
+                        'pl-2 pr-1 py-2 text-left',
+                        'text-sm font-medium rounded-md',
                         'focus:outline-none focus:ring-2 focus:ring-indigo-500',
                       )}
                     >
                       <item.icon
-                        className="mr-3 flex-shrink-0
-                        h-6 w-6 text-gray-400 group-hover:text-gray-500"
+                        className="mr-3 flex-shrink-0 h-6 w-6
+                         text-gray-400 group-hover:text-gray-500"
                         aria-hidden="true"
                       />
                       <span className="flex-1">{item.name}</span>
@@ -247,10 +247,10 @@ export default function Homepage() {
                           key={subItem.name}
                           as="a"
                           href={subItem.href}
-                          className="group w-full flex items-center pl-11
-                          pr-2 py-2 text-sm font-medium
-                          text-gray-600 rounded-md
-                          hover:text-gray-900 hover:bg-gray-50"
+                          className="group w-full flex
+                          items-center pl-11 pr-2 py-2
+                          text-sm font-medium text-gray-600
+                           rounded-md hover:text-gray-900 hover:bg-gray-50"
                         >
                           {subItem.name}
                         </Disclosure.Button>
@@ -266,12 +266,13 @@ export default function Homepage() {
                 </Dialog.Panel>
               </Transition.Child>
               <div className="flex-shrink-0 w-14" aria-hidden="true">
-                {/* Dummy element to force
-                 sidebar to shrink to fit close icon */}
+                {/* Dummy element to force sidebar
+                to shrink to fit close icon */}
               </div>
             </div>
           </Dialog>
         </Transition.Root>
+
 
         {/* Static sidebar for desktop */}
         <div
@@ -295,6 +296,7 @@ export default function Homepage() {
                   data-mdb-ripple="true"
                   data-mdb-ripple-color="light"
                   className="inline-block px-6 py-2.5 ml-7
+                  border
                    text-black font-medium text-xs leading-tight
                     uppercase rounded shadow-md
                     hover:bg-blue-700 hover:shadow-lg
@@ -305,7 +307,7 @@ export default function Homepage() {
                   data-bs-toggle="collapse"
                   data-bs-target="#collapseExample"
                   aria-expanded="false" aria-controls="collapseExample"
-                ><ChevronLeftIcon className="h-6 w-6"/></button>
+                ><ChevronLeftIcon className="h-6 w-6 "/></button>
               </div>
 
             </div>
@@ -403,7 +405,7 @@ export default function Homepage() {
           } flex flex-col flex-1`}
         >
           <div className="sticky top-0 z-10
-          flex-shrink-0 flex h-16 bg-white shadow">
+          flex-shrink-0 flex h-12 bg-white shadow">
             <button
               type="button"
               className="px-4 border-r border-gray-200
@@ -414,16 +416,17 @@ export default function Homepage() {
               <span className="sr-only">Open sidebar</span>
               <MenuAlt2Icon className="h-6 w-6" aria-hidden="true" />
             </button>
-            <div className="flex-1 px-0 flex justify-between">
+            <div className="flex-1 px-0 flex justify-between h-12">
               { !showSidebar && <button
                 onClick={() =>setShowSiderbar(true)}
                 type="button"
                 data-mdb-ripple="true"
                 data-mdb-ripple-color="light"
                 className="inline-block px-6
-                py-2.5 h-12 mt-4 text-black font-medium
+                border
+                py-2.5 h-12  text-black font-medium
                  text-xs leading-tight uppercase
-                 rounded shadow-md hover:bg-blue-700
+                 rounded hover:bg-blue-700
                  hover:shadow-lg focus:bg-blue-700
                  focus:shadow-lg focus:outline-none
                  focus:ring-0 active:bg-blue-800
@@ -434,7 +437,7 @@ export default function Homepage() {
                 data-bs-target="#collapseExample"
                 aria-expanded="false"
                 aria-controls="collapseExample"
-              ><ChevronRightIcon className="h-6 w-6"/></button>}
+              ><ChevronRightIcon className="h-6 w-6 "/></button>}
               <div className="flex-1 flex">
                 <form className="w-full flex md:ml-0" action="#" method="GET">
                   <label htmlFor="search-field" className="sr-only">
@@ -468,7 +471,7 @@ export default function Homepage() {
             <p className="md:space-x-1 space-y-1 md:space-y-0 mb-4">
             </p>
             <div className="collapse" id="collapseExample">
-              <div className="block p-6 rounded-lg shadow-lg bg-white">
+              <div className="block p-6 rounded-lg  bg-white">
                 <div className="py-6">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
                     {/* Replace with your content */}
@@ -480,7 +483,12 @@ export default function Homepage() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-center">
+            {/* Box-shadow generator to help adjust the effect
+            https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_Backgrounds_and_Borders/Box-shadow_generator */}
+            <div
+              className={` ${
+              showSidebar ? '' : ' shadow-[0_-15px_5px_0px_rgba(0,0,0,0.3)]'
+              } flex justify-center`}>
               <div className="mt-40">
                 <img src="/easyview.png"></img>
                 <div></div>
