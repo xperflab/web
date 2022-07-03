@@ -10,6 +10,7 @@ import {
   XIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  InboxIcon,
 } from '@heroicons/react/outline';
 import 'tw-elements';
 import {SearchIcon} from '@heroicons/react/solid';
@@ -33,7 +34,6 @@ const navigation = [
       {name: 'Example VR Trace', href: '#'},
     ],
   }];
-
 /**
  * Combine the className in if condition render
  * @param  {...any} classes
@@ -51,7 +51,6 @@ function MyDropzone(props) {
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
-
       reader.onabort = () => console.log('file reading was aborted');
       reader.onerror = () => console.log('file reading has failed');
       reader.onload = () => {
@@ -78,48 +77,48 @@ function MyDropzone(props) {
   const {getRootProps, getInputProps} = useDropzone({
     onDrop,
   });
-
   return (
-
     <div>
-
       <div {...getRootProps()}>
         <main>
-          <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            {/* Replace with your content */}
-            <div className="px-4 py-8 sm:px-0">
-              <div className="border-4 border-dashed border-gray-200
-              rounded-lg h-35" style={{
+          <div className="max-w-7xl mx-auto ">
+            <input {...getInputProps()} />
+            <div className="px-4 py-5 sm:px-0">
+              <div className=" border-dashed border-gray-200
+              rounded-lg h-40" style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center', flexDirection: 'column',
               }}>
-                <input {...getInputProps()} />
-                <p >
-                </p><br />
-                <div style={{fontSize: 26, color: '#262626'}}>
+                <InboxIcon className="text-[#B73C93]"/>
+                <div className ="text-[#262626] text-2xl">
                   Click or drag file to this area to decode</div>
               </div>
             </div>
-            {/* /End replace */}
           </div>
         </main>
-
       </div>
     </div>
   );
 }
 /**
- * Include sidebar and dropzone. If the width is
- * less than 768px will trigger the responsive design
+ * Include sidebar and dropzone. If the screen width is
+ * less than 768px will trigger the responsive design.
  * @return {Homepage}
  */
 export default function Homepage() {
+  /**
+   *  When screen width is less than 768px to control
+   *  open sidebar or close sidebar.
+   */
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  /**
+   * Click buttons to show the sidebar or hide the sidebar.
+   */
   const [showSidebar, setShowSiderbar] = useState(true);
   return (
     <>
-      <div>
+      <div className="h-full">
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog as="div" className="relative z-40 md:hidden"
             onClose={setSidebarOpen}>
@@ -134,7 +133,6 @@ export default function Homepage() {
             >
               <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
             </Transition.Child>
-
             <div className="fixed inset-0 flex z-40">
               <Transition.Child
                 as={Fragment}
@@ -171,7 +169,7 @@ export default function Homepage() {
                       </button>
                     </div>
                   </Transition.Child>
-                  <div className="flex-shrink-0 flex items-center px-4">
+                  <div className="flex-shrink-0 flex items-center px-4 ">
                     <img
                       className="h-8 w-auto"
                       src="https://tailwindui.com/img/logos/workflow-logo-indigo-600-mark-gray-800-text.svg"
@@ -272,44 +270,32 @@ export default function Homepage() {
             </div>
           </Dialog>
         </Transition.Root>
-
-
         {/* Static sidebar for desktop */}
         <div
           className={` ${
-          showSidebar ? 'md:w-64' : 'w-0'
+          showSidebar ? 'md:w-[16.3rem]' : 'w-0'
           } hidden md:flex md:flex-col md:fixed md:inset-y-0 duration-200`}
         >
           <div className="flex flex-col flex-grow border-r
-          border-gray-200 pt-5 bg-white overflow-y-auto">
-            <div className="flex items-center flex-shrink-0 px-4">
+          border-gray-200 bg-white overflow-y-auto">
+            <div className="flex items-center flex-shrink-0 px-4 pt-2">
               <img
                 className="h-8 w-auto"
                 src="https://tailwindui.com/img/logos/workflow-logo-indigo-600-mark-gray-800-text.svg"
                 alt="Workflow"
               />
-
               <div className="flex space-x-2 justify-center">
                 <button
                   onClick={() =>setShowSiderbar(false)}
                   type="button"
                   data-mdb-ripple="true"
                   data-mdb-ripple-color="light"
-                  className="inline-block px-6 py-2.5 ml-7
-                  border
-                   text-black font-medium text-xs leading-tight
-                    uppercase rounded shadow-md
-                    hover:bg-blue-700 hover:shadow-lg
-                    focus:bg-blue-700 focus:shadow-lg
-                    focus:outline-none focus:ring-0
-                    active:bg-blue-800
-                    active:shadow-lg transition duration-5000 ease-in-out"
+                  className="inline-block px-6 py-2.5 ml-7"
                   data-bs-toggle="collapse"
                   data-bs-target="#collapseExample"
                   aria-expanded="false" aria-controls="collapseExample"
                 ><ChevronLeftIcon className="h-6 w-6 "/></button>
               </div>
-
             </div>
             <div className="mt-5 flex-grow flex flex-col">
               <nav className="flex-1 px-2
@@ -402,9 +388,9 @@ export default function Homepage() {
         <div
           className={` ${
           showSidebar ? 'md:pl-64' : 'pl-0 '
-          } flex flex-col flex-1`}
+          } flex flex-col flex-1 h-full`}
         >
-          <div className="sticky top-0 z-10
+          <div className="sticky ml-1 top-0 z-10
           flex-shrink-0 flex h-12 bg-white shadow">
             <button
               type="button"
@@ -432,7 +418,6 @@ export default function Homepage() {
                  focus:ring-0 active:bg-blue-800
                  active:shadow-lg transition
                  duration-150 ease-in-out hidden md:flex"
-
                 data-bs-toggle="collapse"
                 data-bs-target="#collapseExample"
                 aria-expanded="false"
@@ -466,20 +451,14 @@ export default function Homepage() {
               </div>
             </div>
           </div>
-
           <main className="flex-1">
-            <p className="md:space-x-1 space-y-1 md:space-y-0 mb-4">
-            </p>
-            <div className="collapse" id="collapseExample">
-              <div className="block p-6 rounded-lg  bg-white">
-                <div className="py-6">
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                    {/* Replace with your content */}
-
-                    <MyDropzone/>
-
-                    {/* /End replace */}
-                  </div>
+            <div className="collapse bg-[#F3F4F6]"
+              enter="ease-in-out " id="collapseExample">
+              <div className="block rounded-lg">
+                <div>
+                  {/* Replace with your content */}
+                  <MyDropzone/>
+                  {/* /End replace */}
                 </div>
               </div>
             </div>
@@ -487,14 +466,13 @@ export default function Homepage() {
             https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_Backgrounds_and_Borders/Box-shadow_generator */}
             <div
               className={` ${
-              showSidebar ? '' : ' shadow-[0_-15px_5px_0px_rgba(0,0,0,0.3)]'
-              } flex justify-center`}>
+              showSidebar ? '' : ' shadow-[0_-1px_3px_-0px_rgba(0,0,0,0.1)]'
+              } flex justify-center h-full`}>
               <div className="mt-40">
                 <img src="/easyview.png"></img>
                 <div></div>
               </div>
             </div>
-
           </main>
         </div>
       </div>

@@ -8,7 +8,7 @@ export default class App extends Component {
   // eslint-disable-next-line require-jsdoc
   render() {
     return (
-      <div><Homepage/></div>
+      <div className="h-full"><Homepage/></div>
     );
   }
 }
