@@ -108,8 +108,9 @@ function MyDropzone(props) {
  */
 export default function Homepage() {
   /**
-   *  When screen width is less than 768px to control
-   *  open sidebar or close sidebar.
+   * When screen width is less than 768px, control open
+   * sidebar or close sidebar.
+   *
    */
   const [sidebarOpen, setSidebarOpen] = useState(false);
   /**
