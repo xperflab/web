@@ -16,6 +16,34 @@ import "antd/dist/antd.min.css";
 import { InboxOutlined } from "@ant-design/icons";
 import { message, Upload, Layout, Spin } from "antd";
 
+let bufAddr = 0
+let remain = 0
+
+const instance = window.Module
+
+export const bufferSize = 128 * 1024 * 1024;
+function parsePart(buf) {
+  if (bufAddr == 0) {
+    bufAddr = instance._initBufferAddr(bufferSize)
+  }
+  instance.writeArrayToMemory(buf, bufAddr + remain)
+  remain = instance._parsePart(buf.length + remain)
+  return remain
+}
+
+function build() {
+  instance._build()
+  console.log("build finished.")
+}
+
+function isPProf() {
+  return instance._isPProf()
+}
+
+function setRewind() {
+  return instance._setRewind()
+}
+
 
 function MyDropzone(props) {
   const { Dragger } = Upload;
@@ -24,42 +52,102 @@ function MyDropzone(props) {
   //   onDrop(e) {
   //     console.log("Dropped files", e.dataTransfer);
   //   }
+
   useEffect(() => {
     console.log(loading);
   }, [loading]);
   const onDrop = useCallback((acceptedFiles) => {
-    acceptedFiles.forEach((file) => {
-      const reader = new FileReader()
+    acceptedFiles.forEach(async (f) => {
+      console.time('Parse')
+      console.log("file", f)
+      let from = 0
 
-      reader.onabort = () => console.log('file reading was aborted')
-      reader.onerror = () => console.log('file reading has failed')
-      reader.onload = () => {
-        // Do whatever you want with the file contents
-        setLoading(true)
+      while (true) {
+        console.log(`Read from ${from} to ${from + bufferSize - remain}`)
 
-        const binaryStr = reader.result
-        console.log(binaryStr)
-        let result = window.decodeProfile(binaryStr, file.type)
-        console.log(result)
-        if (result == 0) {
-          let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
-          console.log(jsonStr)
-          let fileExistList = JSON.parse(jsonStr)
-          for (let i = 0; i < fileExistList.length; i++) {
-            window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
+        const s = f.slice(from, from + bufferSize - remain)
+        if (s.size == 0)
+          break
+
+        const a = await s.arrayBuffer()
+        let view = new Uint8Array(a);
+        remain = parsePart(view)
+
+        if (remain == -1) {
+          console.log("Error")
+          break
+        }
+        from += view.length
+      }
+
+      if (isPProf()) {
+        setRewind()
+        console.log("Rewinding...")
+        from = 0
+        remain = 0
+
+        while (true) {
+          console.log(`Read from ${from} to ${from + bufferSize - remain}`)
+
+          const s = f.slice(from, from + bufferSize - remain)
+          console.log(`got ${s.size} bytes`)
+          if (s.size == 0)
+            break
+
+          const a = await s.arrayBuffer()
+          let view = new Uint8Array(a);
+          remain = parsePart(view)
+
+          if (remain == -1) {
+            console.log("Error")
+            break
           }
-          //window.navigate("/flame_graph");  
-          changeComponentToFlamegraph()
-          changeShowCurrentProfile()
-          window.postMessage(
-            {
-              type: "Select Flamegraph",
-              data: ""
-            }
-          );
+          from += view.length
         }
       }
-      reader.readAsArrayBuffer(file)
+
+      build()
+      let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
+      // console.log(jsonStr)
+      let fileExistList = JSON.parse(jsonStr)
+      for (let i = 0; i < fileExistList.length; i++) {
+        window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
+      }
+      changeComponentToFlamegraph()
+      changeShowCurrentProfile()
+      console.timeEnd('Parse')
+
+      // const reader = new FileReader()
+
+      // reader.onabort = () => console.log('file reading was aborted')
+      // reader.onerror = () => console.log('file reading has failed')
+      // reader.onload = () => {
+      //   // Do whatever you want with the file contents
+      //   setLoading(true)
+
+      //   const binaryStr = reader.result
+      //   console.log(binaryStr)
+      //   let result = window.decodeProfile(binaryStr, file.type)
+      //   console.log(result)
+      //   if (result == 0) {
+      //     let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
+      //     console.log(jsonStr)
+      //     let fileExistList = JSON.parse(jsonStr)
+      //     for (let i = 0; i < fileExistList.length; i++) {
+      //       window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
+      //     }
+      //     //window.navigate("/flame_graph");  
+      //     changeComponentToFlamegraph()
+      //     changeShowCurrentProfile()
+      //     window.postMessage(
+      //       {
+      //         type: "Select Flamegraph",
+      //         data: ""
+      //       }
+      //     );
+      //   }
+      // }
+      // reader.readAsArrayBuffer(file)
       //  reader.readAsBinaryString(file)
     })
 
