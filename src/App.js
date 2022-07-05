@@ -31,8 +31,10 @@ function DragOpenFileLayerDropzone() {
   return (
     <div className="h-full"{...getRootProps()}>
       <input {...getInputProps()} />
-      <Bars/>
-      <Homepage/>
+      <div>
+        <Bars/>
+        <Homepage/>
+      </div>
     </div>
   );
 }
