@@ -1,20 +1,20 @@
-import {useDropzone} from 'react-dropzone';
-import {Disclosure} from '@headlessui/react';
-import {React, Fragment, useState} from 'react';
-import {Dialog, Transition} from '@headlessui/react';
+/**
+ * eslint require
+ */
+import {React} from 'react';
+
+import {Dialog, Disclosure, Transition} from '@headlessui/react';
 import {
-  FolderIcon,
-  HomeIcon,
-  MenuAlt2Icon,
+  ChevronLeftIcon,
+  ChevronRightIcon, FolderIcon,
+  HomeIcon, InboxIcon, MenuAlt2Icon,
   UsersIcon,
   XIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  InboxIcon,
 } from '@heroicons/react/outline';
-import 'tw-elements';
 import {SearchIcon} from '@heroicons/react/solid';
-import {useCallback} from 'react';
+import {Fragment, useCallback, useState} from 'react';
+import {useDropzone} from 'react-dropzone';
+import 'tw-elements';
 const navigation = [
   {name: 'Dashboard', icon: HomeIcon, current: true, href: '#'},
   {
@@ -470,7 +470,13 @@ export default function Homepage() {
               showSidebar ? '' : ' shadow-[0_-1px_3px_-0px_rgba(0,0,0,0.1)]'
               } flex justify-center h-full`}>
               <div className="mt-40">
-                <img src="/easyview.png"></img>
+                <div className="text-7xl px-4 font-bold
+                text-black">
+                  Easy<span
+                    className="font-medium text-transparent
+                     bg-clip-text bg-gradient-to-br
+                     from-[#fe4ba1] to-[#4a247c]">View</span>
+                </div>
                 <div></div>
               </div>
             </div>
