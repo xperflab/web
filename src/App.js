@@ -3,47 +3,60 @@
  */
 import {React} from 'react';
 
-import {Component, useCallback} from 'react';
-import {useDropzone} from 'react-dropzone';
-import Bars from './components/bars';
-import Homepage from './pages/homepage';
+import {Component} from 'react';
+import LeftBar from './components/bars/leftBar';
+import ViewContainer from './components/views/viewContainer';
+import OpenFileDropezone from './components/utils/openFileDropzone';
+
 /**
- * Top layer
- * Include sidebar and dropzone. If the screen width is
- * less than 768px will trigger the responsive design.
- * @return {DragOpenFileLayerDropzone}
- */
-function DragOpenFileLayerDropzone() {
-  const onDrop = useCallback((acceptedFiles) => {
-    acceptedFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onabort = () => console.log('file reading was aborted');
-      reader.onerror = () => console.log('file reading has failed');
-      reader.onload = () => {
-      // Do whatever you want with the file contents
-        const binaryStr = reader.result;
-        console.log(binaryStr);
-      };
-      reader.readAsArrayBuffer(file);
-    });
-  }, []);
-  const {getRootProps, getInputProps} = useDropzone({onDrop, noClick: true});
-  return (
-    <div className="h-full"{...getRootProps()}>
-      <input {...getInputProps()} />
-      <Bars/>
-      <Homepage/>
-    </div>
-  );
-}
-/**
- *The main component.
+ *
+ * @param { Component} value
  */
 export default class App extends Component {
+  /**
+   *
+   * @param {*} props
+   */
+  constructor(props) {
+    super(props);
+    this.state = {
+      showSidebar: true,
+      sidebarOpen: false,
+    };
+  }
+  /**
+   * Click buttons to show the sidebar or hide the sidebar.
+   * @param {boolean} value
+   */
+  setShowSidebar = (value) =>{
+    this.setState({
+      showSidebar: value,
+    });
+  };
+  /**
+   * When screen width is less than 768px, control open
+   * sidebar or close sidebar.
+   * @param {boolean} value
+   */
+  setSidebarOpen = (value) => {
+    this.setState({
+      sidebarOpen: value,
+    });
+  };
   // eslint-disable-next-line require-jsdoc
   render() {
     return (
-      <DragOpenFileLayerDropzone/>
+      <div className="h-full">
+        <LeftBar showSidebar = {this.state.showSidebar}
+          sidebarOpen = {this.state.sidebarOpen}
+          setShowSidebar = {this.setShowSidebar}
+          setSidebarOpen={this.setSidebarOpen}/>
+        <ViewContainer showSidebar ={this.state.showSidebar}
+          sidebarOpen = {this.state.sidebarOpen}
+          setShowSidebar = {this.setShowSidebar}
+          setSidebarOpen={this.setSidebarOpen}/>
+        <OpenFileDropezone/>
+      </div>
     );
   }
 }
