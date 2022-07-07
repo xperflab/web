@@ -22,7 +22,7 @@ export default class ViewContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showSidebar: this.props.showSidebar,
+      showSidebar: this.props.sideState.showSidebar,
     };
   }
   // eslint-disable-next-line require-jsdoc
@@ -30,7 +30,7 @@ export default class ViewContainer extends Component {
     return (
       <div
         className={` ${
-          this.props.showSidebar ? 'md:pl-64' : 'pl-0 '
+          this.props.sideState.showSidebar ? 'md:pl-64' : 'pl-0 '
         } flex flex-col flex-1 h-full`}
       >
         <div className="sticky ml-1 top-0 z-10
@@ -40,14 +40,14 @@ export default class ViewContainer extends Component {
             className="px-4 border-r border-gray-200
               text-gray-500 focus:outline-none
                focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
-            onClick={() => this.props.setSidebarOpen(true)}
+            onClick={() => this.props.sideState.setSidebarOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>
             <MenuAlt2Icon className="h-6 w-6" aria-hidden="true" />
           </button>
           <div className="flex-1 px-0 flex justify-between h-12">
-            { !this.props.showSidebar && <button
-              onClick={() =>this.props.setShowSidebar(true)}
+            { !this.props.sideState.showSidebar && <button
+              onClick={() =>this.props.sideState.setShowSidebar(true)}
               type="button"
               data-mdb-ripple="true"
               data-mdb-ripple-color="light"
@@ -100,7 +100,5 @@ export default class ViewContainer extends Component {
   }
 }
 ViewContainer.propTypes = {
-  showSidebar: PropTypes.bool,
-  setShowSidebar: PropTypes.func,
-  setSidebarOpen: PropTypes.func,
+  sideState: PropTypes.object.isRequired,
 };

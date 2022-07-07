@@ -20,18 +20,24 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showSidebar: true,
-      sidebarOpen: false,
+      sideState: {
+        showSidebar: true,
+        sidebarOpen: false,
+        setShowSidebar: this.setShowSidebar.bind(this),
+        setSidebarOpen: this.setSidebarOpen.bind(this)},
     };
   }
   /**
    * Click buttons to show the sidebar or hide the sidebar.
    * @param {boolean} value
    */
+
   setShowSidebar = (value) =>{
+    const newSideState = Object.assign(this.state.sideState,
+        {showSidebar: value});
     this.setState({
-      showSidebar: value,
-    });
+      sideState: newSideState},
+    );
   };
   /**
    * When screen width is less than 768px, control open
@@ -39,22 +45,18 @@ export default class App extends Component {
    * @param {boolean} value
    */
   setSidebarOpen = (value) => {
+    const newSideState = Object.assign(this.state.sideState,
+        {showSidebar: value});
     this.setState({
-      sidebarOpen: value,
-    });
+      sideState: newSideState},
+    );
   };
   // eslint-disable-next-line require-jsdoc
   render() {
     return (
       <div className="h-full">
-        <LeftBar showSidebar = {this.state.showSidebar}
-          sidebarOpen = {this.state.sidebarOpen}
-          setShowSidebar = {this.setShowSidebar}
-          setSidebarOpen={this.setSidebarOpen}/>
-        <ViewContainer showSidebar ={this.state.showSidebar}
-          sidebarOpen = {this.state.sidebarOpen}
-          setShowSidebar = {this.setShowSidebar}
-          setSidebarOpen={this.setSidebarOpen}/>
+        <LeftBar sideState = {this.state.sideState}/>
+        <ViewContainer sideState = {this.state.sideState}/>
         <OpenFileDropezone/>
       </div>
     );

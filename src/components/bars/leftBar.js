@@ -45,15 +45,14 @@ function classNames(...classes) {
  */
 export default function LeftBar(props) {
   console.log(props);
-  const [sidebarOpen, setSidebarOpen] = useState(props.sidebarOpen);
-
-  const [showSidebar, setShowSiderbar] = useState(props.showSidebar);
+  const [sidebarOpen, setSidebarOpen] = useState(props.sideState.sidebarOpen);
+  const [showSidebar, setShowSiderbar] = useState(props.sideState.showSidebar);
   useEffect(() => {
-    setShowSiderbar(props.showSidebar);
-  }, [props.showSidebar]);
+    setShowSiderbar(props.sideState.showSidebar);
+  }, [props.sideState.showSidebar]);
   useEffect(() => {
-    setSidebarOpen(props.sidebarOpen);
-  }, [props.sidebarOpen]);
+    setSidebarOpen(props.sideState.sidebarOpen);
+  }, [props.sideState.sidebarOpen]);
   return (
     <div>
       <Transition.Root show={sidebarOpen} as={Fragment}>
@@ -98,7 +97,7 @@ export default function LeftBar(props) {
                          justify-center h-10 w-10
                           rounded-full focus:outline-none
                           focus:ring-2 focus:ring-inset focus:ring-white"
-                      onClick={() => props.setSidebarOpen(false)}
+                      onClick={() => props.sideState.setSidebarOpen(false)}
                     >
                       <span className="sr-only">Close sidebar</span>
                       <XIcon className="h-6 w-6
@@ -224,7 +223,7 @@ export default function LeftBar(props) {
             />
             <div className="flex space-x-2 justify-center">
               <button
-                onClick={() =>props.setShowSidebar(false)}
+                onClick={() =>props.sideState.setShowSidebar(false)}
                 type="button"
                 data-mdb-ripple="true"
                 data-mdb-ripple-color="light"
@@ -329,24 +328,11 @@ export default function LeftBar(props) {
 }
 
 LeftBar.propTypes = {
-  sidebarOpen: PropTypes.bool.isRequired,
-  showSidebar: PropTypes.bool.isRequired,
-  setSidebarOpen: PropTypes.func.isRequired,
-  setShowSidebar: PropTypes.func.isRequired,
-  navigation: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        href: PropTypes.string.isRequired,
-        icon: PropTypes.elementType.isRequired,
-        current: PropTypes.bool,
-        children: PropTypes.arrayOf(
-            PropTypes.shape({
-              name: PropTypes.string.isRequired,
-              href: PropTypes.string.isRequired,
-            }),
-        ),
-      }),
-  ).isRequired,
+  sideState: PropTypes.shape({
+    setShowSidebar: PropTypes.func.isRequired,
+    showSidebar: PropTypes.bool.isRequired,
+    sidebarOpen: PropTypes.bool.isRequired,
+    setSidebarOpen: PropTypes.func.isRequired,
+  }).isRequired,
+  navigation: PropTypes.array.isRequired,
 };
-
-
