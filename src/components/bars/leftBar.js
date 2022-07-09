@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {React, useEffect} from 'react';
 import {Dialog, Disclosure, Transition} from '@headlessui/react';
 import {
@@ -8,6 +9,8 @@ import {
 import {Fragment, useState} from 'react';
 import 'tw-elements';
 import PropTypes from 'prop-types';
+import useConnect from '../utils/connect';
+import {storeContext} from '../utils/store';
 
 const navigation = [
   {name: 'Dashboard', icon: HomeIcon, current: true, href: '#'},
@@ -45,19 +48,12 @@ function classNames(...classes) {
  */
 export default function LeftBar(props) {
   console.log(props);
-  const [sidebarOpen, setSidebarOpen] = useState(props.sideState.sidebarOpen);
-  const [showSidebar, setShowSiderbar] = useState(props.sideState.showSidebar);
-  useEffect(() => {
-    setShowSiderbar(props.sideState.showSidebar);
-  }, [props.sideState.showSidebar]);
-  useEffect(() => {
-    setSidebarOpen(props.sideState.sidebarOpen);
-  }, [props.sideState.sidebarOpen]);
+  const {state, dispatch} = useConnect(storeContext);
   return (
     <div>
-      <Transition.Root show={sidebarOpen} as={Fragment}>
+      <Transition.Root show={state.sidebarOpen} as={Fragment}>
         <Dialog as="div" className="relative z-40 md:hidden"
-          onClose={setSidebarOpen}>
+          onClose={()=>dispatch({type: 'setSidebarOpenFalse'})}>
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-linear duration-300"
@@ -97,7 +93,7 @@ export default function LeftBar(props) {
                          justify-center h-10 w-10
                           rounded-full focus:outline-none
                           focus:ring-2 focus:ring-inset focus:ring-white"
-                      onClick={() => props.sideState.setSidebarOpen(false)}
+                      onClick={()=>dispatch({type: 'setSidebarOpenFalse'})}
                     >
                       <span className="sr-only">Close sidebar</span>
                       <XIcon className="h-6 w-6
@@ -210,7 +206,7 @@ export default function LeftBar(props) {
       {/* Static sidebar for desktop */}
       <div
         className={` ${
-           showSidebar ? 'md:w-[16.3rem]' : 'w-0'
+           state.showSidebar ? 'md:w-[16.3rem]' : 'w-0'
         } hidden md:flex md:flex-col md:fixed md:inset-y-0 duration-200`}
       >
         <div className="flex flex-col flex-grow border-r
@@ -223,7 +219,7 @@ export default function LeftBar(props) {
             />
             <div className="flex space-x-2 justify-center">
               <button
-                onClick={() =>props.sideState.setShowSidebar(false)}
+                onClick={()=>dispatch({type: 'setShowSidebarFalse'})}
                 type="button"
                 data-mdb-ripple="true"
                 data-mdb-ripple-color="light"
@@ -327,12 +323,3 @@ export default function LeftBar(props) {
   );
 }
 
-LeftBar.propTypes = {
-  sideState: PropTypes.shape({
-    setShowSidebar: PropTypes.func.isRequired,
-    showSidebar: PropTypes.bool.isRequired,
-    sidebarOpen: PropTypes.bool.isRequired,
-    setSidebarOpen: PropTypes.func.isRequired,
-  }).isRequired,
-  navigation: PropTypes.array.isRequired,
-};
