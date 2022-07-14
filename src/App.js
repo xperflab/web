@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable require-jsdoc */
 /**
  * eslint require
  */
@@ -47,4 +49,5 @@ export default App;
 //     );
 //   }
 // }
+
 
