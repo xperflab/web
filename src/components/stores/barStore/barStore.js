@@ -6,6 +6,8 @@ import {makeAutoObservable} from 'mobx';
  *  sidebar or close sidebar.
  *
  *  showSidebar : Click buttons to show the sidebar or hide the sidebar.
+ * if sidebar is hided, the dropzone will be shown.
+ * else, the dropzone will be hidden.
  */
 class BarStore {
   sidebarOpen = false;
