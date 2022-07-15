@@ -7,6 +7,7 @@ import {
 import {inject, observer} from 'mobx-react';
 import {Fragment, React} from 'react';
 import 'tw-elements';
+import {PropTypes} from 'prop-types';
 const navigation = [
   {name: 'Dashboard', icon: HomeIcon, current: true, href: '#'},
   {
