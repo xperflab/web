@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable require-jsdoc */
 /**
  * eslint require
  */
@@ -10,14 +8,10 @@ import {BarStore} from './components/stores';
 import LeftBar from './components/bars/leftBar';
 import ViewContainer from './components/views/viewContainer';
 import OpenFileDropezone from './components/utils/openFileDropzone';
-
 const stores = {BarStore};
 
 
 const App = observer(() => {
-  console.log('App');
-
-
   return (
     <Provider {...stores}>
       <div className="h-full">
