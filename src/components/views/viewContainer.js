@@ -8,6 +8,7 @@ import {Component} from 'react';
 import Homeview from './homeview';
 import {PropTypes} from 'prop-types';
 
+export default inject('BarStore')(observer(ViewContainer));
 /**
  * @class ViewContainer
  */
@@ -100,6 +101,5 @@ class ViewContainer extends Component {
 ViewContainer.propTypes = {
   BarStore: PropTypes.object.isRequired,
 };
-export default inject('BarStore')(observer(ViewContainer));
 
 

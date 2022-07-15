@@ -37,6 +37,8 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
+
+export default inject('BarStore')(observer(LeftBar));
 /**
  *
  * @param {App} props
@@ -325,5 +327,4 @@ LeftBar.propTypes = {
   BarStore: PropTypes.object.isRequired,
 };
 
-export default inject('BarStore')(observer(LeftBar));
 
