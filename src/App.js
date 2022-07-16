@@ -1,15 +1,26 @@
-import React, {Component} from 'react';
-
-
 /**
- *The main component control switches different pages and components.
+ * eslint require
  */
-export default class App extends Component {
-  // eslint-disable-next-line require-jsdoc
-  render() {
-    return (
-      <div>App</div>
-    );
-  }
-}
+import {React} from 'react';
 
+import {Provider, observer} from 'mobx-react';
+import {BarStore} from './components/stores';
+import LeftBar from './components/bars/leftBar';
+import ViewContainer from './components/views/viewContainer';
+import OpenFileDropezone from './components/utils/openFileDropzone';
+const stores = {BarStore};
+
+
+const App = observer(() => {
+  return (
+    <Provider {...stores}>
+      <div className="h-full">
+        <LeftBar/>
+        <ViewContainer/>
+        <OpenFileDropezone/>
+      </div>
+    </Provider>
+  );
+});
+
+export default App;
