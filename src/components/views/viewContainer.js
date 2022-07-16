@@ -9,6 +9,7 @@ import Homeview from './homeview';
 import {PropTypes} from 'prop-types';
 
 /**
+ *  inject('BarStore')
  * @class ViewContainer
  */
 class ViewContainer extends Component {

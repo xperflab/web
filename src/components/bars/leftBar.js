@@ -38,7 +38,7 @@ function classNames(...classes) {
 }
 
 /**
- *
+ * inject('BarStore')
  * @param {App} props
  * @return {LeftBar}
  */
