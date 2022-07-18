@@ -1,10 +1,12 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable valid-jsdoc */
 /* eslint-disable require-jsdoc */
 /* eslint-disable max-len */
 /**
  * eslint require
  */
 import {React} from 'react';
-
+import {inject, observer} from 'mobx-react';
 import {useCallback} from 'react';
 import {useDropzone} from 'react-dropzone';
 // eslint-disable-next-line no-unused-vars
@@ -41,7 +43,8 @@ function decodeProfile(buffer, mime) {
   * Top layer mask
   * @return {OpenFileDropezone}
   */
-export default function OpenFileDropezone() {
+function OpenFileDropezone(props) {
+  console.log(props);
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
@@ -60,6 +63,7 @@ export default function OpenFileDropezone() {
           for (let i = 0; i < fileExistList.length; i++) {
             window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
           }
+          props.BarStore.setShowCurrentProfile(true);
           // changeComponentToFlamegraph();
           // changeShowCurrentProfile();
         }
@@ -81,5 +85,5 @@ export default function OpenFileDropezone() {
     </div>
   );
 }
-
+export default inject('BarStore')(observer(OpenFileDropezone));
 

@@ -26,6 +26,12 @@ class BarStore {
   setShowSidebar = (value) => {
     this.showSidebar = value;
   };
+  setShowCurrentProfile = (value) => {
+    this.showCurrentProfile = value;
+  };
+  setShowVRTrace = (value) => {
+    this.showVRTrace = value;
+  };
 }
 const barStore = new BarStore();
 export default barStore;
