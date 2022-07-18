@@ -4,11 +4,11 @@
 import {React} from 'react';
 
 import {Provider, observer} from 'mobx-react';
-import {BarStore} from './components/stores';
+import {BarStore, ViewStore} from './components/stores';
 import LeftBar from './components/bars/leftBar';
 import ViewContainer from './components/views/viewContainer';
 import OpenFileDropezone from './components/utils/openFileDropzone';
-const stores = {BarStore};
+const stores = {BarStore, ViewStore};
 
 
 const App = observer(() => {

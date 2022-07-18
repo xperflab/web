@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import {React} from 'react';
 import {
   ChevronRightIcon, MenuAlt2Icon,
@@ -9,7 +10,7 @@ import Homeview from './homeview';
 import {PropTypes} from 'prop-types';
 
 /**
- *  inject('BarStore')
+ *  inject('BarStore, ViewStore')
  * @class ViewContainer
  */
 class ViewContainer extends Component {
@@ -22,6 +23,16 @@ class ViewContainer extends Component {
   }
   // eslint-disable-next-line require-jsdoc
   render() {
+    let renderComponent;
+    if (this.props.ViewStore.currentComponent === 'homeview') {
+      renderComponent = (<Homeview/>);
+    } else if (this.props.ViewStore.currentComponent === 'flamegraph') {
+      renderComponent = (<div>FlameGraph</div>);
+    } else if (this.props.ViewStore.currentComponent === 'treetable') {
+      renderComponent = (<div>TreeTable</div>);
+    } else if (this.props.ViewStore.currentComponent === 'vrtrace') {
+      renderComponent = ( <div>VRTrace</div>);
+    }
     return (
       <div
         className={` ${
@@ -93,7 +104,9 @@ class ViewContainer extends Component {
             </div>
           </div>
         </div>
-        <Homeview/>
+        {
+          renderComponent
+        }
       </div>
     );
   }
@@ -101,6 +114,6 @@ class ViewContainer extends Component {
 ViewContainer.propTypes = {
   BarStore: PropTypes.object.isRequired,
 };
-export default inject('BarStore')(observer(ViewContainer));
+export default inject('BarStore', 'ViewStore')(observer(ViewContainer));
 
 

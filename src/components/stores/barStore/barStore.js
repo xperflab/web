@@ -12,6 +12,8 @@ import {makeAutoObservable} from 'mobx';
 class BarStore {
   sidebarOpen = false;
   showSidebar = true;
+  showCurrentProfile = false;
+  showVRTrace = false;
   /**
    * Creating observable state
    */

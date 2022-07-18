@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /**
  * eslint require
  */
@@ -24,10 +25,18 @@ export default function OpenFileDropezone() {
       reader.readAsArrayBuffer(file);
     });
   }, []);
-  const {getRootProps, getInputProps} = useDropzone({onDrop, noClick: true});
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop, noClick: true});
   return (
-    <div className="h-full"{...getRootProps()}>
+    <div className="absolute top-0 right-0 bottom-0 left-0 w-full h-full overflow-hidden  z-40 pointer-events-none active:pointer-events-auto"
+      {...getRootProps()}>
       <input {...getInputProps()} />
+      {
+  isDragActive ?
+    <div className="h-full w-full border-dashed border-8 bg-black opacity-20"></div>:
+    <div className="h-full w-full"></div>
+      }
     </div>
   );
 }
+
+
