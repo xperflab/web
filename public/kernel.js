@@ -1,12 +1,3 @@
-/* eslint-disable camelcase */
-/* eslint-disable new-cap */
-/* eslint-disable prefer-rest-params */
-/* eslint-disable prefer-spread */
-/* eslint-disable no-throw-literal */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-var */
-/* eslint-disable require-jsdoc */
-/* eslint-disable max-len */
 var Module=typeof Module!=='undefined'?Module:{}; let moduleOverrides={}; let key; for (key in Module) {
   if (Module.hasOwnProperty(key)) {
     moduleOverrides[key]=Module[key];
