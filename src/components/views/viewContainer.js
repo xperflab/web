@@ -8,7 +8,7 @@ import {inject, observer} from 'mobx-react';
 import {Component} from 'react';
 import Homeview from './homeview';
 import {PropTypes} from 'prop-types';
-
+import TreetableDataProcess from './treetableDataProcess';
 /**
  *  inject('BarStore, ViewStore')
  * @class ViewContainer
@@ -27,11 +27,11 @@ class ViewContainer extends Component {
     if (this.props.ViewStore.currentComponent === 'homeview') {
       renderComponent = (<Homeview/>);
     } else if (this.props.ViewStore.currentComponent === 'flamegraph') {
-      renderComponent = (<div>FlameGraph</div>);
+      renderComponent = (<div></div>);
     } else if (this.props.ViewStore.currentComponent === 'treetable') {
-      renderComponent = (<div>TreeTable</div>);
+      renderComponent = (<TreetableDataProcess/>);
     } else if (this.props.ViewStore.currentComponent === 'vrtrace') {
-      renderComponent = ( <div>VRTrace</div>);
+      renderComponent = ( <div></div>);
     }
     return (
       <div
