@@ -65,6 +65,7 @@ function OpenFileDropezone(props) {
           }
           props.BarStore.setShowCurrentProfile(true);
           props.ViewStore.setCurrentTreeTable();
+          props.ProfileStore.incrementProfileKey();
           // changeComponentToFlamegraph();
           // changeShowCurrentProfile();
         }
@@ -86,5 +87,5 @@ function OpenFileDropezone(props) {
     </div>
   );
 }
-export default inject('BarStore', 'ViewStore')(observer(OpenFileDropezone));
+export default inject('BarStore', 'ViewStore', 'ProfileStore')(observer(OpenFileDropezone));
 
