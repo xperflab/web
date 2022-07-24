@@ -75,15 +75,20 @@ function OpenFileDropezone(props) {
   }, []);
   const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop, noClick: true});
   return (
-    // <div className="absolute top-0 right-0 bottom-0 left-0 w-full h-full overflow-hidden  z-40 pointer-events-none active:pointer-events-auto"
-    <div className="absolute top-0 right-0 bottom-0 left-0 w-full h-full overflow-hidden  z-40"
-      {...getRootProps()}>
+
+
+    <div className={` ${
+      props.ProfileStore.IsDragOver ? '' : 'pointer-events-none'
+    } absolute top-0 right-0 bottom-0 left-0 w-full h-full overflow-hidden  z-40`}
+
+    {...getRootProps()}>
       <input {...getInputProps()} />
       {
   isDragActive ?
     <div className="h-full w-full border-dashed border-8 bg-black opacity-20"></div>:
     <div className="h-full w-full"></div>
       }
+
     </div>
   );
 }

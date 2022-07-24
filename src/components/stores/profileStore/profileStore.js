@@ -4,7 +4,8 @@ import {makeAutoObservable} from 'mobx';
 
 
 class ProfileStore {
-  ProfileKey = 1; // default value
+  ProfileId = 1; // default value
+  IsDragOver = false;
   /**
    * Creating observable state
    */
@@ -13,6 +14,9 @@ class ProfileStore {
   }
   incrementProfileKey = () => {
     this.ProfileKey += 1;
+  };
+  setIsDragOver = (value) => {
+    this.IsDragOver = value;
   };
 }
 const profileStore = new ProfileStore();
