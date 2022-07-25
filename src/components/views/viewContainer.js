@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import {React} from 'react';
 import {
   ChevronRightIcon, MenuAlt2Icon,
@@ -7,9 +8,9 @@ import {inject, observer} from 'mobx-react';
 import {Component} from 'react';
 import Homeview from './homeview';
 import {PropTypes} from 'prop-types';
-
+import TreetableDataProcess from './treetableDataProcess';
 /**
- *  inject('BarStore')
+ *  inject('BarStore, ViewStore')
  * @class ViewContainer
  */
 class ViewContainer extends Component {
@@ -18,10 +19,22 @@ class ViewContainer extends Component {
      * @param {object} props
      */
   constructor(props) {
+    console.log(props);
     super(props);
   }
   // eslint-disable-next-line require-jsdoc
   render() {
+    let renderComponent;
+    if (this.props.ViewStore.currentComponent === 'homeview') {
+      renderComponent = (<Homeview/>);
+    } else if (this.props.ViewStore.currentComponent === 'flamegraph') {
+      renderComponent = (<div></div>);
+    } else if (this.props.ViewStore.currentComponent === 'treetable') {
+      renderComponent = (<TreetableDataProcess key=
+        {this.props.ProfileStore.ProfileId}/>);
+    } else if (this.props.ViewStore.currentComponent === 'vrtrace') {
+      renderComponent = ( <div></div>);
+    }
     return (
       <div
         className={` ${
@@ -93,7 +106,9 @@ class ViewContainer extends Component {
             </div>
           </div>
         </div>
-        <Homeview/>
+        {
+          renderComponent
+        }
       </div>
     );
   }
@@ -101,6 +116,7 @@ class ViewContainer extends Component {
 ViewContainer.propTypes = {
   BarStore: PropTypes.object.isRequired,
 };
-export default inject('BarStore')(observer(ViewContainer));
+export default inject('BarStore', 'ViewStore', 'ProfileStore',
+)(observer(ViewContainer));
 
 
