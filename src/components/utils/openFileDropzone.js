@@ -10,34 +10,7 @@ import {inject, observer} from 'mobx-react';
 import {useCallback} from 'react';
 import {useDropzone} from 'react-dropzone';
 // eslint-disable-next-line no-unused-vars
-function decodeProfile(buffer, mime) {
-  let data = new Uint8Array(buffer);
-  let len = data.length;
-  if (mime == 'application/gzip') {
-    data = pako.ungzip(data);
-    len = data.length;
-    const newBuf = window.Module._malloc(data.length);
-    window.Module.HEAPU8.set(data, newBuf);
-    const result = window.Module._decode(newBuf, len);
-    return result;
-  } else {
-    let newBuf = window.Module._malloc(data.length);
-    Module.HEAPU8.set(data, newBuf);
-    let result =window.Module._decode(newBuf, len);
-    if (result == 1) {
-      try {
-        data = pako.ungzip(data);
-        len = data.length;
-        newBuf = window.Module._malloc(data.length);
-        Module.HEAPU8.set(data, newBuf);
-        result = window.Module._decode(newBuf, len);
-      } catch (error) {
-        return 1;
-      }
-    }
-    return result;
-  }
-}
+
 
 /**
   * Top layer mask
@@ -53,12 +26,9 @@ function OpenFileDropezone(props) {
       reader.onload = () => {
         // Do whatever you want with the file contents
         const binaryStr = reader.result;
-        console.log(binaryStr);
-        const result = decodeProfile(binaryStr, file.type);
-        console.log(result);
+        const result = props.ProfileStore.decodeProfile(binaryStr, file.type);
         if (result == 0) {
           const jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')();
-          console.log(jsonStr);
           const fileExistList = JSON.parse(jsonStr);
           for (let i = 0; i < fileExistList.length; i++) {
             window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
@@ -66,8 +36,6 @@ function OpenFileDropezone(props) {
           props.BarStore.setShowCurrentProfile(true);
           props.ViewStore.setCurrentTreeTable();
           props.ProfileStore.incrementProfileKey();
-          // changeComponentToFlamegraph();
-          // changeShowCurrentProfile();
         }
       };
       reader.readAsArrayBuffer(file);

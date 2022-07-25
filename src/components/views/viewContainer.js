@@ -19,6 +19,7 @@ class ViewContainer extends Component {
      * @param {object} props
      */
   constructor(props) {
+    console.log(props);
     super(props);
   }
   // eslint-disable-next-line require-jsdoc
@@ -30,7 +31,7 @@ class ViewContainer extends Component {
       renderComponent = (<div></div>);
     } else if (this.props.ViewStore.currentComponent === 'treetable') {
       renderComponent = (<TreetableDataProcess key=
-        {this.props.ProfileStore.ProfileKey}/>);
+        {this.props.ProfileStore.ProfileId}/>);
     } else if (this.props.ViewStore.currentComponent === 'vrtrace') {
       renderComponent = ( <div></div>);
     }
