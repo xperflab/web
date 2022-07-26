@@ -1,23 +1,36 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable require-jsdoc */
 /* eslint-disable react/prop-types */
 import 'antd/dist/antd.min.css';
 import {Component} from 'react';
+import {inject, observer} from 'mobx-react';
 import TreeTable, {useLazyloadPlugin} from 'react-antd-treetable';
+import {toJS} from 'mobx';
 
-
-export default class Treetable extends Component {
+class Treetable extends Component {
   constructor(props) {
     super(props);
     this.state = {
       expandedKeys: [],
+      columns: props.cols,
     };
+  }
+  componentDidMount() {
+    const column = this.props.TreetableStore.columns;
+    console.log(column);
+  }
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.cols !== this.props.cols) {
+      console.log('update');
+      this.setState({
+        columns: this.props.cols.filter((col)=>col.select === true),
+      });
+    }
   }
 
   onExpandedRowsChange = (data) => {
-    //  let data = this.onLoadMore(expandedRowKeys)
     this.setState({expandedKeys: data});
-    // console.log(this.state.expandedRowKeys)
   };
 
   onLoadMore = async (record) => {
@@ -46,7 +59,7 @@ export default class Treetable extends Component {
         expandedRowKeys={this.state.expandedKeys}
         onExpandedRowsChange={this.onExpandedRowsChange}
         dataSource={this.props.tableList}
-        columns={this.props.cols}
+        columns={this.state.columns}
         scroll={{y: this.props.tableHeight, x: 1000}}
         plugins={[
           useLazyloadPlugin({
@@ -58,3 +71,4 @@ export default class Treetable extends Component {
     );
   }
 }
+export default inject('TreetableStore')(observer(Treetable));

@@ -6,11 +6,12 @@
 import {React, Component} from 'react';
 
 import {Provider, observer} from 'mobx-react';
-import {BarStore, ViewStore, ProfileStore} from './components/stores';
+import {BarStore, ViewStore, ProfileStore, TreetableStore,
+} from './components/stores';
 import LeftBar from './components/bars/leftBar';
 import ViewContainer from './components/views/viewContainer';
 import OpenFileDropezone from './components/utils/openFileDropzone';
-const stores = {BarStore, ViewStore, ProfileStore};
+const stores = {BarStore, ViewStore, ProfileStore, TreetableStore};
 
 
 class App extends Component {
@@ -63,7 +64,9 @@ class App extends Component {
 
   _onDragLeave(e) {
     console.log('dragleave');
-    // ProfileStore.setIsDragOver(false);
+    if (ProfileStore.isDragOver) {
+      ProfileStore.setIsDragOver(false);
+    }
     this.setState({className: 'h-full w-full'});
     e.stopPropagation();
     e.preventDefault();

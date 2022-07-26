@@ -33,6 +33,7 @@ function OpenFileDropezone(props) {
           for (let i = 0; i < fileExistList.length; i++) {
             window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
           }
+          props.TreetableStore.columns.clear();
           props.BarStore.setShowCurrentProfile(true);
           props.ViewStore.setCurrentTreeTable();
           props.ProfileStore.incrementProfileKey();
@@ -60,5 +61,5 @@ function OpenFileDropezone(props) {
     </div>
   );
 }
-export default inject('BarStore', 'ViewStore', 'ProfileStore')(observer(OpenFileDropezone));
+export default inject('BarStore', 'ViewStore', 'ProfileStore', 'TreetableStore')(observer(OpenFileDropezone));
 

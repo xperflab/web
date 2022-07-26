@@ -102,12 +102,12 @@ function LeftBar(props) {
       {/* Static sidebar for desktop */}
       <div
         className={` ${
-       props.BarStore.showSidebar ? 'md:w-[16.3rem]' : 'w-0'
+       props.BarStore.showSidebar ? 'md:w-[16.3rem] ' : 'w-0'
         } hidden md:flex md:flex-col
-         md:fixed md:inset-y-0 duration-200`}
+         md:fixed md:inset-y-0 duration-200 bg-gray-100`}
       >
-        <div className="flex flex-col flex-grow border-r
-       border-gray-200 bg-white overflow-y-auto">
+        <div className=" flex flex-col flex-grow border-r
+       border-gray-200 overflow-y-auto ">
           <div className="flex items-center flex-shrink-0 px-4 pt-2">
             <img
               className="h-8 w-auto"
@@ -129,12 +129,13 @@ function LeftBar(props) {
           </div>
           <div className="mt-5 flex-grow flex flex-col">
             <nav className="flex-1 px-2
-           space-y-1 bg-white" aria-label="Sidebar">
+           space-y-1" aria-label="Sidebar">
               <Menu/>
             </nav>
           </div>
         </div>
       </div>
+
     </div>
   );
 }

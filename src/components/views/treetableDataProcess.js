@@ -1,19 +1,19 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable require-jsdoc */
 /* eslint-disable react/no-deprecated */
 /* eslint-disable max-len */
 
 import 'antd/dist/antd.min.css';
-import {Select} from 'antd';
 import {Component} from 'react';
 import Treetable from './treetable';
 import '../views-css/treetable.css';
 import React from 'react';
-import Example from './select';
-const {Option} = Select;
-export default class TreetableDataProcess extends Component {
+import Select from './select';
+import {inject, observer} from 'mobx-react';
+import {toJS} from 'mobx';
+class TreetableDataProcess extends Component {
   constructor(props) {
     super(props);
-    //  this.sortChangeEvent = this.sortChangeEvent.bind(this);
     this.state = {
       expandedKeys: [],
       tableList: [],
@@ -37,19 +37,19 @@ export default class TreetableDataProcess extends Component {
     const jsonStr2 = window.Module.cwrap('getMetricDesJsonStr', 'string')();
     const MetricTypesArray = JSON.parse(jsonStr2);
     console.log(MetricTypesArray);
-    const cols = [];
-    cols.push({
+    this.props.TreetableStore.columns.push({
       dataIndex: 'name',
       title: 'name',
       width: 600,
       ellipsis: true,
-
+      select: true,
     });
     MetricTypesArray.forEach((element) => {
-      cols.push({
+      this.props.TreetableStore.columns.push({
         dataIndex: 'i' + element.id,
         title: element.name + ' [INC]',
         width: 100,
+        select: true,
         onHeaderCell: (column) => {
           return {
             onClick: () => {
@@ -67,10 +67,11 @@ export default class TreetableDataProcess extends Component {
         },
 
       });
-      cols.push({
+      this.props.TreetableStore.columns.push({
         dataIndex: 'e' + element.id,
         title: element.name + ' [EXC]',
         width: 100,
+        select: true,
         onHeaderCell: (column) => {
           return {
             onClick: () => {
@@ -91,11 +92,7 @@ export default class TreetableDataProcess extends Component {
       });
     });
     this.setState({metricArray: MetricTypesArray});
-    this.setState({columns: cols});
-    for (let i = 1; i < cols.length; i++) {
-      temp.push(<Option key={cols[i].dataIndex}>{cols[i].title}</Option>);
-      defaultSelect.push(cols[i].dataIndex);
-    }
+    console.log(toJS(this.props.TreetableStore.columns));
     this.setState({children: temp});
     this.setState({defaultSelects: defaultSelect});
     console.log(temp);
@@ -147,69 +144,6 @@ export default class TreetableDataProcess extends Component {
   changeToFlat = () => {
     this.setState({dataShowType: 2});
   };
-  handleChange = (value) => {
-    console.log(value);
-    console.log(this.state.metricArray);
-    const cols = [];
-    cols.push({
-      dataIndex: 'name',
-      title: 'name',
-      width: 600,
-      ellipsis: true,
-    });
-    this.state.metricArray.forEach((element) => {
-      const index = 'i' + element.id;
-      if (value.includes(index)) {
-        cols.push({
-          dataIndex: 'i' + element.id,
-          title: element.name + ' [INC]',
-          width: 100,
-          onHeaderCell: (column) => {
-            return {
-              onClick: () => {
-                console.log(column);
-                console.log(element);
-                const metricIdx = parseInt(element.id);
-                const valueType = 0;
-                window.Module._sortContextTreeByMetricIdx(valueType, metricIdx);
-                const jsonStr = window.Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
-                const dataList = JSON.parse(jsonStr);
-                this.setState({tableList: dataList, tablekey: this.state.tablekey + 1});
-              },
-            };
-          },
-
-        });
-      }
-      const index2 = 'e' + element.id;
-      if (value.includes(index2)) {
-        cols.push({
-          dataIndex: 'e' + element.id,
-          title: element.name + ' [EXC]',
-          width: 100,
-          onHeaderCell: (column) => {
-            return {
-              onClick: () => {
-                console.log(column);
-                console.log(element);
-                const metricIdx = parseInt(element.id);
-                console.log(metricIdx);
-                const valueType = 1;
-                window.Module._sortContextTreeByMetricIdx(valueType, metricIdx);
-                const jsonStr = window.Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
-                const dataList = JSON.parse(jsonStr);
-                console.log(dataList);
-                this.setState({tableList: dataList, tablekey: this.state.tablekey + 1});
-              },
-            };
-          },
-
-        });
-      }
-    });
-    console.log(cols);
-    this.setState({columns: cols});
-  };
 
   render() {
     return (
@@ -243,25 +177,11 @@ export default class TreetableDataProcess extends Component {
         />
 
         <div id= "select"ref={this.select}>
-          <Select
-
-            mode="multiple"
-            allowClear
-            style={{
-              width: '100%',
-            }}
-            placeholder="Please select"
-            defaultValue={this.state.defaultSelects}
-            onChange={this.handleChange}
-          >
-            {this.state.children}
-          </Select>
-          <Example/>
+          <Select/>
         </div>
-        <div><Treetable tableHeight ={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={this.state.columns} tableList={this.state.tableList} /></div>
+        <div><Treetable tableHeight ={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={toJS(this.props.TreetableStore.columns)} tableList={this.state.tableList} /></div>
       </div>
     );
   }
 }
-
-
+export default inject('TreetableStore')(observer(TreetableDataProcess));
