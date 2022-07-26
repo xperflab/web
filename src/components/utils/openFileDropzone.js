@@ -54,7 +54,7 @@ function OpenFileDropezone(props) {
       <input {...getInputProps()} />
       {
   isDragActive ?
-    <div className="h-full w-full border-dashed border-8 bg-black opacity-20"></div>:
+    <div className="h-full w-full border-dashed border-black border-8 bg-gray-500 opacity-20"></div>:
     <div className="h-full w-full"></div>
       }
 
