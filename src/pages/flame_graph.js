@@ -8,6 +8,7 @@ import { Component } from "react";
 import XEUtils from "xe-utils";
 import '../pages-css/flame_graph.css';
 import { useResizeObserver } from 'react-use-observer'
+import { updateValueTree, drawFlameGraphClickNode } from '../compoents/ezview';
 function str2ab(str) {
   var buf = new ArrayBuffer(str.length);
   var bufView = new Uint8Array(buf);
@@ -57,10 +58,10 @@ export default class FlameGraph extends Component {
 
     // this.state.dataShowType = 0;
     // this.state.metricIndex = 0;
-    this.state.focusNode.id = 2;
+    this.state.focusNode.id = 0; // ?
     this.state.focusNode.x = 0;
     this.state.focusNode.y = 0;
-    this.state.focusNode.hovorId = 2;
+    this.state.focusNode.hovorId = 0;
     this.state.global.messageDetails = document.getElementById("details");
     this.state.global.container = document.getElementById("viewContainer");
     console.log(this.state.global.container)
@@ -123,12 +124,11 @@ export default class FlameGraph extends Component {
 
     this.resizeObserver = new ResizeObserver(entries => {
       console.log("resize")
-      this.state.global.renderview.width= this.viewContainer.current.offsetWidth
+      this.state.global.renderview.width = this.viewContainer.current.offsetWidth
       this.update()
       this.onDraw()
-
-   });
-   this.resizeObserver.observe(document.getElementById("viewContainer"));
+    });
+    this.resizeObserver.observe(document.getElementById("viewContainer"));
 
     window.addEventListener("message", (event) => {
       const message = event.data; // The json data that the extension sent
@@ -196,17 +196,20 @@ export default class FlameGraph extends Component {
     ) {
       this.state.dataShowType = dataShowType;
       this.state.metricIndex = metricIndex;
-      this.state.focusNode.id = 2;
+      this.state.focusNode.id = 0;
       this.state.focusNode.x = 0;
       this.state.focusNode.y = 0;
-      this.state.focusNode.hovorId = 2;
+      this.state.focusNode.hovorId = 0;
     }
 
     window.Module.ccall("setFunctionFilter", null, ["string"], [functionFilter]);
 
-    window.Module._updateValueTree(0, dataShowType, metricIndex);
-
-    this.onDraw();
+    updateValueTree(0, dataShowType, metricIndex).then(
+      res => {
+        console.log("Update Value Ready ... ");
+        this.onDraw()
+      }
+    )
   }
   onDraw() {
     this.state.global.texts.innerHTML = "";
@@ -216,7 +219,7 @@ export default class FlameGraph extends Component {
       this.props.height
     );
 
-    window.Module._drawFlameGraphClickNode(
+    drawFlameGraphClickNode(
       this.state.focusNode.id,
       this.state.focusNode.x,
       this.state.focusNode.y,
@@ -336,10 +339,10 @@ export default class FlameGraph extends Component {
   changeToTopDown = () => {
     //this.state.dataShowType = 1;
     //this.drawFlameGraph(0,  this.state.metricIndex, "")
-    this.state.focusNode.id = 2;
+    this.state.focusNode.id = 0;
     this.state.focusNode.x = 0;
     this.state.focusNode.y = 0;
-    this.state.focusNode.hovorId = 2;
+    this.state.focusNode.hovorId = 0;
     this.setState({ dataShowType: 0 })
   }
 
@@ -347,10 +350,10 @@ export default class FlameGraph extends Component {
   changeToBottomUp = () => {
     //this.state.dataShowType = 1;
     console.log(this)
-    this.state.focusNode.id = 2;
+    this.state.focusNode.id = 0;
     this.state.focusNode.x = 0;
     this.state.focusNode.y = 0;
-    this.state.focusNode.hovorId = 2;
+    this.state.focusNode.hovorId = 0;
     this.setState({ dataShowType: 1 });
     // console.log(this.state.dataShowType)
     //  window.onresize = this.onWindowResize;
@@ -360,10 +363,10 @@ export default class FlameGraph extends Component {
   changeToFlat = () => {
     //this.state.dataShowType = 1;
     // this.drawFlameGraph(2,  this.state.metricIndex, "")
-    this.state.focusNode.id = 2;
+    this.state.focusNode.id = 0;
     this.state.focusNode.x = 0;
     this.state.focusNode.y = 0;
-    this.state.focusNode.hovorId = 2;
+    this.state.focusNode.hovorId = 0;
     this.setState({ dataShowType: 2 })
   }
 
@@ -467,9 +470,9 @@ export default class FlameGraph extends Component {
           <div className="col-start-2 col-span-4">
             <div className="details"></div>
           </div>
-          <div id="viewContainer"  ref={this.viewContainer} className="col-start-2 col-span-4"style={{height:1500}} >
-            <canvas id="renderView" ref ={this.renderview} className="canvas">
-</canvas>
+          <div id="viewContainer" ref={this.viewContainer} className="col-start-2 col-span-4" style={{ height: 1500 }} >
+            <canvas id="renderView" ref={this.renderview} className="canvas">
+            </canvas>
           </div>
           <div className="col-start-2 col-span-4">
             <div style={{ position: "relative", height: 0 }}>
