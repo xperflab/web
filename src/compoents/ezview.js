@@ -35,6 +35,7 @@ export const updateValueTree = instance.cwrap('updateValueTree', '', ['number', 
 export const drawFlameGraphClickNode = instance.cwrap('drawFlameGraphClickNode', '', ['number', 'number', 'number', 'number', 'number'], { async: true })
 
 export async function parseFile(f) {
+    console.time("parse")
     console.log("file", f)
     let from = 0
 
@@ -83,5 +84,6 @@ export async function parseFile(f) {
     }
 
     await build()
+    console.timeEnd("parse")
 }
 
