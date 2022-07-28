@@ -149,35 +149,83 @@ class TreetableDataProcess extends Component {
     return (
       <div ref={this.viewContainer} className='h-full w-full'>
         <div ref={this.buttons} >
-          <button
-            type="button"
-            onClick={this.changeToTopDown}
-            className="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-          >
-          Top Down
-          </button>
-          <button
-            type="button"
-            onClick={this.changeToBottomUp}
-            className="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-          >
-          Bottom Up
-          </button>
-          <button
-            type="button"
-            onClick={this.changeToFlat}
-            className="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-          >
-          Flat
-          </button>
+
+          <div className="flex pl-[0.2rem]" role="group">
+            <button
+              onClick={this.changeToTopDown}
+              type="button"
+              className="
+        rounded-l
+        px-6
+        py-2
+        border-2 border-blue-600
+        text-blue-600
+        font-medium
+        text-xs
+        leading-tight
+        uppercase
+        hover:bg-black hover:bg-opacity-5
+        focus:outline-none focus:ring-0
+        transition
+        duration-150
+        ease-in-out
+      "
+            >
+      Top Down
+            </button>
+            <button
+              onClick={this.changeToBottomUp}
+              type="button"
+              className="
+        px-6
+        py-2
+        border-t-2 border-b-2 border-blue-600
+        text-blue-600
+        font-medium
+        text-xs
+        leading-tight
+        uppercase
+        hover:bg-black hover:bg-opacity-5
+        focus:outline-none focus:ring-0
+        transition
+        duration-150
+        ease-in-out
+      "
+            >
+      Bottom Up
+            </button>
+            <button
+              onClick={this.changeToFlat}
+              type="button"
+              className="
+        rounded-r
+        px-6
+        py-2
+        border-2 border-blue-600
+        text-blue-600
+        font-medium
+        text-xs
+        leading-tight
+        uppercase
+        hover:bg-black hover:bg-opacity-5
+        focus:outline-none focus:ring-0
+        transition
+        duration-150
+        ease-in-out
+      "
+            >
+      Flat
+            </button>
+          </div>
         </div>
         <link
           href="https://cdn.jsdelivr.net/npm/@tailwindcss/custom-forms@0.2.1/dist/custom-forms.css"
           rel="stylesheet"
         />
 
+
         <div id= "select"ref={this.select}>
-          <Select/>
+          <Select />
         </div>
         <div><Treetable tableHeight ={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={toJS(this.props.TreetableStore.columns)} tableList={this.state.tableList} /></div>
       </div>

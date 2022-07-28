@@ -38,7 +38,7 @@ class ViewContainer extends Component {
     return (
       <div
         className={` ${
-      this.props.BarStore.showSidebar ? 'md:pl-64' : 'pl-0 '
+      this.props.BarStore.showSidebar ? 'md:pl-[14.8rem]' : 'pl-0 '
         } flex flex-col flex-1 h-full`}
       >
         <div className="sticky ml-1 top-0 z-10

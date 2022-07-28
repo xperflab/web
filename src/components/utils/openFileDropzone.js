@@ -54,7 +54,7 @@ function OpenFileDropezone(props) {
       <input {...getInputProps()} />
       {
   isDragActive ?
-    <div className="h-full w-full border-dashed border-black border-8 bg-gray-500 opacity-20"></div>:
+    <div className="h-full w-full border-dashed border-[#E06C75] border-4 bg-gray-500 bg-opacity-20"></div>:
     <div className="h-full w-full"></div>
       }
 
@@ -62,4 +62,3 @@ function OpenFileDropezone(props) {
   );
 }
 export default inject('BarStore', 'ViewStore', 'ProfileStore', 'TreetableStore')(observer(OpenFileDropezone));
-

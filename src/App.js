@@ -18,7 +18,7 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      className: 'h-full w-full',
+
     };
     this._onDragEnter = this._onDragEnter.bind(this);
     this._onDragLeave = this._onDragLeave.bind(this);
@@ -44,9 +44,6 @@ class App extends Component {
   }
   _onDragEnter(e) {
     console.log('dragenter');
-    this.setState({
-      className: 'h-full w-full ',
-    });
     ProfileStore.setIsDragOver(true);
     e.stopPropagation();
     e.preventDefault();
@@ -67,7 +64,6 @@ class App extends Component {
     if (ProfileStore.isDragOver) {
       ProfileStore.setIsDragOver(false);
     }
-    this.setState({className: 'h-full w-full'});
     e.stopPropagation();
     e.preventDefault();
     return false;
@@ -83,7 +79,7 @@ class App extends Component {
   render() {
     return (
       <Provider {...stores}>
-        <div className={this.state.className}>
+        <div className="w-full h-full">
           <LeftBar/>
           <ViewContainer/>
           <OpenFileDropezone/>
