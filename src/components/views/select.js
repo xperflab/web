@@ -17,12 +17,16 @@ class Select extends Component {
   constructor(props) {
     console.log(props);
     super(props);
+    this.state = {
+      isOpen: false,
+    };
   }
   handelChange = (e) =>{
     this.props.TreetableStore.updateSelect(e.dataIndex);
     // const updated = this.props.TreetableStore.columns.find((column) => column.dataIndex === e.dataIndex);
     // updated.select = !updated.select;
     console.log(toJS(this.props.TreetableStore));
+    this.forceUpdate();
   };
   render() {
     return (
@@ -35,7 +39,11 @@ class Select extends Component {
           {({open}) => (
             <>
               <div className="mt-1 relative">
-                <Listbox.Button className="relative w-full h-[1.9rem] bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <Listbox.Button className="relative w-full h-[1.9rem] bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default sm:text-sm"
+                  onClick={() => {
+                    this.setState({isOpen: !this.state.isOpen});
+                  }}
+                >
                   <span className="flex items-center">
                   </span>
                   <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
@@ -43,14 +51,9 @@ class Select extends Component {
                   </span>
                 </Listbox.Button>
 
-                <Transition
-                  show={open}
-                  as={Fragment}
-                  leave="transition ease-in duration-100"
-                  leaveFrom="opacity-100"
-                  leaveTo="opacity-0"
-                >
-                  <Listbox.Options className="absolute z-10 mt-1 w-[25rem]
+
+                {this.state.isOpen && (
+                  <Listbox.Options static className="absolute z-10 mt-1 w-[25rem]
                   bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
                     { toJS(this.props.TreetableStore.columns).slice(1).map((person) => (
                       <Listbox.Option
@@ -96,7 +99,8 @@ class Select extends Component {
                       </Listbox.Option>
                     ))}
                   </Listbox.Options>
-                </Transition>
+                )}
+
               </div>
             </>
           )}
