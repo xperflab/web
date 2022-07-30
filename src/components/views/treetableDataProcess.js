@@ -150,7 +150,8 @@ class TreetableDataProcess extends Component {
       <div ref={this.viewContainer} className='h-full w-full'>
         <div ref={this.buttons} >
 
-          <div className="flex pl-[0.2rem]" role="group">
+          <div className="flex pl-[0.2rem]
+        h-8" role="group">
             <button
               onClick={this.changeToTopDown}
               type="button"
@@ -169,6 +170,7 @@ class TreetableDataProcess extends Component {
         transition
         duration-150
         ease-in-out
+
       "
             >
       Top Down
@@ -212,6 +214,7 @@ class TreetableDataProcess extends Component {
         transition
         duration-150
         ease-in-out
+        w-15
       "
             >
       Flat
