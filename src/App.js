@@ -106,11 +106,15 @@ const App = ({onDragEnter, onDragOver, onDragLeave, onDrop}) => {
   const onFileDrop = (e) => {
     if (e.type === 'drop') {
       console.log('drop');
+      countRef.current++;
       ProfileStore.setIsDragOver(false);
       onDrop?.(e);
     }
     if (e.type === 'dragover') {
       console.log('dragover');
+      if (!ProfileStore.isDragOver) {
+        ProfileStore.setIsDragOver(true);
+      }
       onDragOver?.(e);
     }
     if (e.type === 'dragenter') {
