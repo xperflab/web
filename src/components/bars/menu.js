@@ -30,7 +30,7 @@ function Menu(props) {
         {props.BarStore.showCurrentProfile &&
            <div>
              <button
-               className="bg-gray-100 text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
+               className=" text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
              pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
              focus:outline-none ocus:ring-2 focus:ring-indigo-500"
                onClick={() => setCurrentProfileOpen(!currentProfileOpen)}
@@ -80,7 +80,7 @@ function Menu(props) {
 
         <button
           as="div"
-          className="bg-gray-100 text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
+          className=" text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
             pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
             focus:outline-none ocus:ring-2 focus:ring-indigo-500"
           onClick={() => setProfileOpen(!profileOpen)}
@@ -127,7 +127,7 @@ function Menu(props) {
 
 
         <button
-          className="bg-gray-100 text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
+          className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
             pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
             focus:outline-none ocus:ring-2 focus:ring-indigo-500"
           onClick={() => setVRProfileOpen(!VRProfileOpen)}

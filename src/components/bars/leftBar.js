@@ -84,6 +84,13 @@ function LeftBar(props) {
                     src="/new_logo.png"
                     alt="Workflow"
                   />
+                  <div className="text-xl pl-3 font-bold
+              text-black">
+                Easy<span
+                      className="font-medium text-transparent
+                   bg-clip-text bg-gradient-to-br
+                   from-[#fe4ba1] to-[#4a247c]">View</span>
+                  </div>
                 </div>
                 <div className="mt-5 flex-1 h-0 overflow-y-auto">
                   <nav className="px-2 space-y-1">
