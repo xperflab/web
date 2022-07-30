@@ -81,7 +81,7 @@ function LeftBar(props) {
                 <div className="flex-shrink-0 flex items-center px-4 ">
                   <img
                     className="h-8 w-auto"
-                    src="https://tailwindui.com/img/logos/workflow-logo-indigo-600-mark-gray-800-text.svg"
+                    src="/new_logo.png"
                     alt="Workflow"
                   />
                 </div>
@@ -111,9 +111,16 @@ function LeftBar(props) {
           <div className="flex items-center flex-shrink-0 px-4 pt-2">
             <img
               className="h-8 w-auto"
-              src="https://tailwindui.com/img/logos/workflow-logo-indigo-600-mark-gray-800-text.svg"
+              src="/new_logo.png"
               alt="Workflow"
             />
+            <div className="text-xl pl-3 font-bold
+              text-black">
+                Easy<span
+                className="font-medium text-transparent
+                   bg-clip-text bg-gradient-to-br
+                   from-[#fe4ba1] to-[#4a247c]">View</span>
+            </div>
             <div className="flex space-x-2 justify-center">
               <button
                 onClick={() =>props.BarStore.setShowSidebar(false)}
