@@ -13,8 +13,6 @@ import LeftBar from './components/bars/leftBar';
 import ViewContainer from './components/views/viewContainer';
 import OpenFileDropezone from './components/utils/openFileDropzone';
 const stores = {BarStore, ViewStore, ProfileStore, TreetableStore};
-
-
 const App = ({onDragEnter, onDragOver, onDragLeave, onDrop}) => {
   const countRef = useRef(0);
 

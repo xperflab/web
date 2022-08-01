@@ -114,7 +114,7 @@ function LeftBar(props) {
          md:fixed md:inset-y-0 duration-200 bg-gray-100`}
       >
         <div className="  flex flex-col flex-grow border-r
-       border-gray-200 overflow-y-auto ">
+       border-gray-200 overflow-y-auto">
           <div className="flex items-center flex-shrink-0 px-4 pt-2">
             <img
               className="h-8 w-auto"

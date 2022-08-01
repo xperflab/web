@@ -48,7 +48,7 @@ class TreetableDataProcess extends Component {
       this.props.TreetableStore.columns.push({
         dataIndex: 'i' + element.id,
         title: element.name + ' [INC]',
-        width: 100,
+        width: 200,
         select: true,
         onHeaderCell: (column) => {
           return {
@@ -70,7 +70,7 @@ class TreetableDataProcess extends Component {
       this.props.TreetableStore.columns.push({
         dataIndex: 'e' + element.id,
         title: element.name + ' [EXC]',
-        width: 100,
+        width: 200,
         select: true,
         onHeaderCell: (column) => {
           return {
@@ -147,7 +147,7 @@ class TreetableDataProcess extends Component {
 
   render() {
     return (
-      <div ref={this.viewContainer} className='h-full w-full'>
+      <div ref={this.viewContainer} className='h-full w-full pl-1'>
         <div ref={this.buttons} >
 
           <div className="flex pl-[0.2rem]

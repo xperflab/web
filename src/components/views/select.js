@@ -6,9 +6,10 @@
 /* This example requires Tailwind CSS v2.0+ */
 import {Fragment, useState, Component} from 'react';
 import {Listbox, Transition} from '@headlessui/react';
-import {CheckIcon, SelectorIcon} from '@heroicons/react/solid';
+import {CheckIcon, SelectorIcon, Cog} from '@heroicons/react/solid';
 import {inject, observer} from 'mobx-react';
 import {toJS} from 'mobx';
+import {CogIcon} from '@heroicons/react/outline';
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
@@ -39,15 +40,13 @@ class Select extends Component {
           {({open}) => (
             <>
               <div className="mt-1 relative">
-                <Listbox.Button className="relative w-full h-[1.9rem] bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default sm:text-sm"
+                <Listbox.Button className="relative w-[0.03rem] h-[1.9rem] bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default sm:text-sm"
                   onClick={() => {
                     this.setState({isOpen: !this.state.isOpen});
                   }}
                 >
-                  <span className="flex items-center">
-                  </span>
-                  <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <SelectorIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                    <CogIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                   </span>
                 </Listbox.Button>
 
