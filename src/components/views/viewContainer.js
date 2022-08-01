@@ -63,7 +63,8 @@ class ViewContainer extends Component {
               data-mdb-ripple-color="light"
               className="inline-block px-6
             border
-            py-2.5 h-12  text-black font-medium
+            py-2.5 h-12  mt-[-0.1rem] ml-[-0.2rem] h-[3.2rem]
+              text-black font-medium
              text-xs leading-tight uppercase
              rounded hover:bg-blue-700
              hover:shadow-lg focus:bg-blue-700
