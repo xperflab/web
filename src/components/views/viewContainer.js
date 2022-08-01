@@ -41,28 +41,29 @@ class ViewContainer extends Component {
       this.props.BarStore.showSidebar ? 'md:pl-[14.8rem]' : 'pl-0 '
         } flex flex-col flex-1 h-full`}
       >
-        <button
-          type="button"
-          className="px-4 border-r border-gray-200
+        <div className="sticky ml-1 top-0 z-10
+      flex-shrink-0 flex h-12 bg-gray-100 shadow">
+          <button
+            type="button"
+            className="px-4 border-r border-gray-200
           text-gray-500 focus:outline-none
            focus:ring-2 focus:ring-inset
            focus:ring-indigo-500 md:hidden"
-          onClick={() =>
-            this.props.BarStore.setSidebarOpen(true)}
-        >
-          <span className="sr-only">Open sidebar</span>
-          <MenuAlt2Icon className="h-6 w-6" aria-hidden="true" />
-        </button>
-
-        <div className="flex">
-          { !this.props.BarStore.showSidebar && <button
-            onClick={() =>this.props.BarStore.setShowSidebar(true)}
-            type="button"
-            data-mdb-ripple="true"
-            data-mdb-ripple-color="light"
-            className="inline-block px-4
+            onClick={() =>
+              this.props.BarStore.setSidebarOpen(true)}
+          >
+            <span className="sr-only">Open sidebar</span>
+            <MenuAlt2Icon className="h-6 w-6" aria-hidden="true" />
+          </button>
+          <div className="flex-1 px-0 flex items-center justify-between h-12">
+            { !this.props.BarStore.showSidebar && <button
+              onClick={() =>this.props.BarStore.setShowSidebar(true)}
+              type="button"
+              data-mdb-ripple="true"
+              data-mdb-ripple-color="light"
+              className="inline-block px-6
             border
-            py-2.5 mt-[-0.1rem] ml-[-0.2rem] h-[3.2rem]  text-black font-medium
+            py-2.5 h-12  text-black font-medium
              text-xs leading-tight uppercase
              rounded hover:bg-blue-700
              hover:shadow-lg focus:bg-blue-700
@@ -70,47 +71,40 @@ class ViewContainer extends Component {
              focus:ring-0 active:bg-blue-800
              active:shadow-lg transition
              duration-150 ease-in-out hidden md:flex"
-            data-bs-toggle="collapse"
-            data-bs-target="#collapseExample"
-            aria-expanded="false"
-            aria-controls="collapseExample"
-          ><ChevronRightIcon className="h-6 w-6 "/></button>}
-          <div className="pl-[20rem]">
-            <div className="sticky w-[30rem] top-0
-      flex-shrink-0 flex h-12 bg-white shadow ">
-
-              <div className="flex-1 px-0 flex justify-between h-12">
-                <div className="flex-1 flex">
-                  <form className="w-full flex md:ml-0"
-                    action="#" method="GET">
-                    <label htmlFor="search-field" className="sr-only">
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseExample"
+              aria-expanded="false"
+              aria-controls="collapseExample"
+            ><ChevronRightIcon className="h-6 w-6 "/></button>}
+            <div className="flex-1 flex justify-center ">
+              <form className="w-1/2 flex md:ml-0 bg-white"
+                action="#" method="GET">
+                <label htmlFor="search-field" className="sr-only">
                 Search
-                    </label>
-                    <div className="relative w-full
+                </label>
+                <div className="relative w-full
               text-gray-400 focus-within:text-gray-600">
-                      <div className="absolute inset-y-0
+                  <div className="absolute inset-y-0
                 left-0 flex items-center pointer-events-none">
-                        <SearchIcon className="h-5 w-5"
-                          aria-hidden="true" />
-                      </div>
-                      <input
-                        id="search-field"
-                        className="block w-full h-full pl-8
+                    <SearchIcon className="h-5 w-5"
+                      aria-hidden="true" />
+                  </div>
+                  <input
+                    id="search-field"
+                    className="block w-full h-full pl-8
                   pr-3 py-2 border-transparent
                   text-gray-900 placeholder-gray-500
                   focus:outline-none
                   focus:placeholder-gray-400
                   focus:ring-0 focus:border-transparent
                   sm:text-sm cursor-not-allowed"
-                        placeholder="Search"
-                        type="search"
-                        name="search"
-                        disabled
-                      />
-                    </div>
-                  </form>
+                    placeholder="Search"
+                    type="search"
+                    name="search"
+                    disabled
+                  />
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
@@ -126,5 +120,3 @@ ViewContainer.propTypes = {
 };
 export default inject('BarStore', 'ViewStore', 'ProfileStore',
 )(observer(ViewContainer));
-
-
