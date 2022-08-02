@@ -77,16 +77,16 @@ class ViewContainer extends Component {
               aria-expanded="false"
               aria-controls="collapseExample"
             ><ChevronRightIcon className="h-6 w-6 "/></button>}
-            <div className="flex-1 flex justify-center ">
+            <div className="flex-1 flex justify-center  h-4/7  ">
               <form className="w-1/2 flex md:ml-0 bg-white"
                 action="#" method="GET">
                 <label htmlFor="search-field" className="sr-only">
                 Search
                 </label>
-                <div className="relative w-full
-              text-gray-400 focus-within:text-gray-600">
+                <div className="flex relative w-full
+              text-gray-400 focus-within:text-gray-600 ">
                   <div className="absolute inset-y-0
-                left-0 flex items-center pointer-events-none">
+                left-0 flex items-center pointer-events-none p-1 w-7">
                     <SearchIcon className="h-5 w-5"
                       aria-hidden="true" />
                   </div>

@@ -60,7 +60,7 @@ function Menu(props) {
 
                  className="group w-full flex
                   items-center pl-[3.3rem] pr-2 py-2
-                  text-sm font-medium text-gray-600
+                  text-sm font-medium text-white
                    rounded-md hover:text-gray-900 hover:bg-gray-50"
                >
                  Flame Graph

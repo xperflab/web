@@ -55,7 +55,7 @@ class Treetable extends Component {
     return (
       <TreeTable
         rowKey="id"
-        bordered
+        bordered = {true}
         size="small"
         expandedRowKeys={this.state.expandedKeys}
         onExpandedRowsChange={this.onExpandedRowsChange}
