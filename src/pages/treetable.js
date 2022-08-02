@@ -8,6 +8,11 @@ import '../pages-css/treetable.css';
 import React from 'react';
 const { Option } = Select;
 
+import { updateValueTree, getRootID, getMetricDesJsonStr, getTreeTableChildrenList } from '../compoents/ezview';
+
+
+let root_id
+
 export default class treetable extends Component {
   constructor(props) {
     super(props);
@@ -24,6 +29,7 @@ export default class treetable extends Component {
       tablekey: 0,
       tableHeight: 550,
     };
+    root_id = getRootID()
     this.viewContainer = React.createRef()
     this.buttons = React.createRef()
     this.select = React.createRef()
@@ -32,7 +38,7 @@ export default class treetable extends Component {
   componentWillMount() {
     let temp = []
     let defaultSelect =[]
-    let jsonStr2 = window.Module.cwrap('getMetricDesJsonStr', 'string')();
+    let jsonStr2 = getMetricDesJsonStr();
     let MetricTypesArray = JSON.parse(jsonStr2)
     console.log(MetricTypesArray)
     let cols = []
@@ -56,7 +62,7 @@ export default class treetable extends Component {
               let metricIdx = parseInt(element.id);
               let valueType = 0;
               window.Module._sortContextTreeByMetricIdx(valueType, metricIdx);
-              let jsonStr = window.Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
+              let jsonStr = getTreeTableChildrenList(root_id);
               let dataList = JSON.parse(jsonStr)
               console.log(dataList)
               this.setState({ tableList: dataList, tablekey: this.state.tablekey + 1 })
@@ -78,7 +84,7 @@ export default class treetable extends Component {
               console.log(metricIdx)
               let valueType = 1;
               window.Module._sortContextTreeByMetricIdx(valueType, metricIdx);
-              let jsonStr = window.Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
+              let jsonStr = getTreeTableChildrenList(root_id);
               let dataList = JSON.parse(jsonStr)
               console.log(dataList)
               this.setState({ tableList: dataList, tablekey: this.state.tablekey + 1 })
@@ -99,7 +105,7 @@ export default class treetable extends Component {
     console.log(temp)
 
     window.Module._updateValueTree(1, this.state.dataShowType, 0);
-    let jsonStr = Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
+    let jsonStr = getTreeTableChildrenList(root_id);
     const tableData = JSON.parse(jsonStr);
 
     this.setState({ tableList: tableData, tablekey: this.state.tablekey + 1 })
@@ -121,7 +127,7 @@ export default class treetable extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (prevState.dataShowType != this.state.dataShowType) {
       window.Module._updateValueTree(1, this.state.dataShowType, 0);
-      let jsonStr = Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
+      let jsonStr = getTreeTableChildrenList(root_id);
       const tableData = JSON.parse(jsonStr);
 
       this.setState({ tableList: tableData, tablekey: this.state.tablekey + 1 })
@@ -178,7 +184,7 @@ export default class treetable extends Component {
                 let metricIdx = parseInt(element.id);
                 let valueType = 0;
                 window.Module._sortContextTreeByMetricIdx(valueType, metricIdx);
-                let jsonStr = window.Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
+                let jsonStr = getTreeTableChildrenList(root_id);
                 let dataList = JSON.parse(jsonStr)
                 this.setState({ tableList: dataList, tablekey: this.state.tablekey + 1 })
               }
@@ -202,7 +208,7 @@ export default class treetable extends Component {
                 console.log(metricIdx)
                 let valueType = 1;
                 window.Module._sortContextTreeByMetricIdx(valueType, metricIdx);
-                let jsonStr = window.Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
+                let jsonStr = getTreeTableChildrenList(root_id);
                 let dataList = JSON.parse(jsonStr)
                 console.log(dataList)
                 this.setState({ tableList: dataList, tablekey: this.state.tablekey + 1 })

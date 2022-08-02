@@ -1,7 +1,12 @@
 const instance = window.Module
 
+window.x = instance
+
 export const bufferSize = 128 * 1024 * 1024;
 async function parsePart(buf) {
+    // delete all used db
+    indexedDB.deleteDatabase('td')
+
     if (bufAddr == 0) {
         bufAddr = instance._initBufferAddr(bufferSize)
     }
@@ -26,7 +31,13 @@ function setRewind() {
 let bufAddr = 0
 let remain = 0
 
+export const getRootID = instance.cwrap('getRootID', 'string')
+
 export const getSourceFileJsonStr = instance.cwrap('getSourceFileJsonStr', 'string')
+
+export const getMetricDesJsonStr = instance.cwrap('getMetricDesJsonStr', 'string')
+
+export const getTreeTableChildrenList = instance.cwrap('getTreeTableChildrenList', 'string', ['number'])
 
 export const getClickNodeMessage = instance.cwrap('getClickNodeMessage', 'string', ['number', 'number', 'number'])
 
@@ -38,6 +49,8 @@ export async function parseFile(f) {
     console.time("parse")
     console.log("file", f)
     let from = 0
+    bufAddr = 0
+    remain = 0
 
     while (true) {
         console.log(`Read from ${from} to ${from + bufferSize - remain}`)

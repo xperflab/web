@@ -8,7 +8,7 @@ import { Component } from "react";
 import XEUtils from "xe-utils";
 import '../pages-css/flame_graph.css';
 import { useResizeObserver } from 'react-use-observer'
-import { updateValueTree, drawFlameGraphClickNode } from '../compoents/ezview';
+import { updateValueTree, drawFlameGraphClickNode, getRootID } from '../compoents/ezview';
 function str2ab(str) {
   var buf = new ArrayBuffer(str.length);
   var bufView = new Uint8Array(buf);
@@ -22,6 +22,8 @@ const options = [
   { value: 'strawberry', label: 'Strawberry' },
   { value: 'vanilla', label: 'Vanilla' }
 ]
+
+let root_id
 
 export default class FlameGraph extends Component {
   constructor(props) {
@@ -43,6 +45,8 @@ export default class FlameGraph extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.viewContainer = React.createRef()
     this.renderview = React.createRef()
+
+    root_id = getRootID()
   }
 
   static propTypes = {
@@ -196,10 +200,10 @@ export default class FlameGraph extends Component {
     ) {
       this.state.dataShowType = dataShowType;
       this.state.metricIndex = metricIndex;
-      this.state.focusNode.id = 0;
+      this.state.focusNode.id = root_id;
       this.state.focusNode.x = 0;
       this.state.focusNode.y = 0;
-      this.state.focusNode.hovorId = 0;
+      this.state.focusNode.hovorId = root_id;
     }
 
     window.Module.ccall("setFunctionFilter", null, ["string"], [functionFilter]);
@@ -339,10 +343,10 @@ export default class FlameGraph extends Component {
   changeToTopDown = () => {
     //this.state.dataShowType = 1;
     //this.drawFlameGraph(0,  this.state.metricIndex, "")
-    this.state.focusNode.id = 0;
+    this.state.focusNode.id = root_id;
     this.state.focusNode.x = 0;
     this.state.focusNode.y = 0;
-    this.state.focusNode.hovorId = 0;
+    this.state.focusNode.hovorId = root_id;
     this.setState({ dataShowType: 0 })
   }
 
@@ -350,10 +354,10 @@ export default class FlameGraph extends Component {
   changeToBottomUp = () => {
     //this.state.dataShowType = 1;
     console.log(this)
-    this.state.focusNode.id = 0;
+    this.state.focusNode.id = root_id;
     this.state.focusNode.x = 0;
     this.state.focusNode.y = 0;
-    this.state.focusNode.hovorId = 0;
+    this.state.focusNode.hovorId = root_id;
     this.setState({ dataShowType: 1 });
     // console.log(this.state.dataShowType)
     //  window.onresize = this.onWindowResize;
@@ -363,10 +367,10 @@ export default class FlameGraph extends Component {
   changeToFlat = () => {
     //this.state.dataShowType = 1;
     // this.drawFlameGraph(2,  this.state.metricIndex, "")
-    this.state.focusNode.id = 0;
+    this.state.focusNode.id = root_id;
     this.state.focusNode.x = 0;
     this.state.focusNode.y = 0;
-    this.state.focusNode.hovorId = 0;
+    this.state.focusNode.hovorId = root_id;
     this.setState({ dataShowType: 2 })
   }
 
