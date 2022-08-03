@@ -22,22 +22,22 @@ const App = ({onDragEnter, onDragOver, onDragLeave, onDrop}) => {
       countRef.current++;
       ProfileStore.setIsDragOver(false);
       onDrop?.(e);
-    }
+  }
     if (e.type === 'dragover') {
       console.log('dragover');
       if (!ProfileStore.isDragOver) {
         ProfileStore.setIsDragOver(true);
-      }
+  }
       onDragOver?.(e);
-    }
+  }
     if (e.type === 'dragenter') {
       console.log('dragenter');
       countRef.current++;
       if (countRef.current % 2) {
         ProfileStore.setIsDragOver(true);
         onDragEnter?.(e);
-      }
-    }
+  }
+  }
     if (e.type === 'dragleave') {
       console.log('dragleave');
       countRef.current++;
@@ -45,10 +45,10 @@ const App = ({onDragEnter, onDragOver, onDragLeave, onDrop}) => {
         ProfileStore.setIsDragOver(false);
         onDragLeave?.(e);
         countRef.current = 0;
-      }
+  }
     }
   };
-  return (
+    return (
     <Provider {...stores}>
       <div className="w-full h-full" onDrop={onFileDrop}
         onDragOver={onFileDrop}
@@ -57,10 +57,10 @@ const App = ({onDragEnter, onDragOver, onDragLeave, onDrop}) => {
         <OpenFileDropezone/>
         <LeftBar/>
         <ViewContainer/>
-      </div>
+        </div>
     </Provider>
 
-  );
+    );
 };
 
 export default observer(App);

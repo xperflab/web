@@ -78,7 +78,8 @@ class ViewContainer extends Component {
               aria-controls="collapseExample"
             ><ChevronRightIcon className="h-6 w-6 "/></button>}
             <div className="flex-1 flex justify-center  h-4/7  ">
-              <form className="w-1/2 flex md:ml-0 bg-white"
+
+              <form className="w-1/2 flex md:ml-0 bg-white "
                 action="#" method="GET">
                 <label htmlFor="search-field" className="sr-only">
                 Search
@@ -98,7 +99,8 @@ class ViewContainer extends Component {
                   focus:outline-none
                   focus:placeholder-gray-400
                   focus:ring-0 focus:border-transparent
-                  sm:text-sm cursor-not-allowed"
+                  sm:text-sm cursor-not-allowed
+                  shadow-inner"
                     placeholder="Search"
                     type="search"
                     name="search"
@@ -106,6 +108,7 @@ class ViewContainer extends Component {
                   />
                 </div>
               </form>
+
             </div>
           </div>
         </div>
