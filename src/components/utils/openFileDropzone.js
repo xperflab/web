@@ -47,7 +47,7 @@ function OpenFileDropezone(props) {
 
 
     <div className={` ${
-      props.ProfileStore.IsDragOver ? '' : 'pointer-events-none'
+      props.DragStore.IsDragOver ? '' : 'pointer-events-none'
     } absolute top-0 right-0 bottom-0 left-0 w-full h-full overflow-hidden  z-40`}
 
     {...getRootProps()}>
@@ -61,4 +61,4 @@ function OpenFileDropezone(props) {
     </div>
   );
 }
-export default inject('BarStore', 'ViewStore', 'ProfileStore', 'TreetableStore')(observer(OpenFileDropezone));
+export default inject('BarStore', 'ViewStore', 'ProfileStore', 'TreetableStore', 'DragStore')(observer(OpenFileDropezone));

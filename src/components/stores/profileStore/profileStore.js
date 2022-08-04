@@ -5,7 +5,7 @@ import {makeAutoObservable} from 'mobx';
 
 class ProfileStore {
   ProfileId = 1; // default value
-  IsDragOver = false;
+
   /**
    * Creating observable state
    */
@@ -15,9 +15,7 @@ class ProfileStore {
   incrementProfileKey = () => {
     this.ProfileId += 1;
   };
-  setIsDragOver = (value) => {
-    this.IsDragOver = value;
-  };
+
   decodeProfile(buffer, mime) {
     let data = new Uint8Array(buffer);
     let len = data.length;
