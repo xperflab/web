@@ -10,7 +10,7 @@ import {
  */
 function HomePageLayerDropzone() {
   return (
-    <div className="max-w-7xl mx-auto dark:bg-slate-500 ">
+    <div className="max-w-7xl mx-auto  ">
       <div className="px-4 py-5 sm:px-0">
         <div className="   border-dashed border-gray-200
                 rounded-lg h-40" style={{
@@ -37,7 +37,7 @@ export default class Homeview extends Component {
       <div className="h-full">
         <div className="collapse bg-[#F3F4F6]"
           enter="ease-in-out " id="collapseExample">
-          <div className="block rounded-lg">
+          <div className="block dark:bg-slate-500">
             <div>
               {/* Replace with your content */}
               <HomePageLayerDropzone/>
