@@ -76,7 +76,7 @@ class ViewContainer extends Component {
               data-bs-target="#collapseExample"
               aria-expanded="false"
               aria-controls="collapseExample"
-            ><ChevronRightIcon className="h-6 w-6 "/></button>}
+            ><ChevronRightIcon className="h-6 w-6 mt-1"/></button>}
             <div className="flex-1 flex justify-center  h-4/7  ">
 
               <form className="w-1/2 flex md:ml-0 bg-white "

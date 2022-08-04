@@ -24,7 +24,7 @@ class TreetableDataProcess extends Component {
       metricArray: [],
       defaultSelects: [],
       tablekey: 0,
-      tableHeight: 550,
+      tableHeight: 0,
     };
     this.viewContainer = React.createRef();
     this.buttons = React.createRef();
@@ -112,6 +112,7 @@ class TreetableDataProcess extends Component {
     this.resizeObserver = new ResizeObserver((entries) => {
       console.log('resize');
       const tableHeight = this.viewContainer.current.clientHeight - this.buttons.current.clientHeight-this.select.current.clientHeight;
+      console.log(tableHeight);
       this.setState({tableHeight: tableHeight});
     });
     this.resizeObserver.observe(document.getElementById('select'));
@@ -149,7 +150,6 @@ class TreetableDataProcess extends Component {
     return (
       <div ref={this.viewContainer} className='h-full w-full pl-1'>
         <div ref={this.buttons} >
-
           <div className="flex pl-[0.2rem]
         h-8" role="group">
             <button
