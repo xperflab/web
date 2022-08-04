@@ -30,7 +30,7 @@ function Menu(props) {
         {props.BarStore.showCurrentProfile &&
            <div>
              <button
-               className=" text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
+               className=" text-gray-600  dark:text-white hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
              pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
              focus:outline-none ocus:ring-2 focus:ring-indigo-500"
                onClick={() => setCurrentProfileOpen(!currentProfileOpen)}
@@ -56,21 +56,22 @@ function Menu(props) {
                </svg>
              </button>
              {currentProfileOpen && ( < div className="space-y-1">
-               <div
+               <>
+                 <div className={` ${
+      props.ViewStore.currentComponent ==='flamegraph'? 'text-white bg-[#bc3793]' : 'text-gray-600'} dark:text-slate-400  group w-full flex
+    items-center pl-[3.3rem] pr-2 py-2
+    text-sm font-medium 
+     rounded-md hover:text-gray-900 hover:bg-gray-50`}>
 
-                 className="group w-full flex
-                  items-center pl-[3.3rem] pr-2 py-2
-                  text-sm font-medium text-white
-                   rounded-md hover:text-gray-900 hover:bg-gray-50"
-               >
                  Flame Graph
-               </div>
-               <div
-                 className="group w-full flex
-                  items-center pl-[3.3rem] pr-2 py-2
-                  text-sm font-medium text-gray-600
-                   rounded-md hover:text-gray-900 hover:bg-gray-50"
-               >
+                 </div>
+               </>
+               <div className={` ${
+      props.ViewStore.currentComponent ==='treetable'? 'text-white bg-[#bc3793]' : 'text-gray-600'
+               }  dark:text-slate-400 group w-full flex
+    items-center pl-[3.3rem] pr-2 py-2
+    text-sm font-medium 
+     rounded-md hover:text-gray-900 hover:bg-gray-50`}>
                  Tree Table
                </div>
              </div>)}
@@ -80,7 +81,7 @@ function Menu(props) {
 
         <button
           as="div"
-          className=" text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
+          className=" dark:text-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
             pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
             focus:outline-none ocus:ring-2 focus:ring-indigo-500"
           onClick={() => setProfileOpen(!profileOpen)}
@@ -108,7 +109,7 @@ function Menu(props) {
         {profileOpen && ( < div className="space-y-1">
           <div
 
-            className="group w-full flex
+            className=" dark:text-slate-400 group w-full flex
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
                   rounded-md hover:text-gray-900 hover:bg-gray-50"
@@ -116,7 +117,7 @@ function Menu(props) {
                 Open File
           </div>
           <div
-            className="group w-full flex
+            className="dark:text-slate-400 group w-full flex
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
                   rounded-md hover:text-gray-900 hover:bg-gray-50"
@@ -127,7 +128,7 @@ function Menu(props) {
 
 
         <button
-          className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
+          className=" dark:text-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
             pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
             focus:outline-none ocus:ring-2 focus:ring-indigo-500"
           onClick={() => setVRProfileOpen(!VRProfileOpen)}
@@ -155,7 +156,7 @@ function Menu(props) {
         {VRProfileOpen && ( <div className="space-y-1">
           <div
 
-            className="group w-full flex
+            className="group w-full flex dark:text-slate-400
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
                   rounded-md hover:text-gray-900 hover:bg-gray-50"

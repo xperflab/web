@@ -8,17 +8,17 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.2.0",
     "@testing-library/user-event": "^13.5.0",
+    "antd": "4.13.0",
     "eslint-plugin-import": "^2.26.0",
     "mobx": "^6.6.1",
     "mobx-react": "^7.5.2",
     "react": "^18.2.0",
+    "react-antd-treetable": "^1.0.3",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.1",
     "react-scripts": "5.0.1",
     "tw-elements": "^1.0.0-alpha12",
-    "web-vitals": "^2.1.4",
-    "antd": "4.13.0",
-    "react-antd-treetable": "^1.0.3"
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.7",
+    "easyview-antd-treetable": "^1.0.2",
     "eslint": "^8.18.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-react": "^7.30.1",

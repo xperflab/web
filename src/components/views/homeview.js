@@ -10,16 +10,16 @@ import {
  */
 function HomePageLayerDropzone() {
   return (
-    <div className="max-w-7xl mx-auto ">
+    <div className="max-w-7xl mx-auto dark:bg-slate-500 ">
       <div className="px-4 py-5 sm:px-0">
-        <div className=" border-dashed border-gray-200
+        <div className="   border-dashed border-gray-200
                 rounded-lg h-40" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center', flexDirection: 'column',
         }}>
           <InboxIcon className="text-[#B73C93]"/>
-          <div className ="text-[#262626] text-2xl">
+          <div className ="text-[#262626] text-2xl dark:text-slate-400">
                     Click or drag file to this area to decode</div>
         </div>
       </div>

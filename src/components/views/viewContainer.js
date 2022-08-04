@@ -9,6 +9,7 @@ import {Component} from 'react';
 import Homeview from './homeview';
 import {PropTypes} from 'prop-types';
 import TreetableDataProcess from './treetableDataProcess';
+
 /**
  *  inject('BarStore, ViewStore')
  * @class ViewContainer
@@ -39,7 +40,7 @@ class ViewContainer extends Component {
       <div
         className={` ${
       this.props.BarStore.showSidebar ? 'md:pl-[14.8rem]' : 'pl-0 '
-        } flex flex-col flex-1 h-full`}
+        } flex flex-col flex-1 h-full dark:bg-slate-800`}
       >
         <div className="sticky ml-1 top-0 z-10
       flex-shrink-0 flex h-12 bg-gray-100 shadow">
@@ -55,13 +56,14 @@ class ViewContainer extends Component {
             <span className="sr-only">Open sidebar</span>
             <MenuAlt2Icon className="h-6 w-6" aria-hidden="true" />
           </button>
-          <div className="flex-1 px-0 flex items-center justify-between h-12">
+          <div className="flex-1 px-0 flex items-center justify-between
+          h-12 dark:bg-slate-900 ">
             { !this.props.BarStore.showSidebar && <button
               onClick={() =>this.props.BarStore.setShowSidebar(true)}
               type="button"
               data-mdb-ripple="true"
               data-mdb-ripple-color="light"
-              className="inline-block px-6
+              className="dark:border-slate-600 inline-block px-6
             border
             py-2.5 h-12  mt-[-0.1rem] ml-[-0.2rem] h-[3.2rem]
               text-black font-medium
@@ -71,13 +73,17 @@ class ViewContainer extends Component {
              focus:shadow-lg focus:outline-none
              focus:ring-0 active:bg-blue-800
              active:shadow-lg transition
-             duration-150 ease-in-out hidden md:flex"
+             duration-150 ease-in-out hidden md:flex
+             "
               data-bs-toggle="collapse"
               data-bs-target="#collapseExample"
               aria-expanded="false"
               aria-controls="collapseExample"
-            ><ChevronRightIcon className="h-6 w-6 mt-1"/></button>}
-            <div className="flex-1 flex justify-center  h-4/7  ">
+            ><ChevronRightIcon className="h-6 w-6 mt-1
+            dark:text-slate-400 "
+              /></button>}
+            <div className="flex-1 flex justify-center
+             h-4/7  ">
 
               <form className="w-1/2 flex md:ml-0 bg-white "
                 action="#" method="GET">
@@ -93,7 +99,7 @@ class ViewContainer extends Component {
                   </div>
                   <input
                     id="search-field"
-                    className="block w-full h-full pl-8
+                    className="block dark:bg-slate-800 w-full h-full pl-8
                   pr-3 py-2 border-transparent
                   text-gray-900 placeholder-gray-500
                   focus:outline-none

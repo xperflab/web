@@ -7,3 +7,9 @@
 .ant-table table{
     text-align: right !important;
 }
+/* .ant-table-thead .ant-table-cell {
+    background-color: gray !important;
+} */
+/* .ant-table-tbody > tr > td {
+    border-bottom: 1px solid #000000;
+    } */

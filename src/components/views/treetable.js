@@ -5,7 +5,7 @@
 import 'antd/dist/antd.min.css';
 import {Component} from 'react';
 import {inject, observer} from 'mobx-react';
-import TreeTable, {useLazyloadPlugin} from 'react-antd-treetable';
+import TreeTable, {useLazyloadPlugin} from 'easyview-antd-treetable';
 import {toJS} from 'mobx';
 
 class Treetable extends Component {
@@ -55,7 +55,6 @@ class Treetable extends Component {
     return (
       <TreeTable
         rowKey="id"
-        bordered = {true}
         size="small"
         expandedRowKeys={this.state.expandedKeys}
         onExpandedRowsChange={this.onExpandedRowsChange}

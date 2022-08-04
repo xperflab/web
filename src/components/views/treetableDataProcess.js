@@ -149,7 +149,7 @@ class TreetableDataProcess extends Component {
   render() {
     return (
       <div ref={this.viewContainer} className='h-full w-full pl-1'>
-        <div ref={this.buttons} >
+        <div ref={this.buttons} className="mt-1">
           <div className="flex pl-[0.2rem]
         h-8" role="group">
             <button

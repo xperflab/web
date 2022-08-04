@@ -12,6 +12,7 @@ import {Fragment, React, useState} from 'react';
 import 'tw-elements';
 import {PropTypes} from 'prop-types';
 import Menu from './menu';
+import Toggle from '../widget/toggle';
 /**
   * Combine the className in if condition render
   * @param  {...any} classes
@@ -26,7 +27,7 @@ import Menu from './menu';
  */
 function LeftBar(props) {
   return (
-    <div>
+    <div >
       <Transition.Root show={props.BarStore.sidebarOpen} as={Fragment}>
         <Dialog as="div" className="relative z-40 md:hidden"
           onClose={props.BarStore.setSidebarOpen}>
@@ -110,12 +111,11 @@ function LeftBar(props) {
       <div
         className={` ${
        props.BarStore.showSidebar ? 'md:w-[15rem] ' : 'w-0'
-        } hidden md:flex md:flex-col
-         md:fixed md:inset-y-0 duration-200 bg-gray-100`}
+        } hidden md:flex md:flex-col  md:fixed md:inset-y-0 duration-200 bg-gray-100 dark:bg-slate-900`}
       >
         <div className="  flex flex-col flex-grow border-r
-       border-gray-200 overflow-y-auto overflow-hidden">
-          <div className="flex items-center flex-shrink-0 px-4 pt-2">
+       border-gray-200 overflow-y-auto overflow-hidden  dark:bg-slate-900 dark:border-slate-600">
+          <div className="flex items-center flex-shrink-0 px-4 pt-2  dark:bg-slate-900">
             <img
               className="h-8 w-auto"
               src="/new_logo.png"
@@ -138,7 +138,7 @@ function LeftBar(props) {
                 data-bs-toggle="collapse"
                 data-bs-target="#collapseExample"
                 aria-expanded="false" aria-controls="collapseExample"
-              ><ChevronLeftIcon className="h-6 w-6 "/></button>
+              ><ChevronLeftIcon className="h-6 w-6 dark:text-slate-400"/></button>
             </div>
           </div>
           <div className="mt-5 flex-grow flex flex-col">
@@ -146,8 +146,12 @@ function LeftBar(props) {
            space-y-1" aria-label="Sidebar">
               <Menu/>
             </nav>
+            <div className="flex items-center justify-center mb-10">     <Toggle/><div className="ml-3 dark:text-slate-400">dark mode</div></div>
+
           </div>
+
         </div>
+
       </div>
 
     </div>

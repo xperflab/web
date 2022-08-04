@@ -31,7 +31,7 @@ class Select extends Component {
   };
   render() {
     return (
-      <div className="w-[7.4rem] pl-[0.2rem]">
+      <div className="w-[7.4rem] pl-[0.2rem] ">
         <Listbox
           onChange={(event) => {
             console.log('enfant', event);
@@ -39,8 +39,8 @@ class Select extends Component {
           }}>
           {({open}) => (
             <>
-              <div className="mt-1 relative">
-                <Listbox.Button className="relative w-[0.03rem] h-[1.9rem] bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default sm:text-sm"
+              <div className="mt-1 relative ">
+                <Listbox.Button className="relative dark:bg-slate-600 dark:border-slate-600 w-[0.03rem] h-[1.9rem] bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default sm:text-sm"
                   onClick={() => {
                     this.setState({isOpen: !this.state.isOpen});
                   }}
@@ -52,7 +52,7 @@ class Select extends Component {
 
 
                 {this.state.isOpen && (
-                  <Listbox.Options static className="absolute z-10 mt-1 w-[25rem]
+                  <Listbox.Options static className="absolute z-10 mt-1 w-[25rem] dark:bg-slate-600
                   bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
                     { toJS(this.props.TreetableStore.columns).slice(1).map((person) => (
                       <Listbox.Option
@@ -76,7 +76,7 @@ class Select extends Component {
                                 aria-hidden="true"
                               />
                               <span
-                                className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate')}
+                                className={classNames(selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate dark:text-slate-400')}
                               >
                                 {person.title}
                                 <span className="sr-only"> is {person.select ? 'select' : 'offline'}</span>
