@@ -47,7 +47,7 @@ class Treetable extends Component {
       const children = JSON.parse(jsonStr);
       // console.log(children);
       resolve(children);
-    }, 200);
+    }, 0);
   });
 
 

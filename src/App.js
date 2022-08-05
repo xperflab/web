@@ -22,7 +22,7 @@ const App = ({onDragEnter, onDragOver, onDragLeave, onDrop}) => {
   };
   return (
     <Provider {...stores}>
-      <div className="w-full h-full overflow-hidden" onDrop={onFileDrop}
+      <div className="w-full h-full" onDrop={onFileDrop}
         onDragOver={onFileDrop}
         onDragEnter={onFileDrop}
         onDragLeave={onFileDrop}>
