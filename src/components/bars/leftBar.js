@@ -12,7 +12,7 @@ import {Fragment, React, useState} from 'react';
 import 'tw-elements';
 import {PropTypes} from 'prop-types';
 import Menu from './menu';
-import Toggle from '../widget/toggle';
+import Toggle from '../widget/DarkModeButton';
 /**
   * Combine the className in if condition render
   * @param  {...any} classes
@@ -53,7 +53,7 @@ function LeftBar(props) {
               leaveTo="-translate-x-full"
             >
               <Dialog.Panel className="relative flex-1
-             flex flex-col max-w-xs w-full pt-5 pb-4 bg-white">
+             flex flex-col max-w-xs w-full pt-5 pb-4 bg-white dark:bg-slate-800">
                 <Transition.Child
                   as={Fragment}
                   enter="ease-in-out duration-300"
@@ -63,7 +63,7 @@ function LeftBar(props) {
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                 >
-                  <div className="absolute top-0 right-0 -mr-12 pt-2">
+                  <div className="absolute top-0 right-0 -mr-12 pt-2 ">
                     <button
                       type="button"
                       className="ml-1 flex items-center

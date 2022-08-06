@@ -10,7 +10,7 @@ import {Component} from 'react';
 import Homeview from './homeview';
 import {PropTypes} from 'prop-types';
 import TreetableDataProcess from './treetableDataProcess';
-import Toggle from '../widget/toggle';
+import DarkModeButton from '../widget/DarkModeButton';
 /**
  *  inject('BarStore, ViewStore')
  * @class ViewContainer
@@ -62,7 +62,8 @@ class ViewContainer extends Component {
             className="px-4 border-r border-gray-200
           text-gray-500 focus:outline-none
            focus:ring-2 focus:ring-inset
-           focus:ring-indigo-500 md:hidden"
+           focus:ring-indigo-500 md:hidden
+            dark:bg-slate-800 dark:border-slate-700"
             onClick={() =>
               this.props.BarStore.setSidebarOpen(true)}
           >
@@ -130,7 +131,7 @@ class ViewContainer extends Component {
 
             </div>
           </div>
-          <Toggle/>
+          <DarkModeButton/>
         </div>
         {
           renderComponent

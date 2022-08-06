@@ -4,7 +4,7 @@
 /**
  * eslint require
  */
-import {React, Component, useRef, lastActionRef} from 'react';
+import {React, Component, useRef, useEffect, useState} from 'react';
 
 import {Provider, observer} from 'mobx-react';
 import {BarStore, ViewStore, ProfileStore, TreetableStore, DragStore,
@@ -15,6 +15,20 @@ import OpenFileDropezone from './components/utils/openFileDropzone';
 const stores = {BarStore, ViewStore, ProfileStore, TreetableStore, DragStore};
 const App = ({onDragEnter, onDragOver, onDragLeave, onDrop}) => {
   const countRef = useRef(0);
+  // useEffect(() => {
+  //   const head = document.getElementById('head');
+  //   const link = document.createElement('link');
+
+  //   link.type = 'text/css';
+  //   link.rel = 'stylesheet';
+  //   link.href = stylePath;
+
+  //   head.appendChild(link);
+
+  //   return () => {
+  //     head.removeChild(link);
+  //   };
+  // }, [stylePath]);
 
   const onFileDrop = (e) => {
     DragStore.handleDragEvent(e, countRef,

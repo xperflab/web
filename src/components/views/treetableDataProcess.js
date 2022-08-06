@@ -30,11 +30,7 @@ class TreetableDataProcess extends Component {
     this.viewContainer = React.createRef();
     this.buttons = React.createRef();
     this.select = React.createRef();
-    if (props.ViewStore.theme === 'dark') {
-      import('../views-css/treetableDark.css');
-    } else {
-      import('../views-css/treetable.css');
-    }
+    this.treetable = React.createRef();
   }
 
   componentWillMount() {
@@ -110,9 +106,16 @@ class TreetableDataProcess extends Component {
     this.setState({tableList: tableData, tablekey: this.state.tablekey + 1});
   }
   componentDidMount() {
+    // const head = document.getElementById('treetableContainer');
+    // const link = document.createElement('link');
+    // link.type = 'text/css';
+    // link.rel = 'stylesheet';
+    // link.href = this.state.stylePath;
+    // head.appendChild(link);
     console.log(this.viewContainer.current.clientHeight);
     console.log(this.buttons.current.clientHeight);
     console.log(this.select.current.clientHeight);
+    console.log(this.treetable);
     const tableHeight = this.viewContainer.current.clientHeight - this.buttons.current.clientHeight-this.select.current.clientHeight;
     this.setState({tableHeight: tableHeight});
     this.resizeObserver = new ResizeObserver((entries) => {
@@ -122,9 +125,33 @@ class TreetableDataProcess extends Component {
       this.setState({tableHeight: tableHeight});
     });
     this.resizeObserver.observe(document.getElementById('select'));
+
+
+    // this.dispose = autorun(() => {
+    //   const theme = this.props.ViewStore.theme;
+    //   if (theme === 'dark') {
+    //     console.log('dark');
+    //     this.setState({stylePath: '../views-css/treetable-dark.css'});
+    //   } else {
+    //     console.log('light');
+    //     this.setState({stylePath: '../views-css/treetable.css'});
+    //   }
+    // });
   }
 
   componentDidUpdate(prevProps, prevState) {
+    console.log(prevProps);
+    console.log(this.props);
+    if (this.state.theme !== this.props.ViewStore.theme) {
+      if (this.props.ViewStore.theme === 'dark') {
+        this.setState({theme: 'dark'});
+        console.log('dark');
+        import('../views-css/treetableDark.css');
+      } else {
+        this.setState({theme: 'light'});
+        import('../views-css/treetable.css');
+      }
+    }
     if (prevState.dataShowType != this.state.dataShowType) {
       window.Module._updateValueTree(1, this.state.dataShowType, 0);
       const jsonStr = Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
@@ -154,6 +181,7 @@ class TreetableDataProcess extends Component {
 
   render() {
     return (
+
       <div ref={this.viewContainer} className='h-full w-full pl-1'>
         <div ref={this.buttons} className="mt-1">
           <div className="flex pl-[0.2rem]
@@ -236,7 +264,9 @@ class TreetableDataProcess extends Component {
         <div id= "select"ref={this.select}>
           <Select />
         </div>
-        <div className="ml-1 mr-1 mt-1"><Treetable tableHeight ={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={toJS(this.props.TreetableStore.columns)} tableList={this.state.tableList} /></div>
+        <div className="ml-1 mr-1 mt-1" id = "treetableContainer">
+          {this.props.ViewStore.theme === 'dark' ? <link rel="stylesheet" type="text/css" href='../views-css/treetable-dark.css' /> : <link rel="stylesheet" type="text/css" href='../views-css/treetable.css' />}
+          <Treetable ref={this.treetable} tableHeight ={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={toJS(this.props.TreetableStore.columns)} tableList={this.state.tableList} /></div>
       </div>
     );
   }

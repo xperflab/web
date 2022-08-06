@@ -4,12 +4,13 @@
 .table-row-dark {
     background-color: #fbfbfb;
 }
-.ant-table table{
+.ant-table{
+    background-color:#64748b;
     text-align: right !important;
 }
 .ant-table-thead .ant-table-cell {
-    background-color: rgb(233, 233, 233) !important;
+    background-color: #475569 !important;
 }
 .ant-table-tbody > tr > td {
-    border-bottom: 10px solid #dddddd;
+    border-bottom: 1px solid #94a3b8;
 }

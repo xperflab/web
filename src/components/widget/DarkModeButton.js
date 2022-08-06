@@ -1,41 +1,49 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable require-jsdoc */
 /* eslint-disable max-len */
 /* This example requires Tailwind CSS v2.0+ */
 import {useEffect, useState} from 'react';
+import {inject, observer} from 'mobx-react';
 import {
   MoonIcon, SunIcon,
 } from '@heroicons/react/outline';
 
-
-export default function Toggle() {
-  const [enabled, setEnabled] = useState(false);
-  const [theme, setTheme] = useState(null);
+function DarkModeButton(props) {
   useEffect(() => {
     if (window.matchMedia('(prefers-color-scheme:dark)').matches) {
-      setTheme('dark');
+      props.ViewStore.setThemeDark();
+      // setTheme('dark');
     } else {
-      setTheme('light');
+      props.ViewStore.setThemeLight();
+      // setTheme('light');
     }
   }, []);
   useEffect(() =>{
-    if (theme ==='dark') {
+    if (props.ViewStore.theme ==='dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
   });
   const handleThemeSwitch =()=> {
-    setEnabled(!enabled);
-    setTheme(theme === 'dark'? 'light' : 'dark');
+    if (props.ViewStore.theme === 'dark') {
+      props.ViewStore.setThemeLight();
+    } else {
+      props.ViewStore.setThemeDark();
+    }
+    // setTheme(theme === 'dark'? 'light' : 'dark');
   };
   return (
     <>
       <button type='button' onClick={handleThemeSwitch} className ="dark:bg-slate-900 pr-2">
-        {theme === 'dark' ? <MoonIcon className="h-6 w-6
+        {props.ViewStore.theme === 'dark' ? <MoonIcon className="h-6 w-6
                      text-[#B73793] bg-slate-900" aria-hidden="true" /> : <SunIcon className="h-6 w-6
                      text-[#B73793]" aria-hidden="true" /> }
       </button>
     </>
   );
 }
+export default inject('ViewStore',
+)(observer(DarkModeButton));
