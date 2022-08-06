@@ -5,12 +5,19 @@ import {makeAutoObservable} from 'mobx';
 
 class ViewStore {
   currentComponent = 'homeview'; // default value
+  theme = 'dark';
   /**
    * Creating observable state
    */
   constructor() {
     makeAutoObservable(this);
   }
+  setThemeDark = () => {
+    this.theme = 'dark';
+  };
+  setThemeLight = () => {
+    this.theme = 'light';
+  };
   setCurrentFlameGraph = () => {
     this.currentComponent = 'flamegraph';
   };

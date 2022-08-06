@@ -51,7 +51,7 @@ export default class Homeview extends Component {
         flex justify-center h-full">
           <div className="mt-40">
             <div className="text-7xl px-4 font-bold
-              text-black">
+              text-black dark:text-slate-200">
                 Easy<span
                 className="font-medium text-transparent
                    bg-clip-text bg-gradient-to-br

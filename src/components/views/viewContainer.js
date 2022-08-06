@@ -1,5 +1,6 @@
+/* eslint-disable require-jsdoc */
 /* eslint-disable react/prop-types */
-import {React} from 'react';
+import React from 'react';
 import {
   ChevronRightIcon, MenuAlt2Icon,
 } from '@heroicons/react/outline';
@@ -9,7 +10,7 @@ import {Component} from 'react';
 import Homeview from './homeview';
 import {PropTypes} from 'prop-types';
 import TreetableDataProcess from './treetableDataProcess';
-
+import Toggle from '../widget/toggle';
 /**
  *  inject('BarStore, ViewStore')
  * @class ViewContainer
@@ -22,6 +23,17 @@ class ViewContainer extends Component {
   constructor(props) {
     console.log(props);
     super(props);
+    this.state = {
+      treetableViewContainerHeight: 0,
+    };
+    this.topBar = React.createRef();
+    this.rightContainer = React.createRef();
+  }
+  componentDidMount() {
+    this.setState({
+      treetableViewContainerHeight: this.rightContainer.current.clientHeight -
+      this.topBar.current.clientHeight,
+    });
   }
   // eslint-disable-next-line require-jsdoc
   render() {
@@ -32,17 +44,18 @@ class ViewContainer extends Component {
       renderComponent = (<div></div>);
     } else if (this.props.ViewStore.currentComponent === 'treetable') {
       renderComponent = (<TreetableDataProcess key=
-        {this.props.ProfileStore.ProfileId}/>);
+        {this.props.ProfileStore.ProfileId}
+      height ={this.state.treetableViewContainerHeight}/>);
     } else if (this.props.ViewStore.currentComponent === 'vrtrace') {
       renderComponent = ( <div></div>);
     }
     return (
-      <div
+      <div ref={this.rightContainer}
         className={` ${
       this.props.BarStore.showSidebar ? 'md:pl-[14.8rem]' : 'pl-0 '
         } flex flex-col flex-1 h-full dark:bg-slate-800`}
       >
-        <div className="sticky ml-1 top-0 z-10
+        <div ref={this.topBar} className="sticky ml-1 top-0 z-10
       flex-shrink-0 flex h-12 bg-gray-100 shadow">
           <button
             type="button"
@@ -106,7 +119,7 @@ class ViewContainer extends Component {
                   focus:placeholder-gray-400
                   focus:ring-0 focus:border-transparent
                   sm:text-sm cursor-not-allowed
-                  shadow-inner"
+                  shadow-[inset_0_2px_4px_0px_rgba(0,0,0,0.1)]"
                     placeholder="Search"
                     type="search"
                     name="search"
@@ -117,6 +130,7 @@ class ViewContainer extends Component {
 
             </div>
           </div>
+          <Toggle/>
         </div>
         {
           renderComponent

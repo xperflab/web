@@ -49,3 +49,4 @@ class DragStore {
 }
 const dragStore = new DragStore();
 export default dragStore;
+

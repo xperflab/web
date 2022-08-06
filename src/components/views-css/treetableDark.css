@@ -11,5 +11,5 @@
     background-color: rgb(233, 233, 233) !important;
 }
 .ant-table-tbody > tr > td {
-    border-bottom: 1px solid #dddddd;
+    border-bottom: 10px solid #dddddd;
 }

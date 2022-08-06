@@ -11,6 +11,7 @@ import {toJS} from 'mobx';
 class Treetable extends Component {
   constructor(props) {
     super(props);
+    console.log(props);
     this.state = {
       expandedKeys: [],
       columns: props.cols,
@@ -60,7 +61,7 @@ class Treetable extends Component {
         onExpandedRowsChange={this.onExpandedRowsChange}
         dataSource={this.props.tableList}
         columns={this.state.columns}
-        scroll={{y: this.props.tableHeight, x: 1000}}
+        scroll={{y: '740px', x: 1000}}
         plugins={[
           useLazyloadPlugin({
             onLoad: this.onLoadMore,

@@ -86,7 +86,7 @@ function LeftBar(props) {
                     alt="Workflow"
                   />
                   <div className="text-xl pl-3 font-bold
-              text-black">
+              text-black dark:text-[#f1f5f9]">
                 Easy<span
                       className="font-medium text-transparent
                    bg-clip-text bg-gradient-to-br
@@ -122,7 +122,7 @@ function LeftBar(props) {
               alt="Workflow"
             />
             <div className="text-xl pl-3 font-bold
-              text-black">
+              text-black dark:text-slate-200">
                 Easy<span
                 className="font-medium text-transparent
                    bg-clip-text bg-gradient-to-br
@@ -146,7 +146,6 @@ function LeftBar(props) {
            space-y-1" aria-label="Sidebar">
               <Menu/>
             </nav>
-            <div className="flex items-center justify-center mb-10">     <Toggle/><div className="ml-3 dark:text-slate-400">dark mode</div></div>
 
           </div>
 

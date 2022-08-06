@@ -6,13 +6,14 @@
 import 'antd/dist/antd.min.css';
 import {Component} from 'react';
 import Treetable from './treetable';
-import '../views-css/treetable.css';
+// import '../views-css/treetable.css';
 import React from 'react';
 import Select from './select';
 import {inject, observer} from 'mobx-react';
 import {toJS} from 'mobx';
 class TreetableDataProcess extends Component {
   constructor(props) {
+    console.log(props);
     super(props);
     this.state = {
       expandedKeys: [],
@@ -29,6 +30,11 @@ class TreetableDataProcess extends Component {
     this.viewContainer = React.createRef();
     this.buttons = React.createRef();
     this.select = React.createRef();
+    if (props.ViewStore.theme === 'dark') {
+      import('../views-css/treetableDark.css');
+    } else {
+      import('../views-css/treetable.css');
+    }
   }
 
   componentWillMount() {
@@ -214,7 +220,7 @@ class TreetableDataProcess extends Component {
         transition
         duration-150
         ease-in-out
-        w-15
+        w-28
       "
             >
       Flat
@@ -230,9 +236,9 @@ class TreetableDataProcess extends Component {
         <div id= "select"ref={this.select}>
           <Select />
         </div>
-        <div><Treetable tableHeight ={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={toJS(this.props.TreetableStore.columns)} tableList={this.state.tableList} /></div>
+        <div className="ml-1 mr-1 mt-1"><Treetable tableHeight ={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={toJS(this.props.TreetableStore.columns)} tableList={this.state.tableList} /></div>
       </div>
     );
   }
 }
-export default inject('TreetableStore')(observer(TreetableDataProcess));
+export default inject('TreetableStore', 'ViewStore')(observer(TreetableDataProcess));

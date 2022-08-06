@@ -30,7 +30,8 @@ function Menu(props) {
         {props.BarStore.showCurrentProfile &&
            <div>
              <button
-               className=" text-gray-600  dark:text-white hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
+               className=" text-gray-600  dark:text-white dark:hover:bg-slate-400
+               hover:bg-slate-200 hover:text-gray-900 group w-full flex items-center
              pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
              focus:outline-none ocus:ring-2 focus:ring-indigo-500"
                onClick={() => setCurrentProfileOpen(!currentProfileOpen)}
@@ -58,20 +59,20 @@ function Menu(props) {
              {currentProfileOpen && ( < div className="space-y-1">
                <>
                  <div className={` ${
-      props.ViewStore.currentComponent ==='flamegraph'? 'text-white bg-[#bc3793]' : 'text-gray-600'} dark:text-slate-400  group w-full flex
+      props.ViewStore.currentComponent ==='flamegraph'? 'text-white bg-[#bc3793]' : 'text-gray-600'} dark:text-slate-200  group w-full flex
     items-center pl-[3.3rem] pr-2 py-2
     text-sm font-medium 
-     rounded-md hover:text-gray-900 hover:bg-gray-50`}>
+     rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400`}>
 
                  Flame Graph
                  </div>
                </>
                <div className={` ${
       props.ViewStore.currentComponent ==='treetable'? 'text-white bg-[#bc3793]' : 'text-gray-600'
-               }  dark:text-slate-400 group w-full flex
+               }  dark:text-slate-200 group w-full flex
     items-center pl-[3.3rem] pr-2 py-2
     text-sm font-medium 
-     rounded-md hover:text-gray-900 hover:bg-gray-50`}>
+     rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400`}>
                  Tree Table
                </div>
              </div>)}
@@ -81,14 +82,14 @@ function Menu(props) {
 
         <button
           as="div"
-          className=" dark:text-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
+          className=" dark:text-white text-gray-600 hover:bg-slate-200 hover:text-gray-900 group w-full flex items-center
             pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
-            focus:outline-none ocus:ring-2 focus:ring-indigo-500"
+            focus:outline-none ocus:ring-2 focus:ring-indigo-500 dark:hover:bg-slate-400"
           onClick={() => setProfileOpen(!profileOpen)}
         >
           <UsersIcon
             className="mr-3 flex-shrink-0 h-6 w-6
-                text-gray-400 group-hover:text-gray-500"
+                text-gray-400 group-hover:text-gray-500 "
             aria-hidden="true"
           />
           <span className="flex-1">Profile</span>
@@ -109,18 +110,18 @@ function Menu(props) {
         {profileOpen && ( < div className="space-y-1">
           <div
 
-            className=" dark:text-slate-400 group w-full flex
+            className=" dark:text-slate-200 group w-full flex
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
-                  rounded-md hover:text-gray-900 hover:bg-gray-50"
+                  rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
           >
                 Open File
           </div>
           <div
-            className="dark:text-slate-400 group w-full flex
+            className="dark:text-slate-200 group w-full flex
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
-                  rounded-md hover:text-gray-900 hover:bg-gray-50"
+                  rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
           >
                 Example Profile
           </div>
@@ -128,9 +129,9 @@ function Menu(props) {
 
 
         <button
-          className=" dark:text-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center
+          className=" dark:text-white text-gray-600 hover:bg-slate-200 hover:text-gray-900 group w-full flex items-center
             pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
-            focus:outline-none ocus:ring-2 focus:ring-indigo-500"
+            focus:outline-none ocus:ring-2 focus:ring-indigo-500 dark:hover:bg-slate-400"
           onClick={() => setVRProfileOpen(!VRProfileOpen)}
         >
           <UsersIcon
@@ -156,10 +157,10 @@ function Menu(props) {
         {VRProfileOpen && ( <div className="space-y-1">
           <div
 
-            className="group w-full flex dark:text-slate-400
+            className="group w-full flex dark:text-slate-200
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
-                  rounded-md hover:text-gray-900 hover:bg-gray-50"
+                  rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
           >
                 Example VR Trace
           </div>
