@@ -53,10 +53,11 @@ class ViewContainer extends Component {
       <div ref={this.rightContainer}
         className={` ${
       this.props.BarStore.showSidebar ? 'md:pl-[14.8rem]' : 'pl-0 '
-        } flex flex-col flex-1 h-full dark:bg-slate-800`}
+        } flex flex-col flex-1 h-full dark:bg-[#212124]`}
       >
         <div ref={this.topBar} className="sticky ml-1 top-0 z-10
-      flex-shrink-0 flex h-12 bg-gray-100 shadow">
+      flex-shrink-0 flex h-12 bg-gray-100 shadow
+     ">
           <button
             type="button"
             className="px-4 border-r border-gray-200
@@ -71,7 +72,7 @@ class ViewContainer extends Component {
             <MenuAlt2Icon className="h-6 w-6" aria-hidden="true" />
           </button>
           <div className="flex-1 px-0 flex items-center justify-between
-          h-12 dark:bg-slate-900 ">
+          h-12 dark:bg-[#1E1D2B]">
             { !this.props.BarStore.showSidebar && <button
               onClick={() =>this.props.BarStore.setShowSidebar(true)}
               type="button"
@@ -120,7 +121,9 @@ class ViewContainer extends Component {
                   focus:placeholder-gray-400
                   focus:ring-0 focus:border-transparent
                   sm:text-sm cursor-not-allowed
-                  shadow-[inset_0_2px_4px_0px_rgba(0,0,0,0.1)]"
+                  shadow-[inset_0_2px_4px_0px_rgba(0,0,0,0.1)]
+                  dark:shadow-[inset_0_2px_4px_0px_rgba(65, 67, 87, 1)]
+                  "
                     placeholder="Search"
                     type="search"
                     name="search"

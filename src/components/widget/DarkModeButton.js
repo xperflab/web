@@ -37,9 +37,9 @@ function DarkModeButton(props) {
   };
   return (
     <>
-      <button type='button' onClick={handleThemeSwitch} className ="dark:bg-slate-900 pr-2">
+      <button type='button' onClick={handleThemeSwitch} className ="dark:bg-[#1E1D2B]  pr-2">
         {props.ViewStore.theme === 'dark' ? <MoonIcon className="h-6 w-6
-                     text-[#B73793] bg-slate-900" aria-hidden="true" /> : <SunIcon className="h-6 w-6
+                     text-[#B73793] bg-[#1E1D2B]  " aria-hidden="true" /> : <SunIcon className="h-6 w-6
                      text-[#B73793]" aria-hidden="true" /> }
       </button>
     </>

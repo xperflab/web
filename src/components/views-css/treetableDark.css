@@ -1,16 +1,32 @@
-.table-row-light {
-    background-color: #ffffff;
-}
-.table-row-dark {
-    background-color: #fbfbfb;
-}
+/* 
 .ant-table{
-    background-color:#64748b;
+    background-color:#212124;
     text-align: right !important;
 }
 .ant-table-thead .ant-table-cell {
-    background-color: #475569 !important;
+    background-color: #28282B !important;
+    color: #EDEDEE !important;
 }
 .ant-table-tbody > tr > td {
-    border-bottom: 1px solid #94a3b8;
+    border-bottom: 1px solid #3B3B43;
+}
+.react-antd-treetable-cell-content{
+    color: #EDEDEE;
+} */
+
+.ant-table{
+    background-color:var(--ant-table-bg-color);
+}
+.ant-table-thead .ant-table-cell {
+    background-color: var(--ant-table-cell-bg-color)!important;
+    color: var(--ant-table-text-color)!important;
+}
+.ant-table-tbody > tr > td {
+    border-bottom: 1px solid var(--ant-table-border-color);
+}
+.react-antd-treetable-cell-content{
+    color: var(--ant-table-text-color);
+} 
+.ant-table-tbody > tr.ant-table-row:hover > td {
+    background: var(--ant-table-row-hover-bg-color) !important;
 }

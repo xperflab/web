@@ -6,11 +6,11 @@
 import 'antd/dist/antd.min.css';
 import {Component} from 'react';
 import Treetable from './treetable';
-// import '../views-css/treetable.css';
 import React from 'react';
 import Select from './select';
 import {inject, observer} from 'mobx-react';
-import {toJS} from 'mobx';
+import {toJS, autorun} from 'mobx';
+import '../views-css/treetableDark.css';
 class TreetableDataProcess extends Component {
   constructor(props) {
     console.log(props);
@@ -127,16 +127,24 @@ class TreetableDataProcess extends Component {
     this.resizeObserver.observe(document.getElementById('select'));
 
 
-    // this.dispose = autorun(() => {
-    //   const theme = this.props.ViewStore.theme;
-    //   if (theme === 'dark') {
-    //     console.log('dark');
-    //     this.setState({stylePath: '../views-css/treetable-dark.css'});
-    //   } else {
-    //     console.log('light');
-    //     this.setState({stylePath: '../views-css/treetable.css'});
-    //   }
-    // });
+    this.dispose = autorun(() => {
+      const theme = this.props.ViewStore.theme;
+      if (theme === 'dark') {
+        console.log('dark');
+        document.documentElement.style.setProperty('--ant-table-bg-color', '#212124');
+        document.documentElement.style.setProperty('--ant-table-cell-bg-color', '#28282B');
+        document.documentElement.style.setProperty('--ant-table-text-color', '#EDEDEE');
+        document.documentElement.style.setProperty('--ant-table-border-color', '#212124');
+        document.documentElement.style.setProperty('--ant-table-row-hover-bg-color', 'gray');
+      } else {
+        console.log('light');
+        document.documentElement.style.removeProperty('--ant-table-bg-color');
+        document.documentElement.style.setProperty('--ant-table-border-color', '#dddddd');
+        document.documentElement.style.setProperty('--ant-table-cell-bg-color', '#e9e9e9');
+        document.documentElement.style.removeProperty('--ant-table-text-color');
+        document.documentElement.style.setProperty('--ant-table-row-hover-bg-color', '#f5f5f5');
+      }
+    });
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -165,8 +173,6 @@ class TreetableDataProcess extends Component {
   }
 
   changeToTopDown = () => {
-    // this.state.dataShowType = 1;
-    // this.drawFlameGraph(0,  this.state.metricIndex, "")
     this.setState({dataShowType: 0});
   };
 
@@ -265,8 +271,8 @@ class TreetableDataProcess extends Component {
           <Select />
         </div>
         <div className="ml-1 mr-1 mt-1" id = "treetableContainer">
-          {this.props.ViewStore.theme === 'dark' ? <link rel="stylesheet" type="text/css" href='../views-css/treetable-dark.css' /> : <link rel="stylesheet" type="text/css" href='../views-css/treetable.css' />}
-          <Treetable ref={this.treetable} tableHeight ={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={toJS(this.props.TreetableStore.columns)} tableList={this.state.tableList} /></div>
+          <Treetable ref={this.treetable} tableHeight ={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={toJS(this.props.TreetableStore.columns)} tableList={this.state.tableList} />
+        </div>
       </div>
     );
   }

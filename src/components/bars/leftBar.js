@@ -111,11 +111,11 @@ function LeftBar(props) {
       <div
         className={` ${
        props.BarStore.showSidebar ? 'md:w-[15rem] ' : 'w-0'
-        } hidden md:flex md:flex-col  md:fixed md:inset-y-0 duration-200 bg-gray-100 dark:bg-slate-900`}
+        } hidden md:flex md:flex-col  md:fixed md:inset-y-0 duration-200 bg-gray-100 dark:bg-[#1E1D2B]`}
       >
         <div className="  flex flex-col flex-grow border-r
-       border-gray-200 overflow-y-auto overflow-hidden  dark:bg-slate-900 dark:border-slate-600">
-          <div className="flex items-center flex-shrink-0 px-4 pt-2  dark:bg-slate-900">
+       border-gray-200 overflow-y-auto overflow-hidden  dark:bg-[#1E1D2B]        dark:border-[#414357]">
+          <div className="flex items-center flex-shrink-0 px-4 pt-2  dark:bg-[#1E1D2B]">
             <img
               className="h-8 w-auto"
               src="/new_logo.png"
