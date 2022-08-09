@@ -52,11 +52,16 @@ class ViewContainer extends Component {
     return (
       <div ref={this.rightContainer}
         className={` ${
-      this.props.BarStore.showSidebar ? 'md:pl-[14.8rem]' : 'pl-0 '
-        } flex flex-col flex-1 h-full dark:bg-[#212124]`}
+      this.props.BarStore.showSidebar ? 'md:pl-[15rem]' : 'pl-0 '
+        } flex flex-col flex-1 h-full dark:bg-[#212124]
+    
+        `}
       >
-        <div ref={this.topBar} className="sticky ml-1 top-0 z-10
-      flex-shrink-0 flex h-12 bg-gray-100 shadow
+        <div ref={this.topBar} className="sticky top-0 z-10
+      flex-shrink-0 flex bg-gray-100
+      shadow-[0px_1px_0px_0px_rgba(0,0,0,0.1)] border-[0.01rem]
+      dark:shadow-[0px_1px_0px_0px_rgba(255,255,255,0.1)]
+      dark:border-[#414357]
      ">
           <button
             type="button"

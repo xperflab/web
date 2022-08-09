@@ -133,8 +133,8 @@ class TreetableDataProcess extends Component {
         console.log('dark');
         document.documentElement.style.setProperty('--ant-table-bg-color', '#212124');
         document.documentElement.style.setProperty('--ant-table-cell-bg-color', '#28282B');
-        document.documentElement.style.setProperty('--ant-table-text-color', '#EDEDEE');
-        document.documentElement.style.setProperty('--ant-table-border-color', '#212124');
+        document.documentElement.style.setProperty('--ant-table-text-color', '#ededee');
+        document.documentElement.style.setProperty('--ant-table-border-color', '#3b3b43');
         document.documentElement.style.setProperty('--ant-table-row-hover-bg-color', 'gray');
       } else {
         console.log('light');

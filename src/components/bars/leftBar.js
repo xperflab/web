@@ -114,7 +114,9 @@ function LeftBar(props) {
         } hidden md:flex md:flex-col  md:fixed md:inset-y-0 duration-200 bg-gray-100 dark:bg-[#1E1D2B]`}
       >
         <div className="  flex flex-col flex-grow border-r
-       border-gray-200 overflow-y-auto overflow-hidden  dark:bg-[#1E1D2B]        dark:border-[#414357]">
+       border-gray-200 overflow-y-auto overflow-hidden  dark:bg-[#1E1D2B] shadow-[1px_0px_0px_0px_rgba(0,0,0,0.1)] dark:border-[#414357]
+        dark:shadow-[1px_0px_0px_0px_rgba(255,255,255,0.1)]
+       ">
           <div className="flex items-center flex-shrink-0 px-4 pt-2  dark:bg-[#1E1D2B]">
             <img
               className="h-8 w-auto"
