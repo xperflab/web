@@ -149,17 +149,6 @@ class TreetableDataProcess extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     console.log(prevProps);
-    console.log(this.props);
-    if (this.state.theme !== this.props.ViewStore.theme) {
-      if (this.props.ViewStore.theme === 'dark') {
-        this.setState({theme: 'dark'});
-        console.log('dark');
-        import('../views-css/treetableDark.css');
-      } else {
-        this.setState({theme: 'light'});
-        import('../views-css/treetable.css');
-      }
-    }
     if (prevState.dataShowType != this.state.dataShowType) {
       window.Module._updateValueTree(1, this.state.dataShowType, 0);
       const jsonStr = Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(2);
