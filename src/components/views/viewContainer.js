@@ -11,6 +11,7 @@ import Homeview from './homeview';
 import {PropTypes} from 'prop-types';
 import TreetableDataProcess from './treetableDataProcess';
 import DarkModeButton from '../widget/DarkModeButton';
+import FlameGraph from './flamegraph';
 /**
  *  inject('BarStore, ViewStore')
  * @class ViewContainer
@@ -41,7 +42,8 @@ class ViewContainer extends Component {
     if (this.props.ViewStore.currentComponent === 'homeview') {
       renderComponent = (<Homeview/>);
     } else if (this.props.ViewStore.currentComponent === 'flamegraph') {
-      renderComponent = (<div></div>);
+      renderComponent = (<FlameGraph key=
+        {this.props.ProfileStore.ProfileId}/>);
     } else if (this.props.ViewStore.currentComponent === 'treetable') {
       renderComponent = (<TreetableDataProcess key=
         {this.props.ProfileStore.ProfileId}

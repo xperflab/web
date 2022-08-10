@@ -35,7 +35,7 @@ function OpenFileDropezone(props) {
           }
           props.TreetableStore.columns.clear();
           props.BarStore.setShowCurrentProfile(true);
-          props.ViewStore.setCurrentTreeTable();
+          props.ViewStore.setCurrentFlameGraph();
           props.ProfileStore.incrementProfileKey();
         }
       };
