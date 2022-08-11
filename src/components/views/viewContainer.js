@@ -12,6 +12,7 @@ import {PropTypes} from 'prop-types';
 import TreetableDataProcess from './treetableDataProcess';
 import DarkModeButton from '../widget/DarkModeButton';
 import FlameGraph from './flamegraph';
+import XEUtils from 'xe-utils';
 /**
  *  inject('BarStore, ViewStore')
  * @class ViewContainer
@@ -26,9 +27,13 @@ class ViewContainer extends Component {
     super(props);
     this.state = {
       treetableViewContainerHeight: 0,
+      value: '',
+      filterName: '',
     };
     this.topBar = React.createRef();
     this.rightContainer = React.createRef();
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
   componentDidMount() {
     this.setState({
@@ -36,6 +41,15 @@ class ViewContainer extends Component {
       this.topBar.current.clientHeight,
     });
   }
+  handleChange(event) {
+    console.log(event.target.value);
+    this.setState({value: event.target.value});
+  };
+  handleSubmit(event) {
+    this.setState({filterName: XEUtils.toValueString(this.state.value).trim()});
+    event.preventDefault();
+  }
+
   // eslint-disable-next-line require-jsdoc
   render() {
     let renderComponent;
@@ -43,7 +57,8 @@ class ViewContainer extends Component {
       renderComponent = (<Homeview/>);
     } else if (this.props.ViewStore.currentComponent === 'flamegraph') {
       renderComponent = (<FlameGraph key=
-        {this.props.ProfileStore.ProfileId}/>);
+        {this.props.ProfileStore.ProfileId} filterName ={this.state.filterName}
+      />);
     } else if (this.props.ViewStore.currentComponent === 'treetable') {
       renderComponent = (<TreetableDataProcess key=
         {this.props.ProfileStore.ProfileId}
@@ -108,7 +123,7 @@ class ViewContainer extends Component {
              h-4/7  ">
 
               <form className="w-1/2 flex md:ml-0 bg-white "
-                action="#" method="GET">
+                onSubmit={this.handleSubmit}>
                 <label htmlFor="search-field" className="sr-only">
                 Search
                 </label>
@@ -119,7 +134,7 @@ class ViewContainer extends Component {
                     <SearchIcon className="h-5 w-5"
                       aria-hidden="true" />
                   </div>
-                  <input
+                  {this.props.ViewStore.currentComponent ==='flamegraph'? <input
                     id="search-field"
                     className="block dark:bg-slate-800 w-full h-full pl-8
                   pr-3 py-2 border-transparent
@@ -127,15 +142,31 @@ class ViewContainer extends Component {
                   focus:outline-none
                   focus:placeholder-gray-400
                   focus:ring-0 focus:border-transparent
-                  sm:text-sm cursor-not-allowed
+                  sm:text-sm
                   shadow-[inset_0_2px_4px_0px_rgba(0,0,0,0.1)]
                   dark:shadow-[inset_0_2px_4px_0px_rgba(65, 67, 87, 1)]
                   "
                     placeholder="Search"
                     type="search"
                     name="search"
+                    value={this.state.value} onChange={this.handleChange}
+                  />: <input
+                    id="search-field"
+                    className="block dark:bg-slate-800 w-full h-full pl-8
+                pr-3 py-2 border-transparent
+                text-gray-900 placeholder-gray-500
+                focus:outline-none
+                focus:placeholder-gray-400
+                focus:ring-0 focus:border-transparent
+                sm:text-sm cursor-not-allowed
+                shadow-[inset_0_2px_4px_0px_rgba(0,0,0,0.1)]
+                dark:shadow-[inset_0_2px_4px_0px_rgba(65, 67, 87, 1)]
+                "
+                    placeholder="Search"
+                    type="search"
+                    name="search"
                     disabled
-                  />
+                  />}
                 </div>
               </form>
 

@@ -18,8 +18,11 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
+
 function Menu(props) {
   console.log(props);
+
+
   const [currentProfileOpen, setCurrentProfileOpen] = useState(true);
   const [currentVRTraceOpen, setCurrentVRTraceOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(true);
@@ -126,6 +129,29 @@ function Menu(props) {
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
                   rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
+            onClick={() =>{
+              fetch('example.ezview')
+                  .then((e) => e.arrayBuffer())
+                  .then((binaryStr) => {
+                    const result = props.ProfileStore.decodeProfile(binaryStr, '0');
+                    console.log(result);
+                    if (result == 0) {
+                      const jsonStr = window.Module.
+                          cwrap('getSourceFileJsonStr', 'string')();
+                      console.log(jsonStr);
+                      const fileExistList = JSON.parse(jsonStr);
+                      for (let i = 0; i < fileExistList.length; i++) {
+                        window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
+                      }
+                      props.BarStore.setShowCurrentProfile(true);
+                      props.ViewStore.setCurrentFlameGraph();
+                      props.ProfileStore.incrementProfileKey();
+                    }
+                  });
+            }
+
+
+            }
           >
                 Example Profile
           </div>
@@ -173,4 +199,4 @@ function Menu(props) {
     </div>
   );
 }
-export default inject('BarStore', 'ViewStore')(observer(Menu));
+export default inject('BarStore', 'ViewStore', 'ProfileStore')(observer(Menu));

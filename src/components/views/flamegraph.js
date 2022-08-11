@@ -28,7 +28,7 @@ export default class FlameGraph extends Component {
       },
       dataShowType: 0,
       metricIndex: 0,
-      filterName: '',
+      filterName: this.props.filterName,
       value: '',
     };
     this.handleChange = this.handleChange.bind(this);
@@ -96,7 +96,7 @@ export default class FlameGraph extends Component {
     window.Module._setUpDrawFlameGraph(-1, window.Module.addFunction(this.drawRectNode, 'viiiiiji'));
     window.onresize = this.onWindowResize;
     const jsonStr = window.Module.cwrap('getMetricDesJsonStr', 'string')();
-    // console.log(jsonStr)
+    console.log(jsonStr);
     // this.state.metricTypesArray = JSON.parse(jsonStr);
     const metricJson = JSON.parse(jsonStr);
     this.setState({metricTypesArray: metricJson});
@@ -106,9 +106,7 @@ export default class FlameGraph extends Component {
           data: metricJson,
         },
     );
-    console.log(this.state.metricTypesArray[0]);
-    console.log('3');
-    this.drawFlameGraph(this.state.dataShowType, this.state.metricIndex, '');
+    this.drawFlameGraph(this.state.dataShowType, this.state.metricIndex, this.state.filterName);
 
     this.resizeObserver = new ResizeObserver((entries) => {
       console.log('resize');
@@ -142,18 +140,6 @@ export default class FlameGraph extends Component {
           this.state.global.messageDetails.innerHTML = Module.cwrap('getContextDetails', 'string', ['number'])(this.state.focusNode.hovorId);
           break;
         }
-          // case"Flamegraph resize":{
-          //   console.log(this.renderview)
-          //   var width = this.viewContainer.current.offsetWidth;
-          //   console.log(width)
-          //   console.log(this.state.global.renderview)
-          //   console.log( this.state.global.container)
-          //   this.state.global.renderview.width = width
-          //   //console.log (this.state.global.renderview)
-          //   // myDiv = document.getElementById("viewContainer").width;
-
-
-          // }
       }
     },
     );
@@ -162,15 +148,15 @@ export default class FlameGraph extends Component {
     console.log(prevState);
     console.log(this.state);
     if (prevState.dataShowType != this.state.dataShowType) {
-      this.drawFlameGraph(this.state.dataShowType, prevState.metricIndex, prevState.filterName);
+      this.drawFlameGraph(this.state.dataShowType, prevState.metricIndex, prevProps.filterName);
     }
 
     if (this.state.metricIndex != prevState.metricIndex) {
-      this.drawFlameGraph(prevState.dataShowType, this.state.metricIndex, prevState.filterName);
+      this.drawFlameGraph(prevState.dataShowType, this.state.metricIndex, prevProps.filterName);
     }
 
-    if (this.state.filterName != prevState.filterName) {
-      this.drawFlameGraph(prevState.dataShowType, prevState.metricIndex, this.state.filterName);
+    if (prevProps.filterName != this.props.filterName) {
+      this.drawFlameGraph(prevState.dataShowType, prevState.metricIndex, this.props.filterName);
     }
   }
   componentWillUnmount() {
@@ -232,14 +218,6 @@ export default class FlameGraph extends Component {
     outline.interactive = true;
     outline.hitArea = new PIXI.Rectangle(x, y, w, h);
     outline.tint = 0xffffff;
-
-    // outline.mouseover (mouseData){
-    //   this.setState({
-    //     tint: 0x9f78d9
-    //   });
-
-    //   this.state.global.messageDetails.innerHTML = window.Module.cwrap('getContextDetails', 'string', ['number'])(id);
-    // };
     outline.mouseover = function(mouseData) {
       this.tint = 0x9F78D9;
       window.postMessage(
@@ -251,12 +229,6 @@ export default class FlameGraph extends Component {
           },
       );
     };
-
-    // outline.mouseout = (mouseData)=>{
-    //   this.setState({
-    //     tint: 0xffffff
-    //   });
-    // };
     outline.mouseout = function(mouseData) {
       this.tint = 0xFFFFFF;
     };
@@ -366,7 +338,6 @@ export default class FlameGraph extends Component {
 
   handleSubmit(event) {
     this.setState({filterName: XEUtils.toValueString(this.state.value).trim()});
-    //  XEUtils.toValueString(this.state.value).trim();
     event.preventDefault();
   }
 
@@ -374,23 +345,6 @@ export default class FlameGraph extends Component {
   render() {
     return (
       <div>
-        <form className="w-full flex lg:ml-0" onSubmit={this.handleSubmit}>
-          {/* <label>
-            Name:
-            <input type="text" value={this.state.value} onChange={this.handleChange} />
-          </label> */}
-          <label htmlFor="search-field" className="sr-only">
-              Search
-          </label>
-          <div className="relative w-full text-gray-400 focus-within:text-gray-600">
-            <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
-              <SearchIcon className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <input type="text" className="block w-full h-full pl-8 pr-3 py-2 border-transparent text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent sm:text-sm"
-              value={this.state.value} onChange={this.handleChange} placeholder="Search"
-            />
-          </div>
-        </form>
         <span className="relative z-0 inline-flex shadow-sm rounded-md">
           <button
             type="button"
