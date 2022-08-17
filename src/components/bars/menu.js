@@ -1,27 +1,28 @@
-/* eslint-disable react/prop-types */
-/* eslint-disable max-len */
-/* eslint-disable no-unused-vars */
-/* eslint-disable require-jsdoc */
-import React from 'react';
-import {Dialog, Disclosure, Transition} from '@headlessui/react';
 import {
-  ChevronLeftIcon, FolderIcon,
   HomeIcon, UsersIcon,
-  XIcon,
 } from '@heroicons/react/outline';
 import {inject, observer} from 'mobx-react';
-import {Fragment, useState} from 'react';
-import 'tw-elements';
+import React, {useState} from 'react';
 import {PropTypes} from 'prop-types';
+import 'tw-elements';
 
+/**
+  * Combine the className in if condition render
+  * @param  {...any} classes
+  * @return {String}
+  */
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
+/**
+ * inject('BarStore', 'ViewStore')
+ * @param {App} props
+ * @return {Menu}
+ **/
 function Menu(props) {
   console.log(props);
   const [currentProfileOpen, setCurrentProfileOpen] = useState(true);
-  const [currentVRTraceOpen, setCurrentVRTraceOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(true);
   const [VRProfileOpen, setVRProfileOpen] = useState(false);
   return (
@@ -30,8 +31,10 @@ function Menu(props) {
         {props.BarStore.showCurrentProfile &&
            <div>
              <button
-               className=" text-gray-600  dark:text-white dark:hover:bg-slate-400
-               hover:bg-slate-200 hover:text-gray-900 group w-full flex items-center
+               className=" text-gray-600
+               dark:text-white dark:hover:bg-slate-400
+               hover:bg-slate-200 hover:text-gray-900
+               group w-full flex items-center
              pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
              focus:outline-none ocus:ring-2 focus:ring-indigo-500"
                onClick={() => setCurrentProfileOpen(!currentProfileOpen)}
@@ -59,20 +62,25 @@ function Menu(props) {
              {currentProfileOpen && ( < div className="space-y-1">
                <>
                  <div className={` ${
-      props.ViewStore.currentComponent ==='flamegraph'? 'text-white bg-[#bc3793]' : 'text-gray-600'} dark:text-slate-200  group w-full flex
+      props.ViewStore.currentComponent ==='flamegraph'?
+      'text-white bg-[#bc3793]' : 'text-gray-600'} 
+      dark:text-slate-200  group w-full flex
     items-center pl-[3.3rem] pr-2 py-2
     text-sm font-medium 
-     rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400`}>
+     rounded-md hover:text-gray-900 hover:bg-slate-200 
+     dark:hover:bg-slate-400`}>
 
                  Flame Graph
                  </div>
                </>
                <div className={` ${
-      props.ViewStore.currentComponent ==='treetable'? 'text-white bg-[#bc3793]' : 'text-gray-600'
+      props.ViewStore.currentComponent ==='treetable'?
+      'text-white bg-[#bc3793]' : 'text-gray-600'
                }  dark:text-slate-200 group w-full flex
     items-center pl-[3.3rem] pr-2 py-2
     text-sm font-medium 
-     rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400`}>
+     rounded-md hover:text-gray-900 hover:bg-slate-200 
+     dark:hover:bg-slate-400`}>
                  Tree Table
                </div>
              </div>)}
@@ -82,9 +90,11 @@ function Menu(props) {
 
         <button
           as="div"
-          className=" dark:text-white text-gray-600 hover:bg-slate-200 hover:text-gray-900 group w-full flex items-center
+          className=" dark:text-white text-gray-600
+           hover:bg-slate-200 hover:text-gray-900 group w-full flex items-center
             pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
-            focus:outline-none ocus:ring-2 focus:ring-indigo-500 dark:hover:bg-slate-400"
+            focus:outline-none ocus:ring-2
+            focus:ring-indigo-500 dark:hover:bg-slate-400"
           onClick={() => setProfileOpen(!profileOpen)}
         >
           <UsersIcon
@@ -113,7 +123,8 @@ function Menu(props) {
             className=" dark:text-slate-200 group w-full flex
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
-                  rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
+                  rounded-md hover:text-gray-900
+                  hover:bg-slate-200 dark:hover:bg-slate-400"
           >
                 Open File
           </div>
@@ -121,7 +132,8 @@ function Menu(props) {
             className="dark:text-slate-200 group w-full flex
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
-                  rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
+                  rounded-md hover:text-gray-900
+                  hover:bg-slate-200 dark:hover:bg-slate-400"
           >
                 Example Profile
           </div>
@@ -129,9 +141,11 @@ function Menu(props) {
 
 
         <button
-          className=" dark:text-white text-gray-600 hover:bg-slate-200 hover:text-gray-900 group w-full flex items-center
+          className=" dark:text-white text-gray-600
+           hover:bg-slate-200 hover:text-gray-900 group w-full flex items-center
             pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
-            focus:outline-none ocus:ring-2 focus:ring-indigo-500 dark:hover:bg-slate-400"
+            focus:outline-none ocus:ring-2
+            focus:ring-indigo-500 dark:hover:bg-slate-400"
           onClick={() => setVRProfileOpen(!VRProfileOpen)}
         >
           <UsersIcon
@@ -160,7 +174,8 @@ function Menu(props) {
             className="group w-full flex dark:text-slate-200
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
-                  rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
+                  rounded-md hover:text-gray-900
+                  hover:bg-slate-200 dark:hover:bg-slate-400"
           >
                 Example VR Trace
           </div>
@@ -169,4 +184,8 @@ function Menu(props) {
     </div>
   );
 }
+Menu.propTypes = {
+  ViewStore: PropTypes.object.isRequired,
+  BarStore: PropTypes.object.isRequired,
+};
 export default inject('BarStore', 'ViewStore')(observer(Menu));

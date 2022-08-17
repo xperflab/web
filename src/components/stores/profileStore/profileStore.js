@@ -1,8 +1,9 @@
-/* eslint-disable require-jsdoc */
-/* eslint-disable valid-jsdoc */
 import {makeAutoObservable} from 'mobx';
 
-
+/**
+ * ProfileId: ProfileId is to control the treetable and flamegraph to update.
+ *
+ **/
 class ProfileStore {
   ProfileId = 1; // default value
 
@@ -16,6 +17,14 @@ class ProfileStore {
     this.ProfileId += 1;
   };
 
+  /**
+   * At first, Check the profile type. If it is gzipped, then unzip it.
+   * Then, call wasm to decode the profile. If the return
+   * result is 0, it is *success. If the return result is 1, it is failure.
+   * @param {buffer} buffer: profile buffer
+   * @param {mime} mime: mime type of the profile
+   * @return {number} result: 0 is success, 1 is failure
+   **/
   decodeProfile(buffer, mime) {
     let data = new Uint8Array(buffer);
     let len = data.length;

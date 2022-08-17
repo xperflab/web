@@ -1,8 +1,9 @@
-/* eslint-disable require-jsdoc */
-/* eslint-disable valid-jsdoc */
 import {makeAutoObservable} from 'mobx';
 
-
+/**
+ * Control the light theme and dark theme.
+ * Control the current component
+ */
 class ViewStore {
   currentComponent = 'homeview'; // default value
   theme = 'dark';

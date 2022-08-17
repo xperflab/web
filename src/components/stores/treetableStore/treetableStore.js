@@ -1,7 +1,7 @@
-/* eslint-disable require-jsdoc */
-
 import {makeAutoObservable, observable} from 'mobx';
-// eslint-disable-next-line require-jsdoc
+/**
+ * To control the select metric of treetable.
+ */
 class TreetableStore {
   columns = observable([
   ]);
@@ -11,6 +11,10 @@ class TreetableStore {
   constructor() {
     makeAutoObservable(this);
   }
+  /**
+   * Update the columns of the treetable.
+   * @param {dataIndex} dataIndex: the index of the treetabl column
+   */
   updateSelect(dataIndex) {
     const updated = this.columns.find((column) => column.dataIndex ===
     dataIndex);

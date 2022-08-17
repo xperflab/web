@@ -1,14 +1,20 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/react-in-jsx-scope */
-/* eslint-disable require-jsdoc */
 /* eslint-disable react/prop-types */
+/* eslint-disable require-jsdoc */
+/* eslint-disable valid-jsdoc */
+import {React} from 'react';
 import 'antd/dist/antd.min.css';
-import {Component} from 'react';
-import {inject, observer} from 'mobx-react';
 import TreeTable, {useLazyloadPlugin} from 'easyview-antd-treetable';
-import {toJS} from 'mobx';
-
+import {inject, observer} from 'mobx-react';
+import {Component} from 'react';
+/**
+ *  inject('TreetableStore')
+ *
+ */
 class Treetable extends Component {
+  /**
+   *
+   * @param {props} props
+   */
   constructor(props) {
     super(props);
     console.log(props);
@@ -17,11 +23,7 @@ class Treetable extends Component {
       columns: props.cols,
     };
   }
-  componentDidMount() {
-    const column = this.props.TreetableStore.columns;
-    console.log(column);
-  }
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (prevProps.cols !== this.props.cols) {
       console.log('update');
       this.setState({
@@ -52,6 +54,7 @@ class Treetable extends Component {
   });
 
 
+  // eslint-disable-next-line require-jsdoc
   render() {
     return (
       <TreeTable
