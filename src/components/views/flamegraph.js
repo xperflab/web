@@ -326,8 +326,6 @@ export default class FlameGraph extends Component {
   }
 
   handleChangeMetricIndex = (event) => {
-    // console.log(event)
-    // console.log(event.target.options.selectedIndex)
     this.setState({metricIndex: event.target.options.selectedIndex});
   };
 

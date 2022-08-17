@@ -130,6 +130,7 @@ function Menu(props) {
                  text-sm font-medium text-gray-600
                   rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
             onClick={() =>{
+              props.TreetableStore.columns.clear();
               fetch('example.ezview')
                   .then((e) => e.arrayBuffer())
                   .then((binaryStr) => {
@@ -199,4 +200,4 @@ function Menu(props) {
     </div>
   );
 }
-export default inject('BarStore', 'ViewStore', 'ProfileStore')(observer(Menu));
+export default inject('BarStore', 'ViewStore', 'ProfileStore', 'TreetableStore')(observer(Menu));

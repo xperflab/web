@@ -36,11 +36,11 @@ export default class Homeview extends Component {
     return (
       <div className="h-full">
         <div className="collapse bg-[#F3F4F6]
-        dark:shadow-[inset_0px_-1px_1px_0px_rgba(255,255,255,0.1)]
+        dark:shadow-[inset_0px_-2px_2px_0px_rgba(255,255,255,1)]
         shadow-[inset_0px_-1px_1px_0px_rgba(0,0,0,0.1)]
-     "
+        dark:border-b-[#414357]"
         enter="ease-in-out " id="collapseExample">
-          <div className="block dark:bg-[#575A6D]">
+          <div className="block dark:bg-[#272938]">
             <div>
               {/* Replace with your content */}
               <HomePageLayerDropzone/>

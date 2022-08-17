@@ -34,6 +34,7 @@ class TreetableDataProcess extends Component {
   }
 
   componentWillMount() {
+    this.props.TreetableStore.columns.clear();
     const temp = [];
     const defaultSelect =[];
     const jsonStr2 = window.Module.cwrap('getMetricDesJsonStr', 'string')();
