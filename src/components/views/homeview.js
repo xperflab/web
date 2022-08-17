@@ -10,16 +10,16 @@ import {
  */
 function HomePageLayerDropzone() {
   return (
-    <div className="max-w-7xl mx-auto ">
+    <div className="max-w-7xl mx-auto">
       <div className="px-4 py-5 sm:px-0">
-        <div className=" border-dashed border-gray-200
+        <div className="   border-dashed border-gray-200
                 rounded-lg h-40" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center', flexDirection: 'column',
         }}>
           <InboxIcon className="text-[#B73C93]"/>
-          <div className ="text-[#262626] text-2xl">
+          <div className ="text-[#262626] text-2xl dark:text-slate-400">
                     Click or drag file to this area to decode</div>
         </div>
       </div>
@@ -35,9 +35,12 @@ export default class Homeview extends Component {
   render() {
     return (
       <div className="h-full">
-        <div className="collapse bg-[#F3F4F6]"
-          enter="ease-in-out " id="collapseExample">
-          <div className="block rounded-lg">
+        <div className="collapse bg-[#F3F4F6]
+        dark:shadow-[inset_0px_-1px_1px_0px_rgba(255,255,255,0.1)]
+        shadow-[inset_0px_-1px_1px_0px_rgba(0,0,0,0.1)]
+     "
+        enter="ease-in-out " id="collapseExample">
+          <div className="block dark:bg-[#575A6D]">
             <div>
               {/* Replace with your content */}
               <HomePageLayerDropzone/>
@@ -47,11 +50,10 @@ export default class Homeview extends Component {
         </div>
         {/* Box-shadow generator to help anpms djust the effect
           https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_Backgrounds_and_Borders/Box-shadow_generator */}
-        <div className="shadow-[0_-1px_3px_-0px_rgba(0,0,0,0.1)]
-        flex justify-center h-full">
+        <div className="flex justify-center h-full">
           <div className="mt-40">
             <div className="text-7xl px-4 font-bold
-              text-black">
+              text-black dark:text-slate-200">
                 Easy<span
                 className="font-medium text-transparent
                    bg-clip-text bg-gradient-to-br

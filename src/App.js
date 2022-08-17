@@ -1,26 +1,37 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
+/* eslint-disable require-jsdoc */
 /**
  * eslint require
  */
-import {React} from 'react';
+import {React, Component, useRef, useEffect, useState} from 'react';
 
 import {Provider, observer} from 'mobx-react';
-import {BarStore} from './components/stores';
+import {BarStore, ViewStore, ProfileStore, TreetableStore, DragStore,
+} from './components/stores';
 import LeftBar from './components/bars/leftBar';
 import ViewContainer from './components/views/viewContainer';
 import OpenFileDropezone from './components/utils/openFileDropzone';
-const stores = {BarStore};
-
-
-const App = observer(() => {
+const stores = {BarStore, ViewStore, ProfileStore, TreetableStore, DragStore};
+const App = ({onDragEnter, onDragOver, onDragLeave, onDrop}) => {
+  const countRef = useRef(0);
+  const onFileDrop = (e) => {
+    DragStore.handleDragEvent(e, countRef,
+        onDragEnter, onDragOver, onDragLeave, onDrop);
+  };
   return (
     <Provider {...stores}>
-      <div className="h-full">
+      <div className="w-full h-full" onDrop={onFileDrop}
+        onDragOver={onFileDrop}
+        onDragEnter={onFileDrop}
+        onDragLeave={onFileDrop}>
+        <OpenFileDropezone/>
         <LeftBar/>
         <ViewContainer/>
-        <OpenFileDropezone/>
       </div>
     </Provider>
-  );
-});
 
-export default App;
+  );
+};
+
+export default observer(App);
