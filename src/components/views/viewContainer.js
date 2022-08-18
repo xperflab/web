@@ -57,7 +57,8 @@ class ViewContainer extends Component {
       renderComponent = (<Homeview/>);
     } else if (this.props.ViewStore.currentComponent === 'flamegraph') {
       renderComponent = (<FlameGraph key=
-        {this.props.ProfileStore.ProfileId} filterName ={this.state.filterName}
+        {this.props.FlameGraphStore.flamegraphId}
+      filterName ={this.state.filterName}
       />);
     } else if (this.props.ViewStore.currentComponent === 'treetable') {
       renderComponent = (<TreetableDataProcess key=
@@ -185,5 +186,6 @@ class ViewContainer extends Component {
 ViewContainer.propTypes = {
   BarStore: PropTypes.object.isRequired,
 };
-export default inject('BarStore', 'ViewStore', 'ProfileStore',
+export default inject('BarStore', 'ViewStore',
+    'ProfileStore', 'FlameGraphStore',
 )(observer(ViewContainer));

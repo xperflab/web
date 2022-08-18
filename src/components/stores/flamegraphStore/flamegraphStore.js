@@ -12,12 +12,16 @@ import {makeAutoObservable} from 'mobx';
 class FlameGraphStore {
   dataShowType=0;
   metricIndex=0;
+  flamegraphId = 0;
   /**
    * Creating observable state
    */
   constructor() {
     makeAutoObservable(this);
   }
+  incrementFlamegraphId = () => {
+    this.flamegraphId += 1;
+  };
   setDataShowType = (value) => {
     this.dataShowType = value;
   };

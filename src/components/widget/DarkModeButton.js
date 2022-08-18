@@ -33,7 +33,7 @@ function DarkModeButton(props) {
     } else {
       props.ViewStore.setThemeDark();
     }
-    props.ProfileStore.incrementProfileKey();
+    props.FlameGraphStore.incrementFlamegraphId();
     // setTheme(theme === 'dark'? 'light' : 'dark');
   };
   return (
@@ -47,5 +47,5 @@ function DarkModeButton(props) {
     </>
   );
 }
-export default inject('ViewStore', 'ProfileStore',
+export default inject('ViewStore', 'ProfileStore', 'FlameGraphStore',
 )(observer(DarkModeButton));
