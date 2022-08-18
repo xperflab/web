@@ -39,22 +39,37 @@ function HomePageLayerDropzone(props) {
   const {getRootProps, getInputProps} =
   useDropzone({onDrop, noDrop: true});
   return (
-    <div className="max-w-7xl mx-auto" {...getRootProps()}>
+    <div className="collapse bg-[#F3F4F6]
+    dark:shadow-[inset_0px_-2px_2px_0px_rgba(255,255,255,1)]
+    shadow-[inset_0px_-1px_1px_0px_rgba(0,0,0,0.1)]
+    dark:border-b-[#414357]"
+    enter="ease-in-out " id="collapseExample" {...getRootProps()}>
       <input {...getInputProps()} />
-      <div className="px-4 py-5 sm:px-0">
+      <div className="block dark:bg-[#272938]">
+        <div>
+          {/* Replace with your content */}
+          <div className="max-w-7xl mx-auto" >
 
-        <div className="   border-dashed border-gray-200
+            <div className="px-4 py-5 sm:px-0">
+
+              <div className="   border-dashed border-gray-200
                 rounded-lg h-40" style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center', flexDirection: 'column',
-        }}>
-          <InboxIcon className="text-[#B73C93]"/>
-          <div className ="text-[#262626] text-2xl dark:text-slate-400">
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center', flexDirection: 'column',
+              }}>
+                <InboxIcon className="text-[#B73C93]"/>
+                <div className ="text-[#262626] text-2xl dark:text-slate-400">
                     Click or drag file to this area to decode</div>
+              </div>
+            </div>
+          </div>
+          {/* /End replace */}
         </div>
       </div>
     </div>
+
+
   );
 }
 export default inject('TreetableStore', 'BarStore', 'ViewStore',
