@@ -33,6 +33,7 @@ function DarkModeButton(props) {
     } else {
       props.ViewStore.setThemeDark();
     }
+    props.ProfileStore.incrementProfileKey();
     // setTheme(theme === 'dark'? 'light' : 'dark');
   };
   return (
@@ -40,10 +41,11 @@ function DarkModeButton(props) {
       <button type='button' onClick={handleThemeSwitch} className ="dark:bg-[#1E1D2B]  pr-2">
         {props.ViewStore.theme === 'dark' ? <MoonIcon className="h-6 w-6
                      text-[#B73793] bg-[#1E1D2B]  " aria-hidden="true" /> : <SunIcon className="h-6 w-6
-                     text-[#B73793]" aria-hidden="true" /> }
+                     text-[#B73793]" aria-hidden="true" />
+        }
       </button>
     </>
   );
 }
-export default inject('ViewStore',
+export default inject('ViewStore', 'ProfileStore',
 )(observer(DarkModeButton));

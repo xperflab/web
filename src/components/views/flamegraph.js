@@ -13,11 +13,26 @@ import * as PIXI from 'pixi.js';
 import PropTypes from 'prop-types';
 import {Component} from 'react';
 import XEUtils from 'xe-utils';
+import {inject, observer} from 'mobx-react';
 import '../views-css/flamegraph.css';
-
-export default class FlameGraph extends Component {
+import {Fragment} from 'react';
+import {Listbox, Transition} from '@headlessui/react';
+import {CheckIcon, SelectorIcon, Cog} from '@heroicons/react/solid';
+import {toJS} from 'mobx';
+import {CogIcon} from '@heroicons/react/outline';
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
+class FlameGraph extends Component {
   constructor(props) {
+    console.log(props);
     super(props);
+    let bgColor = 0;
+    if (props.ViewStore.theme === 'dark') {
+      bgColor = 0;
+    } else {
+      bgColor = 255;
+    }
     this.state = {
       isFull: false,
       isShow: false,
@@ -26,10 +41,12 @@ export default class FlameGraph extends Component {
       metricTypesArray: [],
       focusNode: {
       },
-      dataShowType: 0,
-      metricIndex: 0,
+      dataShowType: props.FlameGraphStore.dataShowType,
+      metricIndex: props.FlameGraphStore.metricIndex,
       filterName: this.props.filterName,
       value: '',
+      backgroundColor: bgColor,
+      selected: {},
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -43,10 +60,9 @@ export default class FlameGraph extends Component {
   static defaultProps = {
     height: 1500,
   };
-
   componentDidMount() {
-    console.log(this);
-    console.log(this.viewContainer);
+    console.log(this.props);
+
     this.state.focusNode.id = 2;
     this.state.focusNode.x = 0;
     this.state.focusNode.y = 0;
@@ -86,9 +102,9 @@ export default class FlameGraph extends Component {
       width: this.state.global.width,
       height: this.props.height,
       backgroundColor: ConvertRGBtoHex(
-          parseInt(255),
-          parseInt(255),
-          parseInt(255),
+          parseInt(this.state.backgroundColor),
+          parseInt(this.state.backgroundColor),
+          parseInt(this.state.backgroundColor),
       ),
     });
     this.state.global.container.appendChild(this.state.global.app.view);
@@ -99,6 +115,8 @@ export default class FlameGraph extends Component {
     console.log(jsonStr);
     // this.state.metricTypesArray = JSON.parse(jsonStr);
     const metricJson = JSON.parse(jsonStr);
+    console.log(metricJson);
+    this.setState({selected: metricJson[0]});
     this.setState({metricTypesArray: metricJson});
     window.postMessage(
         {
@@ -145,8 +163,9 @@ export default class FlameGraph extends Component {
     );
   }
   componentDidUpdate(prevProps, prevState) {
-    console.log(prevState);
+    console.log(prevProps);
     console.log(this.state);
+
     if (prevState.dataShowType != this.state.dataShowType) {
       this.drawFlameGraph(this.state.dataShowType, prevState.metricIndex, prevProps.filterName);
     }
@@ -166,7 +185,9 @@ export default class FlameGraph extends Component {
     if (this.state.dataShowType != dataShowType || this.state.metricIndex != metricIndex
     ) {
       this.state.dataShowType = dataShowType;
+      this.props.FlameGraphStore.setDataShowType(dataShowType);
       this.state.metricIndex = metricIndex;
+      this.props.FlameGraphStore.setMetricIndex(metricIndex);
       this.state.focusNode.id = 2;
       this.state.focusNode.x = 0;
       this.state.focusNode.y = 0;
@@ -295,6 +316,7 @@ export default class FlameGraph extends Component {
     this.state.focusNode.y = 0;
     this.state.focusNode.hovorId = 2;
     this.setState({dataShowType: 0});
+    this.props.FlameGraphStore.setDataShowType(0);
   };
 
 
@@ -306,6 +328,7 @@ export default class FlameGraph extends Component {
     this.state.focusNode.y = 0;
     this.state.focusNode.hovorId = 2;
     this.setState({dataShowType: 1});
+    this.props.FlameGraphStore.setDataShowType(1);
     // console.log(this.state.dataShowType)
     //  window.onresize = this.onWindowResize;
     // this.drawFlameGraph(this.state.dataShowType,  this.state.metricIndex, "")
@@ -319,6 +342,7 @@ export default class FlameGraph extends Component {
     this.state.focusNode.y = 0;
     this.state.focusNode.hovorId = 2;
     this.setState({dataShowType: 2});
+    this.props.FlameGraphStore.setDataShowType(2);
   };
 
   componentWillReceiveProps(nextProps) {
@@ -326,7 +350,10 @@ export default class FlameGraph extends Component {
   }
 
   handleChangeMetricIndex = (event) => {
-    this.setState({metricIndex: event.target.options.selectedIndex});
+    console.log(event);
+    this.setState({metricIndex: event.id});
+    this.props.FlameGraphStore.setMetricIndex(event.id);
+    this.setState({selected: event});
   };
 
   handleChange(event) {
@@ -342,9 +369,79 @@ export default class FlameGraph extends Component {
 
   render() {
     return (
-      <div>
+      <div className='ml-1 mr-1 mt-1'>
         <span className="relative z-0 inline-flex shadow-sm rounded-md">
-          <button
+          <div className="flex
+        h-8" role="group">
+            <button
+              onClick={this.changeToTopDown}
+              type="button"
+              className="
+        rounded-l
+        px-6
+        py-2
+        border-2 border-blue-600
+        text-blue-600
+        font-medium
+        text-xs
+        leading-tight
+        uppercase
+        hover:bg-black hover:bg-opacity-5
+        focus:outline-none focus:ring-0
+        transition
+        duration-150
+        ease-in-out
+
+      "
+            >
+      Top Down
+            </button>
+            <button
+              onClick={this.changeToBottomUp}
+              type="button"
+              className="
+        px-6
+        py-2
+        border-t-2 border-b-2 border-blue-600
+        text-blue-600
+        font-medium
+        text-xs
+        leading-tight
+        uppercase
+        hover:bg-black hover:bg-opacity-5
+        focus:outline-none focus:ring-0
+        transition
+        duration-150
+        ease-in-out
+      "
+            >
+      Bottom Up
+            </button>
+            <button
+              onClick={this.changeToFlat}
+              type="button"
+              className="
+        rounded-r
+        px-6
+        py-2
+        border-2 border-blue-600
+        text-blue-600
+        font-medium
+        text-xs
+        leading-tight
+        uppercase
+        hover:bg-black hover:bg-opacity-5
+        focus:outline-none focus:ring-0
+        transition
+        duration-150
+        ease-in-out
+        w-28
+      "
+            >
+      Flat
+            </button>
+          </div>
+          {/* <button
             type="button"
             onClick={this.changeToTopDown}
             className="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
@@ -364,7 +461,7 @@ export default class FlameGraph extends Component {
             className="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
           >
               Flat
-          </button>
+          </button> */}
           {/* <button
           type="button"
           onClick ={this.goFull}
@@ -377,23 +474,71 @@ export default class FlameGraph extends Component {
           {/* <label htmlFor="location" className="block text-sm font-medium text-gray-700">
           Location
         </label> */}
-          <select
-            id="location"
-            name="location"
-            onChange={this.handleChangeMetricIndex}
-            className="mt-1 block w-200 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-          >
 
-            {this.state.metricTypesArray.map((metricType) => <option key={metricType.id}>{metricType.name}</option>)}
+          <Listbox value={this.state.selected} onChange={this.handleChangeMetricIndex}>
+            {({open}) => (
+              <>
+                <div className="mt-1 relative">
+                  <Listbox.Button className="relative dark:bg-slate-600 dark:border-slate-600 w-[0.03rem] h-[1.9rem] bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default sm:text-sm">
+                    <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                      <CogIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                    </span>
+                  </Listbox.Button>
 
-          </select>
+                  <Transition
+                    show={open}
+                    as={Fragment}
+                    leave="transition ease-in duration-100"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <Listbox.Options static className="absolute z-10 mt-1 w-[25rem] dark:bg-slate-600
+                  bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                      {this.state.metricTypesArray.map((metricType) => (
+                        <Listbox.Option
+                          key={metricType.id}
+                          className={({active}) =>
+                            classNames(
+                          active ? 'text-white bg-indigo-600' : 'text-gray-900',
+                          'cursor-default select-none relative py-2 pl-3 pr-9 dark:text-slate-200',
+                            )
+                          }
+                          value={metricType}
+                        >
+                          {({selected, active}) => (
+                            <>
+                              <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
+                                {metricType.name}
+                              </span>
+
+                              {selected ? (
+                            <span
+                              className={classNames(
+                                active ? 'text-white' : 'text-indigo-600',
+                                'absolute inset-y-0 right-0 flex items-center pr-4',
+                              )}
+                            >
+                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                            </span>
+                          ) : null}
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </Transition>
+                </div>
+              </>
+            )}
+          </Listbox>
+
           {/* <Select options={this.state.focusNode.metricTypesArray[0].name} /> */}
 
         </div>
         {/* <div className="grid grid-cols-6 gap-x-1 "> */}
         <div >
           <div className="col-start-2 col-span-4">
-            <div id="details" className="details">
+            <div id="details" className="details dark:text-slate-300">
                 VIRTUAL ROOT
             </div>
           </div>
@@ -417,3 +562,4 @@ export default class FlameGraph extends Component {
     );
   }
 }
+export default inject('ViewStore', 'ProfileStore', 'FlameGraphStore')(observer(FlameGraph));

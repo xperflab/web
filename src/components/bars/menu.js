@@ -12,6 +12,8 @@ import {
 import {inject, observer} from 'mobx-react';
 import {Fragment, useState} from 'react';
 import 'tw-elements';
+import {useCallback} from 'react';
+import {useDropzone} from 'react-dropzone';
 import {PropTypes} from 'prop-types';
 
 function classNames(...classes) {
@@ -27,6 +29,33 @@ function Menu(props) {
   const [currentVRTraceOpen, setCurrentVRTraceOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(true);
   const [VRProfileOpen, setVRProfileOpen] = useState(false);
+  const onDrop = useCallback((acceptedFiles) => {
+    acceptedFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onabort = () => console.log('file reading was aborted');
+      reader.onerror = () => console.log('file reading has failed');
+      reader.onload = () => {
+        // Do whatever you want with the file contents
+        const binaryStr = reader.result;
+        const result = props.ProfileStore.decodeProfile(binaryStr, file.type);
+        if (result == 0) {
+          const jsonStr =
+          window.Module.cwrap('getSourceFileJsonStr', 'string')();
+          const fileExistList = JSON.parse(jsonStr);
+          for (let i = 0; i < fileExistList.length; i++) {
+            window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
+          }
+          props.TreetableStore.columns.clear();
+          props.BarStore.setShowCurrentProfile(true);
+          props.ViewStore.setCurrentFlameGraph();
+          props.ProfileStore.incrementProfileKey();
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }, []);
+  const {getRootProps, getInputProps} =
+  useDropzone({onDrop, noDrop: true});
   return (
     <div>
       <div className="space-y-1">
@@ -121,7 +150,8 @@ function Menu(props) {
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
                   rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
-          >
+            {...getRootProps()}>
+            <input {...getInputProps()} />
                 Open File
           </div>
           <div

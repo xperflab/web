@@ -7,12 +7,14 @@
 import {React, Component, useRef, useEffect, useState} from 'react';
 
 import {Provider, observer} from 'mobx-react';
-import {BarStore, ViewStore, ProfileStore, TreetableStore, DragStore,
+import {BarStore, ViewStore, ProfileStore, TreetableStore,
+  DragStore, FlameGraphStore,
 } from './components/stores';
 import LeftBar from './components/bars/leftBar';
 import ViewContainer from './components/views/viewContainer';
 import OpenFileDropezone from './components/utils/openFileDropzone';
-const stores = {BarStore, ViewStore, ProfileStore, TreetableStore, DragStore};
+const stores = {BarStore, ViewStore, ProfileStore, TreetableStore,
+  DragStore, FlameGraphStore};
 const App = ({onDragEnter, onDragOver, onDragLeave, onDrop}) => {
   const countRef = useRef(0);
   // useEffect(() => {
