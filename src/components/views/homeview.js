@@ -32,7 +32,8 @@ export default class Homeview extends Component {
         </div>
         {/* Box-shadow generator to help anpms djust the effect
           https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_Backgrounds_and_Borders/Box-shadow_generator */}
-        <div className="flex justify-center h-full">
+        <div className="flex justify-center h-full
+        dark:shadow-[0px_-2px_0px_0px_rgba(255,255,255,0.1)] z-10">
           <div className="mt-40">
             <div className="text-7xl px-4 font-bold
               text-black dark:text-slate-200">

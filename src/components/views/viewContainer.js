@@ -143,6 +143,7 @@ class ViewContainer extends Component {
                   focus:placeholder-gray-400
                   focus:ring-0 focus:border-transparent
                   sm:text-sm
+                  dark: text-slate-200
                   shadow-[inset_0_2px_4px_0px_rgba(0,0,0,0.1)]
                   dark:shadow-[inset_0_2px_4px_0px_rgba(65, 67, 87, 1)]
                   "
