@@ -32,6 +32,8 @@ function HomePageLayerDropzone(props) {
           props.ViewStore.setCurrentFlameGraph();
           props.ProfileStore.incrementProfileKey();
           props.FlameGraphStore.incrementFlamegraphId();
+          props.FlameGraphStore.setDataShowType(0);
+          props.FlameGraphStore.setMetricIndex(0);
         }
       };
       reader.readAsArrayBuffer(file);

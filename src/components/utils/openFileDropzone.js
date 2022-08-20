@@ -62,4 +62,4 @@ function OpenFileDropezone(props) {
     </div>
   );
 }
-export default inject('BarStore', 'ViewStore', 'ProfileStore', 'TreetableStore', 'DragStore')(observer(OpenFileDropezone));
+export default inject('BarStore', 'ViewStore', 'ProfileStore', 'TreetableStore', 'DragStore', 'FlameGraphStore')(observer(OpenFileDropezone));

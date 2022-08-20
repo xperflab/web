@@ -7,6 +7,7 @@ import {Dialog, Disclosure, Transition} from '@headlessui/react';
 import {
   ChevronLeftIcon, FolderIcon,
   HomeIcon, UsersIcon,
+  ArchiveIcon,
   XIcon,
 } from '@heroicons/react/outline';
 import {inject, observer} from 'mobx-react';
@@ -50,6 +51,8 @@ function Menu(props) {
           props.ViewStore.setCurrentFlameGraph();
           props.ProfileStore.incrementProfileKey();
           props.FlameGraphStore.incrementFlamegraphId();
+          props.FlameGraphStore.setDataShowType(0);
+          props.FlameGraphStore.setMetricIndex(0);
         }
       };
       reader.readAsArrayBuffer(file);
@@ -123,7 +126,7 @@ function Menu(props) {
             focus:outline-none ocus:ring-2 focus:ring-indigo-500 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355]"
           onClick={() => setProfileOpen(!profileOpen)}
         >
-          <UsersIcon
+          <ArchiveIcon
             className="mr-3 flex-shrink-0 h-6 w-6
                 text-gray-400 group-hover:text-gray-500 "
             aria-hidden="true"
@@ -178,6 +181,8 @@ function Menu(props) {
                       props.ViewStore.setCurrentFlameGraph();
                       props.ProfileStore.incrementProfileKey();
                       props.FlameGraphStore.incrementFlamegraphId();
+                      props.FlameGraphStore.setDataShowType(0);
+                      props.FlameGraphStore.setMetricIndex(0);
                     }
                   });
             }
