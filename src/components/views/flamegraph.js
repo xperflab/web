@@ -29,7 +29,7 @@ class FlameGraph extends Component {
     super(props);
     let bgColor = 0;
     if (props.ViewStore.theme === 'dark') {
-      bgColor = 0;
+      bgColor = 33;
     } else {
       bgColor = 255;
     }
@@ -479,10 +479,11 @@ class FlameGraph extends Component {
             {({open}) => (
               <>
                 <div className="mt-1 relative">
-                  <Listbox.Button className="relative dark:bg-slate-600 dark:border-slate-600 w-[0.03rem] h-[1.9rem] bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default sm:text-sm">
-                    <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                      <CogIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                    </span>
+                  <Listbox.Button className="relative dark:bg-slate-600 dark:border-slate-600 w-[8rem] h-[1.9rem] bg-white border border-gray-300 rounded-md shadow-sm cursor-default sm:text-sm flex justify-center items-center dark:text-slate-200">
+                    {/* <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none"> */}
+                    {/* <CogIcon className="h-5 w-5 text-gray-400" aria-hidden="true" /> */}
+                    {this.state.selected.name}
+                    {/* </span> */}
                   </Listbox.Button>
 
                   <Transition

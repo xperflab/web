@@ -37,6 +37,7 @@ function OpenFileDropezone(props) {
           props.BarStore.setShowCurrentProfile(true);
           props.ViewStore.setCurrentFlameGraph();
           props.ProfileStore.incrementProfileKey();
+          props.FlameGraphStore.incrementFlamegraphId();
         }
       };
       reader.readAsArrayBuffer(file);

@@ -49,6 +49,7 @@ function Menu(props) {
           props.BarStore.setShowCurrentProfile(true);
           props.ViewStore.setCurrentFlameGraph();
           props.ProfileStore.incrementProfileKey();
+          props.FlameGraphStore.incrementFlamegraphId();
         }
       };
       reader.readAsArrayBuffer(file);
@@ -62,8 +63,7 @@ function Menu(props) {
         {props.BarStore.showCurrentProfile &&
            <div>
              <button
-               className=" text-gray-600  dark:text-white dark:hover:bg-slate-400
-               hover:bg-slate-200 hover:text-gray-900 group w-full flex items-center
+               className=" text-gray-600  dark:text-white hover:bg-[#B73793CC] dark:hover:bg-[#B7379355] hover:text-gray-900 group w-full flex items-center
              pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
              focus:outline-none ocus:ring-2 focus:ring-indigo-500"
                onClick={() => setCurrentProfileOpen(!currentProfileOpen)}
@@ -94,7 +94,7 @@ function Menu(props) {
       props.ViewStore.currentComponent ==='flamegraph'? 'text-white bg-[#bc3793]' : 'text-gray-600'} dark:text-slate-200  group w-full flex
     items-center pl-[3.3rem] pr-2 py-2
     text-sm font-medium 
-     rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400`}
+     rounded-md hover:text-gray-900 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355]`}
                  onClick={() => props.ViewStore.setCurrentFlameGraph()}
                  >
 
@@ -106,7 +106,7 @@ function Menu(props) {
                }  dark:text-slate-200 group w-full flex
     items-center pl-[3.3rem] pr-2 py-2
     text-sm font-medium 
-     rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400`}
+     rounded-md hover:text-gray-900 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355]`}
                onClick={() => props.ViewStore.setCurrentTreeTable()}
                >
                  Tree Table
@@ -118,9 +118,9 @@ function Menu(props) {
 
         <button
           as="div"
-          className=" dark:text-white text-gray-600 hover:bg-slate-200 hover:text-gray-900 group w-full flex items-center
+          className=" dark:text-white text-gray-600 hover:text-gray-900 group w-full flex items-center
             pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
-            focus:outline-none ocus:ring-2 focus:ring-indigo-500 dark:hover:bg-slate-400"
+            focus:outline-none ocus:ring-2 focus:ring-indigo-500 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355]"
           onClick={() => setProfileOpen(!profileOpen)}
         >
           <UsersIcon
@@ -149,7 +149,7 @@ function Menu(props) {
             className=" dark:text-slate-200 group w-full flex
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
-                  rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
+                  rounded-md hover:text-gray-900 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355]"
             {...getRootProps()}>
             <input {...getInputProps()} />
                 Open File
@@ -158,7 +158,7 @@ function Menu(props) {
             className="dark:text-slate-200 group w-full flex
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
-                  rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
+                  rounded-md hover:text-gray-900 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355]"
             onClick={() =>{
               props.TreetableStore.columns.clear();
               fetch('example.ezview')
@@ -177,6 +177,7 @@ function Menu(props) {
                       props.BarStore.setShowCurrentProfile(true);
                       props.ViewStore.setCurrentFlameGraph();
                       props.ProfileStore.incrementProfileKey();
+                      props.FlameGraphStore.incrementFlamegraphId();
                     }
                   });
             }
@@ -190,9 +191,9 @@ function Menu(props) {
 
 
         <button
-          className=" dark:text-white text-gray-600 hover:bg-slate-200 hover:text-gray-900 group w-full flex items-center
+          className=" dark:text-white text-gray-600 hover:text-gray-900 group w-full flex items-center
             pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
-            focus:outline-none ocus:ring-2 focus:ring-indigo-500 dark:hover:bg-slate-400"
+            focus:outline-none ocus:ring-2 focus:ring-indigo-500 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355] "
           onClick={() => setVRProfileOpen(!VRProfileOpen)}
         >
           <UsersIcon
@@ -221,7 +222,7 @@ function Menu(props) {
             className="group w-full flex dark:text-slate-200
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
-                  rounded-md hover:text-gray-900 hover:bg-slate-200 dark:hover:bg-slate-400"
+                  rounded-md hover:text-gray-900 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355]"
           >
                 Example VR Trace
           </div>
@@ -230,4 +231,4 @@ function Menu(props) {
     </div>
   );
 }
-export default inject('BarStore', 'ViewStore', 'ProfileStore', 'TreetableStore')(observer(Menu));
+export default inject('BarStore', 'ViewStore', 'ProfileStore', 'TreetableStore', 'FlameGraphStore')(observer(Menu));

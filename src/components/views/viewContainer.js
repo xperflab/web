@@ -139,19 +139,19 @@ class ViewContainer extends Component {
                     id="search-field"
                     className="block dark:bg-slate-800 w-full h-full pl-8
                   pr-3 py-2 border-transparent
-                  text-gray-900 placeholder-gray-500
+                  text-gray-500 placeholder-gray-500
                   focus:outline-none
                   focus:placeholder-gray-400
                   focus:ring-0 focus:border-transparent
                   sm:text-sm
-                  dark: text-slate-200
+                  dark:text-slate-200
                   shadow-[inset_0_2px_4px_0px_rgba(0,0,0,0.1)]
                   dark:shadow-[inset_0_2px_4px_0px_rgba(65, 67, 87, 1)]
                   "
                     placeholder="Search"
                     type="search"
                     name="search"
-                    value={this.state.value} onChange={this.handleChange}
+                    onChange={this.handleChange}
                   />: <input
                     id="search-field"
                     className="block dark:bg-slate-800 w-full h-full pl-8
