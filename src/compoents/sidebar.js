@@ -15,6 +15,7 @@ import {
   ExclamationCircleOutlined,
   ProfileOutlined
 } from "@ant-design/icons";
+import { getSourceFileJsonStr, parseFile, updateSourceFileExistStatus } from './ezview';
 const { Header, Sider, Content } = Layout;
 const { SubMenu } = Menu;
 export default class sidebar extends React.Component {
@@ -41,17 +42,17 @@ export default class sidebar extends React.Component {
   openExampleProfile = () => {
     fetch('example.ezview')
       .then(e => e.arrayBuffer())
-      .then(binaryStr => {
-        let result = window.decodeProfile(binaryStr, "0")
-        console.log(result)
-        if (result == 0) {
-          let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
+      .then(b => parseFile(b))
+      .then(error => {
+        console.log(error)
+        if (!error) {
+          let jsonStr = getSourceFileJsonStr()
           console.log(jsonStr)
           let fileExistList = JSON.parse(jsonStr)
           for (let i = 0; i < fileExistList.length; i++) {
-            window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
+            updateSourceFileExistStatus(i, fileExistList[i]);
           }
-          //window.navigate("/flame_graph");  
+
           this.props.changeComponentToFlamegraph()
           this.props.changeShowCurrentProfile()
           this.setState({ selectKey: '3' })
@@ -60,13 +61,14 @@ export default class sidebar extends React.Component {
     this.setState({ showCurrentProfile: true })
     this.setState({ showCurrentVRTrace: false })
   }
+
   openVRExampleTrace = () => {
     this.setState({ showCurrentVRTrace: true })
     this.setState({ showCurrentProfile: false })
     this.props.changeComponentToVR()
     this.setState({ selectKey: '8' })
-
   }
+
   componentDidMount() {
     window.addEventListener("message", (event) => {
       const message = event.data; // The json data that the extension sent
@@ -90,7 +92,7 @@ export default class sidebar extends React.Component {
     if (e.key != '9' && e.key != '10') {
       this.setState({ selectKey: e.key })
     }
-   
+
   }
   render() {
     let renderComponent;
@@ -109,7 +111,7 @@ export default class sidebar extends React.Component {
           </div>
         </div>
         {/* <span style={color}>Easy View</span> */}
-        <Menu theme="dark" mode="inline" onClick={this.onClick} selectedKeys={[this.state.selectKey]} defaultOpenKeys={['sub1','sub2','sub3']}>
+        <Menu theme="dark" mode="inline" onClick={this.onClick} selectedKeys={[this.state.selectKey]} defaultOpenKeys={['sub1', 'sub2', 'sub3']}>
           {this.state.showCurrentProfile && <SubMenu
             key="sub1"
             title={
@@ -168,7 +170,7 @@ export default class sidebar extends React.Component {
             title={
               <span>
 
-<FundViewOutlined />
+                <FundViewOutlined />
                 <span>VR Profile</span>
               </span>
             }

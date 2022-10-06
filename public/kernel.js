@@ -18,6 +18,10 @@ var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions 
 
 var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONMENT_IS_WORKER;
 
+if (Module["ENVIRONMENT"]) {
+ throw new Error("Module.ENVIRONMENT has been deprecated. To force the environment, use the ENVIRONMENT compile-time option (for example, -sENVIRONMENT=web or -sENVIRONMENT=node)");
+}
+
 var scriptDirectory = "";
 
 function locateFile(path) {
@@ -32,29 +36,25 @@ var read_, readAsync, readBinary, setWindowTitle;
 function logExceptionOnExit(e) {
  if (e instanceof ExitStatus) return;
  let toLog = e;
+ if (e && typeof e == "object" && e.stack) {
+  toLog = [ e, e.stack ];
+ }
  err("exiting due to exception: " + toLog);
 }
 
-var fs;
-
-var nodePath;
-
-var requireNodeFS;
-
 if (ENVIRONMENT_IS_NODE) {
+ if (typeof process == "undefined" || !process.release || process.release.name !== "node") throw new Error("not compiled for this environment (did you build to HTML and try to run it not on the web, or set ENVIRONMENT to something - like node - and run it someplace else - like on the web?)");
  if (ENVIRONMENT_IS_WORKER) {
   scriptDirectory = require("path").dirname(scriptDirectory) + "/";
  } else {
   scriptDirectory = __dirname + "/";
  }
- requireNodeFS = () => {
-  if (!nodePath) {
-   fs = require("fs");
-   nodePath = require("path");
-  }
- };
- read_ = function shell_read(filename, binary) {
-  requireNodeFS();
+ var fs, nodePath;
+ if (typeof require === "function") {
+  fs = require("fs");
+  nodePath = require("path");
+ }
+ read_ = (filename, binary) => {
   filename = nodePath["normalize"](filename);
   return fs.readFileSync(filename, binary ? undefined : "utf8");
  };
@@ -63,10 +63,10 @@ if (ENVIRONMENT_IS_NODE) {
   if (!ret.buffer) {
    ret = new Uint8Array(ret);
   }
+  assert(ret.buffer);
   return ret;
  };
  readAsync = (filename, onload, onerror) => {
-  requireNodeFS();
   filename = nodePath["normalize"](filename);
   fs.readFile(filename, function(err, data) {
    if (err) onerror(err); else onload(data.buffer);
@@ -98,6 +98,41 @@ if (ENVIRONMENT_IS_NODE) {
  Module["inspect"] = function() {
   return "[Emscripten Module object]";
  };
+} else if (ENVIRONMENT_IS_SHELL) {
+ if (typeof process == "object" && typeof require === "function" || typeof window == "object" || typeof importScripts == "function") throw new Error("not compiled for this environment (did you build to HTML and try to run it not on the web, or set ENVIRONMENT to something - like node - and run it someplace else - like on the web?)");
+ if (typeof read != "undefined") {
+  read_ = function shell_read(f) {
+   return read(f);
+  };
+ }
+ readBinary = function readBinary(f) {
+  let data;
+  if (typeof readbuffer == "function") {
+   return new Uint8Array(readbuffer(f));
+  }
+  data = read(f, "binary");
+  assert(typeof data == "object");
+  return data;
+ };
+ readAsync = function readAsync(f, onload, onerror) {
+  setTimeout(() => onload(readBinary(f)), 0);
+ };
+ if (typeof scriptArgs != "undefined") {
+  arguments_ = scriptArgs;
+ } else if (typeof arguments != "undefined") {
+  arguments_ = arguments;
+ }
+ if (typeof quit == "function") {
+  quit_ = (status, toThrow) => {
+   logExceptionOnExit(toThrow);
+   quit(status);
+  };
+ }
+ if (typeof print != "undefined") {
+  if (typeof console == "undefined") console = {};
+  console.log = print;
+  console.warn = console.error = typeof printErr != "undefined" ? printErr : print;
+ }
 } else if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
  if (ENVIRONMENT_IS_WORKER) {
   scriptDirectory = self.location.href;
@@ -109,6 +144,7 @@ if (ENVIRONMENT_IS_NODE) {
  } else {
   scriptDirectory = "";
  }
+ if (!(typeof window == "object" || typeof importScripts == "function")) throw new Error("not compiled for this environment (did you build to HTML and try to run it not on the web, or set ENVIRONMENT to something - like node - and run it someplace else - like on the web?)");
  {
   read_ = url => {
    var xhr = new XMLHttpRequest();
@@ -141,7 +177,9 @@ if (ENVIRONMENT_IS_NODE) {
   };
  }
  setWindowTitle = title => document.title = title;
-} else {}
+} else {
+ throw new Error("environment detection error");
+}
 
 var out = Module["print"] || console.log.bind(console);
 
@@ -151,11 +189,55 @@ Object.assign(Module, moduleOverrides);
 
 moduleOverrides = null;
 
+checkIncomingModuleAPI();
+
 if (Module["arguments"]) arguments_ = Module["arguments"];
+
+legacyModuleProp("arguments", "arguments_");
 
 if (Module["thisProgram"]) thisProgram = Module["thisProgram"];
 
+legacyModuleProp("thisProgram", "thisProgram");
+
 if (Module["quit"]) quit_ = Module["quit"];
+
+legacyModuleProp("quit", "quit_");
+
+assert(typeof Module["memoryInitializerPrefixURL"] == "undefined", "Module.memoryInitializerPrefixURL option was removed, use Module.locateFile instead");
+
+assert(typeof Module["pthreadMainPrefixURL"] == "undefined", "Module.pthreadMainPrefixURL option was removed, use Module.locateFile instead");
+
+assert(typeof Module["cdInitializerPrefixURL"] == "undefined", "Module.cdInitializerPrefixURL option was removed, use Module.locateFile instead");
+
+assert(typeof Module["filePackagePrefixURL"] == "undefined", "Module.filePackagePrefixURL option was removed, use Module.locateFile instead");
+
+assert(typeof Module["read"] == "undefined", "Module.read option was removed (modify read_ in JS)");
+
+assert(typeof Module["readAsync"] == "undefined", "Module.readAsync option was removed (modify readAsync in JS)");
+
+assert(typeof Module["readBinary"] == "undefined", "Module.readBinary option was removed (modify readBinary in JS)");
+
+assert(typeof Module["setWindowTitle"] == "undefined", "Module.setWindowTitle option was removed (modify setWindowTitle in JS)");
+
+assert(typeof Module["TOTAL_MEMORY"] == "undefined", "Module.TOTAL_MEMORY has been renamed Module.INITIAL_MEMORY");
+
+legacyModuleProp("read", "read_");
+
+legacyModuleProp("readAsync", "readAsync");
+
+legacyModuleProp("readBinary", "readBinary");
+
+legacyModuleProp("setWindowTitle", "setWindowTitle");
+
+var IDBFS = "IDBFS is no longer included by default; build with -lidbfs.js";
+
+var PROXYFS = "PROXYFS is no longer included by default; build with -lproxyfs.js";
+
+var WORKERFS = "WORKERFS is no longer included by default; build with -lworkerfs.js";
+
+var NODEFS = "NODEFS is no longer included by default; build with -lnodefs.js";
+
+assert(!ENVIRONMENT_IS_SHELL, "shell environment detected but not enabled at build time.  Add 'shell' to `-sENVIRONMENT` to enable.");
 
 var STACK_ALIGN = 16;
 
@@ -190,153 +272,83 @@ function getNativeTypeSize(type) {
   {
    if (type[type.length - 1] === "*") {
     return POINTER_SIZE;
-   } else if (type[0] === "i") {
+   }
+   if (type[0] === "i") {
     const bits = Number(type.substr(1));
     assert(bits % 8 === 0, "getNativeTypeSize invalid bits " + bits + ", type " + type);
     return bits / 8;
-   } else {
-    return 0;
    }
+   return 0;
   }
  }
 }
 
-function warnOnce(text) {
- if (!warnOnce.shown) warnOnce.shown = {};
- if (!warnOnce.shown[text]) {
-  warnOnce.shown[text] = 1;
-  err(text);
+function legacyModuleProp(prop, newName) {
+ if (!Object.getOwnPropertyDescriptor(Module, prop)) {
+  Object.defineProperty(Module, prop, {
+   configurable: true,
+   get: function() {
+    abort("Module." + prop + " has been replaced with plain " + newName + " (the initial value can be provided on Module, but after startup the value is only looked for on a local variable of that name)");
+   }
+  });
  }
 }
 
-function uleb128Encode(n) {
- if (n < 128) {
-  return [ n ];
- }
- return [ n % 128 | 128, n >> 7 ];
-}
-
-function sigToWasmTypes(sig) {
- var typeNames = {
-  "i": "i32",
-  "j": "i64",
-  "f": "f32",
-  "d": "f64",
-  "p": "i32"
- };
- var type = {
-  parameters: [],
-  results: sig[0] == "v" ? [] : [ typeNames[sig[0]] ]
- };
- for (var i = 1; i < sig.length; ++i) {
-  type.parameters.push(typeNames[sig[i]]);
- }
- return type;
-}
-
-function convertJsFunctionToWasm(func, sig) {
- if (typeof WebAssembly.Function == "function") {
-  return new WebAssembly.Function(sigToWasmTypes(sig), func);
- }
- var typeSection = [ 1, 96 ];
- var sigRet = sig.slice(0, 1);
- var sigParam = sig.slice(1);
- var typeCodes = {
-  "i": 127,
-  "p": 127,
-  "j": 126,
-  "f": 125,
-  "d": 124
- };
- typeSection = typeSection.concat(uleb128Encode(sigParam.length));
- for (var i = 0; i < sigParam.length; ++i) {
-  typeSection.push(typeCodes[sigParam[i]]);
- }
- if (sigRet == "v") {
-  typeSection.push(0);
- } else {
-  typeSection = typeSection.concat([ 1, typeCodes[sigRet] ]);
- }
- typeSection = [ 1 ].concat(uleb128Encode(typeSection.length), typeSection);
- var bytes = new Uint8Array([ 0, 97, 115, 109, 1, 0, 0, 0 ].concat(typeSection, [ 2, 7, 1, 1, 101, 1, 102, 0, 0, 7, 5, 1, 1, 102, 0, 0 ]));
- var module = new WebAssembly.Module(bytes);
- var instance = new WebAssembly.Instance(module, {
-  "e": {
-   "f": func
-  }
- });
- var wrappedFunc = instance.exports["f"];
- return wrappedFunc;
-}
-
-var freeTableIndexes = [];
-
-var functionsInTableMap;
-
-function getEmptyTableSlot() {
- if (freeTableIndexes.length) {
-  return freeTableIndexes.pop();
- }
- try {
-  wasmTable.grow(1);
- } catch (err) {
-  if (!(err instanceof RangeError)) {
-   throw err;
-  }
-  throw "Unable to grow wasm table. Set ALLOW_TABLE_GROWTH.";
- }
- return wasmTable.length - 1;
-}
-
-function updateTableMap(offset, count) {
- for (var i = offset; i < offset + count; i++) {
-  var item = getWasmTableEntry(i);
-  if (item) {
-   functionsInTableMap.set(item, i);
-  }
+function ignoredModuleProp(prop) {
+ if (Object.getOwnPropertyDescriptor(Module, prop)) {
+  abort("`Module." + prop + "` was supplied but `" + prop + "` not included in INCOMING_MODULE_JS_API");
  }
 }
 
-function addFunction(func, sig) {
- if (!functionsInTableMap) {
-  functionsInTableMap = new WeakMap();
-  updateTableMap(0, wasmTable.length);
- }
- if (functionsInTableMap.has(func)) {
-  return functionsInTableMap.get(func);
- }
- var ret = getEmptyTableSlot();
- try {
-  setWasmTableEntry(ret, func);
- } catch (err) {
-  if (!(err instanceof TypeError)) {
-   throw err;
-  }
-  var wrapped = convertJsFunctionToWasm(func, sig);
-  setWasmTableEntry(ret, wrapped);
- }
- functionsInTableMap.set(func, ret);
- return ret;
+function isExportedByForceFilesystem(name) {
+ return name === "FS_createPath" || name === "FS_createDataFile" || name === "FS_createPreloadedFile" || name === "FS_unlink" || name === "addRunDependency" || name === "FS_createLazyFile" || name === "FS_createDevice" || name === "removeRunDependency";
 }
 
-function removeFunction(index) {
- functionsInTableMap.delete(getWasmTableEntry(index));
- freeTableIndexes.push(index);
+function missingLibrarySymbol(sym) {
+ if (typeof globalThis !== "undefined" && !Object.getOwnPropertyDescriptor(globalThis, sym)) {
+  Object.defineProperty(globalThis, sym, {
+   configurable: true,
+   get: function() {
+    var msg = "`" + sym + "` is a library symbol and not included by default; add it to your library.js __deps or to DEFAULT_LIBRARY_FUNCS_TO_INCLUDE on the command line";
+    var librarySymbol = sym;
+    if (!librarySymbol.startsWith("_")) {
+     librarySymbol = "$" + sym;
+    }
+    msg += " (e.g. -sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=" + librarySymbol + ")";
+    if (isExportedByForceFilesystem(sym)) {
+     msg += ". Alternatively, forcing filesystem support (-sFORCE_FILESYSTEM) can export this for you";
+    }
+    warnOnce(msg);
+    return undefined;
+   }
+  });
+ }
 }
 
-var tempRet0 = 0;
-
-var setTempRet0 = value => {
- tempRet0 = value;
-};
-
-var getTempRet0 = () => tempRet0;
+function unexportedRuntimeSymbol(sym) {
+ if (!Object.getOwnPropertyDescriptor(Module, sym)) {
+  Object.defineProperty(Module, sym, {
+   configurable: true,
+   get: function() {
+    var msg = "'" + sym + "' was not exported. add it to EXPORTED_RUNTIME_METHODS (see the FAQ)";
+    if (isExportedByForceFilesystem(sym)) {
+     msg += ". Alternatively, forcing filesystem support (-sFORCE_FILESYSTEM) can export this for you";
+    }
+    abort(msg);
+   }
+  });
+ }
+}
 
 var wasmBinary;
 
 if (Module["wasmBinary"]) wasmBinary = Module["wasmBinary"];
 
+legacyModuleProp("wasmBinary", "wasmBinary");
+
 var noExitRuntime = Module["noExitRuntime"] || true;
+
+legacyModuleProp("noExitRuntime", "noExitRuntime");
 
 if (typeof WebAssembly != "object") {
  abort("no native wasm support detected");
@@ -350,100 +362,8 @@ var EXITSTATUS;
 
 function assert(condition, text) {
  if (!condition) {
-  abort(text);
+  abort("Assertion failed" + (text ? ": " + text : ""));
  }
-}
-
-function getCFunc(ident) {
- var func = Module["_" + ident];
- return func;
-}
-
-function ccall(ident, returnType, argTypes, args, opts) {
- var toC = {
-  "string": function(str) {
-   var ret = 0;
-   if (str !== null && str !== undefined && str !== 0) {
-    var len = (str.length << 2) + 1;
-    ret = stackAlloc(len);
-    stringToUTF8(str, ret, len);
-   }
-   return ret;
-  },
-  "array": function(arr) {
-   var ret = stackAlloc(arr.length);
-   writeArrayToMemory(arr, ret);
-   return ret;
-  }
- };
- function convertReturnValue(ret) {
-  if (returnType === "string") {
-   return UTF8ToString(ret);
-  }
-  if (returnType === "boolean") return Boolean(ret);
-  return ret;
- }
- var func = getCFunc(ident);
- var cArgs = [];
- var stack = 0;
- if (args) {
-  for (var i = 0; i < args.length; i++) {
-   var converter = toC[argTypes[i]];
-   if (converter) {
-    if (stack === 0) stack = stackSave();
-    cArgs[i] = converter(args[i]);
-   } else {
-    cArgs[i] = args[i];
-   }
-  }
- }
- var previousAsync = Asyncify.currData;
- var ret = func.apply(null, cArgs);
- function onDone(ret) {
-  runtimeKeepalivePop();
-  if (stack !== 0) stackRestore(stack);
-  return convertReturnValue(ret);
- }
- runtimeKeepalivePush();
- var asyncMode = opts && opts.async;
- if (Asyncify.currData != previousAsync) {
-  return Asyncify.whenDone().then(onDone);
- }
- ret = onDone(ret);
- if (asyncMode) return Promise.resolve(ret);
- return ret;
-}
-
-function cwrap(ident, returnType, argTypes, opts) {
- argTypes = argTypes || [];
- var numericArgs = argTypes.every(function(type) {
-  return type === "number";
- });
- var numericRet = returnType !== "string";
- if (numericRet && numericArgs && !opts) {
-  return getCFunc(ident);
- }
- return function() {
-  return ccall(ident, returnType, argTypes, arguments, opts);
- };
-}
-
-var ALLOC_NORMAL = 0;
-
-var ALLOC_STACK = 1;
-
-function allocate(slab, allocator) {
- var ret;
- if (allocator == ALLOC_STACK) {
-  ret = stackAlloc(slab.length);
- } else {
-  ret = _malloc(slab.length);
- }
- if (!slab.subarray && !slab.slice) {
-  slab = new Uint8Array(slab);
- }
- HEAPU8.set(slab, ret >>> 0);
- return ret;
 }
 
 var UTF8Decoder = typeof TextDecoder != "undefined" ? new TextDecoder("utf8") : undefined;
@@ -455,31 +375,31 @@ function UTF8ArrayToString(heapOrArray, idx, maxBytesToRead) {
  while (heapOrArray[endPtr] && !(endPtr >= endIdx)) ++endPtr;
  if (endPtr - idx > 16 && heapOrArray.buffer && UTF8Decoder) {
   return UTF8Decoder.decode(heapOrArray.subarray(idx, endPtr));
- } else {
-  var str = "";
-  while (idx < endPtr) {
-   var u0 = heapOrArray[idx++];
-   if (!(u0 & 128)) {
-    str += String.fromCharCode(u0);
-    continue;
-   }
-   var u1 = heapOrArray[idx++] & 63;
-   if ((u0 & 224) == 192) {
-    str += String.fromCharCode((u0 & 31) << 6 | u1);
-    continue;
-   }
-   var u2 = heapOrArray[idx++] & 63;
-   if ((u0 & 240) == 224) {
-    u0 = (u0 & 15) << 12 | u1 << 6 | u2;
-   } else {
-    u0 = (u0 & 7) << 18 | u1 << 12 | u2 << 6 | heapOrArray[idx++] & 63;
-   }
-   if (u0 < 65536) {
-    str += String.fromCharCode(u0);
-   } else {
-    var ch = u0 - 65536;
-    str += String.fromCharCode(55296 | ch >> 10, 56320 | ch & 1023);
-   }
+ }
+ var str = "";
+ while (idx < endPtr) {
+  var u0 = heapOrArray[idx++];
+  if (!(u0 & 128)) {
+   str += String.fromCharCode(u0);
+   continue;
+  }
+  var u1 = heapOrArray[idx++] & 63;
+  if ((u0 & 224) == 192) {
+   str += String.fromCharCode((u0 & 31) << 6 | u1);
+   continue;
+  }
+  var u2 = heapOrArray[idx++] & 63;
+  if ((u0 & 240) == 224) {
+   u0 = (u0 & 15) << 12 | u1 << 6 | u2;
+  } else {
+   if ((u0 & 248) != 240) warnOnce("Invalid UTF-8 leading byte 0x" + u0.toString(16) + " encountered when deserializing a UTF-8 string in wasm memory to a JS string!");
+   u0 = (u0 & 7) << 18 | u1 << 12 | u2 << 6 | heapOrArray[idx++] & 63;
+  }
+  if (u0 < 65536) {
+   str += String.fromCharCode(u0);
+  } else {
+   var ch = u0 - 65536;
+   str += String.fromCharCode(55296 | ch >> 10, 56320 | ch & 1023);
   }
  }
  return str;
@@ -515,6 +435,7 @@ function stringToUTF8Array(str, heap, outIdx, maxBytesToWrite) {
    heap[outIdx++ >>> 0] = 128 | u & 63;
   } else {
    if (outIdx + 3 >= endIdx) break;
+   if (u > 1114111) warnOnce("Invalid Unicode code point 0x" + u.toString(16) + " encountered when serializing a JS string to a UTF-8 string in wasm memory! (Valid unicode code points should be in range 0-0x10FFFF).");
    heap[outIdx++ >>> 0] = 240 | u >> 18;
    heap[outIdx++ >>> 0] = 128 | u >> 12 & 63;
    heap[outIdx++ >>> 0] = 128 | u >> 6 & 63;
@@ -526,158 +447,26 @@ function stringToUTF8Array(str, heap, outIdx, maxBytesToWrite) {
 }
 
 function stringToUTF8(str, outPtr, maxBytesToWrite) {
+ assert(typeof maxBytesToWrite == "number", "stringToUTF8(str, outPtr, maxBytesToWrite) is missing the third parameter that specifies the length of the output buffer!");
  return stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
 }
 
 function lengthBytesUTF8(str) {
  var len = 0;
  for (var i = 0; i < str.length; ++i) {
-  var u = str.charCodeAt(i);
-  if (u >= 55296 && u <= 57343) u = 65536 + ((u & 1023) << 10) | str.charCodeAt(++i) & 1023;
-  if (u <= 127) ++len; else if (u <= 2047) len += 2; else if (u <= 65535) len += 3; else len += 4;
- }
- return len;
-}
-
-function AsciiToString(ptr) {
- ptr >>>= 0;
- var str = "";
- while (1) {
-  var ch = HEAPU8[ptr++ >>> 0];
-  if (!ch) return str;
-  str += String.fromCharCode(ch);
- }
-}
-
-function stringToAscii(str, outPtr) {
- return writeAsciiToMemory(str, outPtr, false);
-}
-
-var UTF16Decoder = typeof TextDecoder != "undefined" ? new TextDecoder("utf-16le") : undefined;
-
-function UTF16ToString(ptr, maxBytesToRead) {
- var endPtr = ptr;
- var idx = endPtr >> 1;
- var maxIdx = idx + maxBytesToRead / 2;
- while (!(idx >= maxIdx) && HEAPU16[idx >>> 0]) ++idx;
- endPtr = idx << 1;
- if (endPtr - ptr > 32 && UTF16Decoder) {
-  return UTF16Decoder.decode(HEAPU8.subarray(ptr >>> 0, endPtr >>> 0));
- } else {
-  var str = "";
-  for (var i = 0; !(i >= maxBytesToRead / 2); ++i) {
-   var codeUnit = HEAP16[ptr + i * 2 >>> 1];
-   if (codeUnit == 0) break;
-   str += String.fromCharCode(codeUnit);
-  }
-  return str;
- }
-}
-
-function stringToUTF16(str, outPtr, maxBytesToWrite) {
- if (maxBytesToWrite === undefined) {
-  maxBytesToWrite = 2147483647;
- }
- if (maxBytesToWrite < 2) return 0;
- maxBytesToWrite -= 2;
- var startPtr = outPtr;
- var numCharsToWrite = maxBytesToWrite < str.length * 2 ? maxBytesToWrite / 2 : str.length;
- for (var i = 0; i < numCharsToWrite; ++i) {
-  var codeUnit = str.charCodeAt(i);
-  HEAP16[outPtr >>> 1] = codeUnit;
-  outPtr += 2;
- }
- HEAP16[outPtr >>> 1] = 0;
- return outPtr - startPtr;
-}
-
-function lengthBytesUTF16(str) {
- return str.length * 2;
-}
-
-function UTF32ToString(ptr, maxBytesToRead) {
- var i = 0;
- var str = "";
- while (!(i >= maxBytesToRead / 4)) {
-  var utf32 = HEAP32[ptr + i * 4 >>> 2];
-  if (utf32 == 0) break;
-  ++i;
-  if (utf32 >= 65536) {
-   var ch = utf32 - 65536;
-   str += String.fromCharCode(55296 | ch >> 10, 56320 | ch & 1023);
+  var c = str.charCodeAt(i);
+  if (c <= 127) {
+   len++;
+  } else if (c <= 2047) {
+   len += 2;
+  } else if (c >= 55296 && c <= 57343) {
+   len += 4;
+   ++i;
   } else {
-   str += String.fromCharCode(utf32);
+   len += 3;
   }
- }
- return str;
-}
-
-function stringToUTF32(str, outPtr, maxBytesToWrite) {
- outPtr >>>= 0;
- if (maxBytesToWrite === undefined) {
-  maxBytesToWrite = 2147483647;
- }
- if (maxBytesToWrite < 4) return 0;
- var startPtr = outPtr;
- var endPtr = startPtr + maxBytesToWrite - 4;
- for (var i = 0; i < str.length; ++i) {
-  var codeUnit = str.charCodeAt(i);
-  if (codeUnit >= 55296 && codeUnit <= 57343) {
-   var trailSurrogate = str.charCodeAt(++i);
-   codeUnit = 65536 + ((codeUnit & 1023) << 10) | trailSurrogate & 1023;
-  }
-  HEAP32[outPtr >>> 2] = codeUnit;
-  outPtr += 4;
-  if (outPtr + 4 > endPtr) break;
- }
- HEAP32[outPtr >>> 2] = 0;
- return outPtr - startPtr;
-}
-
-function lengthBytesUTF32(str) {
- var len = 0;
- for (var i = 0; i < str.length; ++i) {
-  var codeUnit = str.charCodeAt(i);
-  if (codeUnit >= 55296 && codeUnit <= 57343) ++i;
-  len += 4;
  }
  return len;
-}
-
-function allocateUTF8(str) {
- var size = lengthBytesUTF8(str) + 1;
- var ret = _malloc(size);
- if (ret) stringToUTF8Array(str, HEAP8, ret, size);
- return ret;
-}
-
-function allocateUTF8OnStack(str) {
- var size = lengthBytesUTF8(str) + 1;
- var ret = stackAlloc(size);
- stringToUTF8Array(str, HEAP8, ret, size);
- return ret;
-}
-
-function writeStringToMemory(string, buffer, dontAddNull) {
- warnOnce("writeStringToMemory is deprecated and should not be called! Use stringToUTF8() instead!");
- var lastChar, end;
- if (dontAddNull) {
-  end = buffer + lengthBytesUTF8(string);
-  lastChar = HEAP8[end >>> 0];
- }
- stringToUTF8(string, buffer, Infinity);
- if (dontAddNull) HEAP8[end >>> 0] = lastChar;
-}
-
-function writeArrayToMemory(array, buffer) {
- HEAP8.set(array, buffer >>> 0);
-}
-
-function writeAsciiToMemory(str, buffer, dontAddNull) {
- for (var i = 0; i < str.length; ++i) {
-  HEAP8[buffer++ >>> 0] = str.charCodeAt(i);
- }
- if (!dontAddNull) HEAP8[buffer >>> 0] = 0;
 }
 
 var HEAP, buffer, HEAP8, HEAPU8, HEAP16, HEAPU16, HEAP32, HEAPU32, HEAPF32, HEAPF64;
@@ -696,9 +485,47 @@ function updateGlobalBufferAndViews(buf) {
 
 var TOTAL_STACK = 5242880;
 
+if (Module["TOTAL_STACK"]) assert(TOTAL_STACK === Module["TOTAL_STACK"], "the stack size can no longer be determined at runtime");
+
 var INITIAL_MEMORY = Module["INITIAL_MEMORY"] || 1073741824;
 
+legacyModuleProp("INITIAL_MEMORY", "INITIAL_MEMORY");
+
+assert(INITIAL_MEMORY >= TOTAL_STACK, "INITIAL_MEMORY should be larger than TOTAL_STACK, was " + INITIAL_MEMORY + "! (TOTAL_STACK=" + TOTAL_STACK + ")");
+
+assert(typeof Int32Array != "undefined" && typeof Float64Array !== "undefined" && Int32Array.prototype.subarray != undefined && Int32Array.prototype.set != undefined, "JS engine does not provide full typed array support");
+
+assert(!Module["wasmMemory"], "Use of `wasmMemory` detected.  Use -sIMPORTED_MEMORY to define wasmMemory externally");
+
+assert(INITIAL_MEMORY == 1073741824, "Detected runtime INITIAL_MEMORY setting.  Use -sIMPORTED_MEMORY to define wasmMemory dynamically");
+
 var wasmTable;
+
+function writeStackCookie() {
+ var max = _emscripten_stack_get_end();
+ assert((max & 3) == 0);
+ HEAPU32[max >>> 2] = 34821223;
+ HEAPU32[max + 4 >>> 2] = 2310721022;
+ HEAPU32[0 >>> 0] = 1668509029;
+}
+
+function checkStackCookie() {
+ if (ABORT) return;
+ var max = _emscripten_stack_get_end();
+ var cookie1 = HEAPU32[max >>> 2];
+ var cookie2 = HEAPU32[max + 4 >>> 2];
+ if (cookie1 != 34821223 || cookie2 != 2310721022) {
+  abort("Stack overflow! Stack cookie has been overwritten at 0x" + max.toString(16) + ", expected hex dwords 0x89BACDFE and 0x2135467, but received 0x" + cookie2.toString(16) + " 0x" + cookie1.toString(16));
+ }
+ if (HEAPU32[0 >>> 0] !== 1668509029) abort("Runtime error: The application has corrupted its heap memory area (address zero)!");
+}
+
+(function() {
+ var h16 = new Int16Array(1);
+ var h8 = new Int8Array(h16.buffer);
+ h16[0] = 25459;
+ if (h8[0] !== 115 || h8[1] !== 99) throw "Runtime error: expected the system to be little-endian! (Run with -sSUPPORT_BIG_ENDIAN to bypass)";
+})();
 
 var __ATPRERUN__ = [];
 
@@ -725,11 +552,14 @@ function preRun() {
 }
 
 function initRuntime() {
+ assert(!runtimeInitialized);
  runtimeInitialized = true;
+ checkStackCookie();
  callRuntimeCallbacks(__ATINIT__);
 }
 
 function postRun() {
+ checkStackCookie();
  if (Module["postRun"]) {
   if (typeof Module["postRun"] == "function") Module["postRun"] = [ Module["postRun"] ];
   while (Module["postRun"].length) {
@@ -753,14 +583,28 @@ function addOnPostRun(cb) {
  __ATPOSTRUN__.unshift(cb);
 }
 
+assert(Math.imul, "This browser does not support Math.imul(), build with LEGACY_VM_SUPPORT or POLYFILL_OLD_MATH_FUNCTIONS to add in a polyfill");
+
+assert(Math.fround, "This browser does not support Math.fround(), build with LEGACY_VM_SUPPORT or POLYFILL_OLD_MATH_FUNCTIONS to add in a polyfill");
+
+assert(Math.clz32, "This browser does not support Math.clz32(), build with LEGACY_VM_SUPPORT or POLYFILL_OLD_MATH_FUNCTIONS to add in a polyfill");
+
+assert(Math.trunc, "This browser does not support Math.trunc(), build with LEGACY_VM_SUPPORT or POLYFILL_OLD_MATH_FUNCTIONS to add in a polyfill");
+
 var runDependencies = 0;
 
 var runDependencyWatcher = null;
 
 var dependenciesFulfilled = null;
 
+var runDependencyTracking = {};
+
 function getUniqueRunDependency(id) {
- return id;
+ var orig = id;
+ while (1) {
+  if (!runDependencyTracking[id]) return id;
+  id = orig + Math.random();
+ }
 }
 
 function addRunDependency(id) {
@@ -768,12 +612,44 @@ function addRunDependency(id) {
  if (Module["monitorRunDependencies"]) {
   Module["monitorRunDependencies"](runDependencies);
  }
+ if (id) {
+  assert(!runDependencyTracking[id]);
+  runDependencyTracking[id] = 1;
+  if (runDependencyWatcher === null && typeof setInterval != "undefined") {
+   runDependencyWatcher = setInterval(function() {
+    if (ABORT) {
+     clearInterval(runDependencyWatcher);
+     runDependencyWatcher = null;
+     return;
+    }
+    var shown = false;
+    for (var dep in runDependencyTracking) {
+     if (!shown) {
+      shown = true;
+      err("still waiting on run dependencies:");
+     }
+     err("dependency: " + dep);
+    }
+    if (shown) {
+     err("(end of list)");
+    }
+   }, 1e4);
+  }
+ } else {
+  err("warning: run dependency added without ID");
+ }
 }
 
 function removeRunDependency(id) {
  runDependencies--;
  if (Module["monitorRunDependencies"]) {
   Module["monitorRunDependencies"](runDependencies);
+ }
+ if (id) {
+  assert(runDependencyTracking[id]);
+  delete runDependencyTracking[id];
+ } else {
+  err("warning: run dependency removed without ID");
  }
  if (runDependencies == 0) {
   if (runDependencyWatcher !== null) {
@@ -798,10 +674,49 @@ function abort(what) {
  err(what);
  ABORT = true;
  EXITSTATUS = 1;
- what += ". Build with -sASSERTIONS for more info.";
  var e = new WebAssembly.RuntimeError(what);
  throw e;
 }
+
+var FS = {
+ error: function() {
+  abort("Filesystem support (FS) was not included. The problem is that you are using files from JS, but files were not used from C/C++, so filesystem support was not auto-included. You can force-include filesystem support with -sFORCE_FILESYSTEM");
+ },
+ init: function() {
+  FS.error();
+ },
+ createDataFile: function() {
+  FS.error();
+ },
+ createPreloadedFile: function() {
+  FS.error();
+ },
+ createLazyFile: function() {
+  FS.error();
+ },
+ open: function() {
+  FS.error();
+ },
+ mkdev: function() {
+  FS.error();
+ },
+ registerDevice: function() {
+  FS.error();
+ },
+ analyzePath: function() {
+  FS.error();
+ },
+ loadFilesFromDB: function() {
+  FS.error();
+ },
+ ErrnoError: function ErrnoError() {
+  FS.error();
+ }
+};
+
+Module["FS_createDataFile"] = FS.createDataFile;
+
+Module["FS_createPreloadedFile"] = FS.createPreloadedFile;
 
 var dataURIPrefix = "data:application/octet-stream;base64,";
 
@@ -811,6 +726,21 @@ function isDataURI(filename) {
 
 function isFileURI(filename) {
  return filename.startsWith("file://");
+}
+
+function createExportWrapper(name, fixedasm) {
+ return function() {
+  var displayName = name;
+  var asm = fixedasm;
+  if (!fixedasm) {
+   asm = Module["asm"];
+  }
+  assert(runtimeInitialized, "native function `" + displayName + "` called before runtime initialization");
+  if (!asm[name]) {
+   assert(asm[name], "exported native function `" + displayName + "` not found");
+  }
+  return asm[name].apply(null, arguments);
+ };
 }
 
 var wasmBinaryFile;
@@ -828,9 +758,8 @@ function getBinary(file) {
   }
   if (readBinary) {
    return readBinary(file);
-  } else {
-   throw "both async and sync fetching of the wasm failed";
   }
+  throw "both async and sync fetching of the wasm failed";
  } catch (err) {
   abort(err);
  }
@@ -874,13 +803,18 @@ function createWasm() {
   exports = Asyncify.instrumentWasmExports(exports);
   Module["asm"] = exports;
   wasmMemory = Module["asm"]["memory"];
+  assert(wasmMemory, "memory not found in wasm exports");
   updateGlobalBufferAndViews(wasmMemory.buffer);
   wasmTable = Module["asm"]["__indirect_function_table"];
+  assert(wasmTable, "table not found in wasm exports");
   addOnInit(Module["asm"]["__wasm_call_ctors"]);
   removeRunDependency("wasm-instantiate");
  }
  addRunDependency("wasm-instantiate");
+ var trueModule = Module;
  function receiveInstantiationResult(result) {
+  assert(Module === trueModule, "the Module object should not be replaced during async compilation - perhaps the order of HTML elements is wrong?");
+  trueModule = null;
   receiveInstance(result["instance"]);
  }
  function instantiateArrayBuffer(receiver) {
@@ -890,6 +824,9 @@ function createWasm() {
    return instance;
   }).then(receiver, function(reason) {
    err("failed to asynchronously prepare wasm: " + reason);
+   if (isFileURI(wasmBinaryFile)) {
+    err("warning: Loading from a file URI (" + wasmBinaryFile + ") is not supported in most browsers. See https://emscripten.org/docs/getting_started/FAQ.html#how-do-i-run-a-local-webserver-for-testing-why-does-my-program-stall-in-downloading-or-preparing");
+   }
    abort(reason);
   });
  }
@@ -929,25 +866,15 @@ var tempI64;
 
 var ASM_CONSTS = {};
 
+function ExitStatus(status) {
+ this.name = "ExitStatus";
+ this.message = "Program terminated with exit(" + status + ")";
+ this.status = status;
+}
+
 function callRuntimeCallbacks(callbacks) {
  while (callbacks.length > 0) {
-  var callback = callbacks.shift();
-  if (typeof callback == "function") {
-   callback(Module);
-   continue;
-  }
-  var func = callback.func;
-  if (typeof func == "number") {
-   if (callback.arg === undefined) {
-    (function() {})();
-   } else {
-    (function(a1) {
-     dynCall_vi.apply(null, [ func, a1 ]);
-    })(callback.arg);
-   }
-  } else {
-   func(callback.arg === undefined ? null : callback.arg);
-  }
+  callbacks.shift()(Module);
  }
 }
 
@@ -959,6 +886,7 @@ function withStackSave(f) {
 }
 
 function demangle(func) {
+ warnOnce("warning: build with -sDEMANGLE_SUPPORT to link in libcxxabi demangling");
  return func;
 }
 
@@ -971,7 +899,7 @@ function demangleAll(text) {
 }
 
 function getValue(ptr, type = "i8") {
- if (type.endsWith("*")) type = "i32";
+ if (type.endsWith("*")) type = "*";
  switch (type) {
  case "i1":
   return HEAP8[ptr >>> 0];
@@ -992,23 +920,15 @@ function getValue(ptr, type = "i8") {
   return HEAPF32[ptr >>> 2];
 
  case "double":
-  return Number(HEAPF64[ptr >>> 3]);
+  return HEAPF64[ptr >>> 3];
+
+ case "*":
+  return HEAPU32[ptr >>> 2];
 
  default:
   abort("invalid type for getValue: " + type);
  }
  return null;
-}
-
-var wasmTableMirror = [];
-
-function getWasmTableEntry(funcPtr) {
- var func = wasmTableMirror[funcPtr];
- if (!func) {
-  if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
-  wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
- }
- return func;
 }
 
 function handleException(e) {
@@ -1034,7 +954,7 @@ function jsStackTrace() {
 }
 
 function setValue(ptr, value, type = "i8") {
- if (type.endsWith("*")) type = "i32";
+ if (type.endsWith("*")) type = "*";
  switch (type) {
  case "i1":
   HEAP8[ptr >>> 0] = value;
@@ -1065,20 +985,33 @@ function setValue(ptr, value, type = "i8") {
   HEAPF64[ptr >>> 3] = value;
   break;
 
+ case "*":
+  HEAPU32[ptr >>> 2] = value;
+  break;
+
  default:
   abort("invalid type for setValue: " + type);
  }
-}
-
-function setWasmTableEntry(idx, func) {
- wasmTable.set(idx, func);
- wasmTableMirror[idx] = wasmTable.get(idx);
 }
 
 function stackTrace() {
  var js = jsStackTrace();
  if (Module["extraStackTrace"]) js += "\n" + Module["extraStackTrace"]();
  return demangleAll(js);
+}
+
+function warnOnce(text) {
+ if (!warnOnce.shown) warnOnce.shown = {};
+ if (!warnOnce.shown[text]) {
+  warnOnce.shown[text] = 1;
+  if (ENVIRONMENT_IS_NODE) text = "warning: " + text;
+  err(text);
+ }
+}
+
+function writeArrayToMemory(array, buffer) {
+ assert(array.length >= 0, "writeArrayToMemory array must have a length (should be an array or typed array)");
+ HEAP8.set(array, buffer >>> 0);
 }
 
 function ___assert_fail(condition, filename, line, func) {
@@ -1136,6 +1069,7 @@ function ExceptionInfo(excPtr) {
  this.release_ref = function() {
   var prev = HEAP32[this.ptr >>> 2];
   HEAP32[this.ptr >>> 2] = prev - 1;
+  assert(prev > 0);
   return prev === 1;
  };
  this.set_adjusted_ptr = function(adjustedPtr) {
@@ -1164,15 +1098,15 @@ function ___cxa_throw(ptr, type, destructor) {
  info.init(type, destructor);
  exceptionLast = ptr;
  uncaughtExceptionCount++;
- throw ptr;
-}
-
-function __emscripten_date_now() {
- return Date.now();
+ throw ptr + " - Exception catching is disabled, this exception cannot be caught. Compile with -sNO_DISABLE_EXCEPTION_CATCHING or -sEXCEPTION_CATCHING_ALLOWED=[..] to catch.";
 }
 
 function _abort() {
- abort("");
+ abort("native code called abort()");
+}
+
+function _emscripten_date_now() {
+ return Date.now();
 }
 
 var IDBStore = {
@@ -1238,9 +1172,8 @@ var IDBStore = {
     var result = event.target.result;
     if (!result) {
      return callback("file " + id + " not found");
-    } else {
-     return callback(null, result);
     }
+    return callback(null, result);
    };
    req.onerror = function(error) {
     callback(error);
@@ -1325,14 +1258,18 @@ function emscripten_realloc_buffer(size) {
   wasmMemory.grow(size - buffer.byteLength + 65535 >>> 16);
   updateGlobalBufferAndViews(wasmMemory.buffer);
   return 1;
- } catch (e) {}
+ } catch (e) {
+  err("emscripten_realloc_buffer: Attempted to grow heap from " + buffer.byteLength + " bytes to " + size + " bytes, but got error: " + e);
+ }
 }
 
 function _emscripten_resize_heap(requestedSize) {
  var oldSize = HEAPU8.length;
  requestedSize = requestedSize >>> 0;
+ assert(requestedSize > oldSize);
  var maxHeapSize = getHeapMax();
  if (requestedSize > maxHeapSize) {
+  err("Cannot enlarge memory, asked to go up to " + requestedSize + " bytes, but the limit is " + maxHeapSize + " bytes!");
   return false;
  }
  let alignUp = (x, multiple) => x + (multiple - x % multiple) % multiple;
@@ -1345,12 +1282,14 @@ function _emscripten_resize_heap(requestedSize) {
    return true;
   }
  }
+ err("Failed to grow the heap from " + oldSize + " bytes to " + newSize + " bytes, not enough memory!");
  return false;
 }
 
 var SYSCALLS = {
  varargs: undefined,
  get: function() {
+  assert(SYSCALLS.varargs != undefined);
   SYSCALLS.varargs += 4;
   var ret = HEAP32[SYSCALLS.varargs - 4 >>> 2];
   return ret;
@@ -1362,10 +1301,12 @@ var SYSCALLS = {
 };
 
 function _fd_close(fd) {
- return 52;
+ abort("fd_close called without SYSCALLS_REQUIRE_FILESYSTEM");
 }
 
 function convertI32PairToI53Checked(lo, hi) {
+ assert(lo == lo >>> 0 || lo == (lo | 0));
+ assert(hi === (hi | 0));
  return hi + 2097152 >>> 0 < 4194305 - !!lo ? (lo >>> 0) + hi * 4294967296 : NaN;
 }
 
@@ -1377,6 +1318,7 @@ var printCharBuffers = [ null, [], [] ];
 
 function printChar(stream, curr) {
  var buffer = printCharBuffers[stream];
+ assert(buffer);
  if (curr === 0 || curr === 10) {
   (stream === 1 ? out : err)(UTF8ArrayToString(buffer, 0));
   buffer.length = 0;
@@ -1386,6 +1328,7 @@ function printChar(stream, curr) {
 }
 
 function flush_NO_FILESYSTEM() {
+ _fflush(0);
  if (printCharBuffers[1].length) printChar(1, 10);
  if (printCharBuffers[2].length) printChar(2, 10);
 }
@@ -1405,10 +1348,6 @@ function _fd_write(fd, iov, iovcnt, pnum) {
  return 0;
 }
 
-function _setTempRet0(val) {
- setTempRet0(val);
-}
-
 function runAndAbortIfError(func) {
  try {
   return func();
@@ -1417,12 +1356,9 @@ function runAndAbortIfError(func) {
  }
 }
 
-function callUserCallback(func, synchronous) {
+function callUserCallback(func) {
  if (ABORT) {
-  return;
- }
- if (synchronous) {
-  func();
+  err("user callback triggered after runtime exited or application aborted.  Ignoring.");
   return;
  }
  try {
@@ -1430,6 +1366,25 @@ function callUserCallback(func, synchronous) {
  } catch (e) {
   handleException(e);
  }
+}
+
+function sigToWasmTypes(sig) {
+ var typeNames = {
+  "i": "i32",
+  "j": "i64",
+  "f": "f32",
+  "d": "f64",
+  "p": "i32"
+ };
+ var type = {
+  parameters: [],
+  results: sig[0] == "v" ? [] : [ typeNames[sig[0]] ]
+ };
+ for (var i = 1; i < sig.length; ++i) {
+  assert(sig[i] in typeNames, "invalid signature char: " + sig[i]);
+  type.parameters.push(typeNames[sig[i]]);
+ }
+ return type;
 }
 
 function runtimeKeepalivePush() {}
@@ -1470,6 +1425,18 @@ var Asyncify = {
     var sig = original.sig;
     if (typeof original == "function") {
      var isAsyncifyImport = ASYNCIFY_IMPORTS.indexOf(x) >= 0 || x.startsWith("__asyncjs__");
+     imports[x] = function() {
+      var originalAsyncifyState = Asyncify.state;
+      try {
+       return original.apply(null, arguments);
+      } finally {
+       var changedToDisabled = originalAsyncifyState === Asyncify.State.Normal && Asyncify.state === Asyncify.State.Disabled;
+       var ignoredInvoke = x.startsWith("invoke_") && true;
+       if (Asyncify.state !== originalAsyncifyState && !isAsyncifyImport && !changedToDisabled && !ignoredInvoke) {
+        throw new Error("import " + x + " was not in ASYNCIFY_IMPORTS, but changed the state");
+       }
+      }
+     };
     }
    })(x);
   }
@@ -1502,13 +1469,15 @@ var Asyncify = {
  maybeStopUnwind: function() {
   if (Asyncify.currData && Asyncify.state === Asyncify.State.Unwinding && Asyncify.exportCallStack.length === 0) {
    Asyncify.state = Asyncify.State.Normal;
-   runAndAbortIfError(Module["_asyncify_stop_unwind"]);
+   runAndAbortIfError(_asyncify_stop_unwind);
    if (typeof Fibers != "undefined") {
     Fibers.trampoline();
    }
   }
  },
  whenDone: function() {
+  assert(Asyncify.currData, "Tried to wait for an async operation when none is in progress.");
+  assert(!Asyncify.asyncPromiseHandlers, "Cannot have multiple async operations in flight at once");
   return new Promise((resolve, reject) => {
    Asyncify.asyncPromiseHandlers = {
     resolve: resolve,
@@ -1542,19 +1511,22 @@ var Asyncify = {
   return start();
  },
  handleSleep: function(startAsync) {
+  assert(Asyncify.state !== Asyncify.State.Disabled, "Asyncify cannot be done during or after the runtime exits");
   if (ABORT) return;
   if (Asyncify.state === Asyncify.State.Normal) {
    var reachedCallback = false;
    var reachedAfterCallback = false;
    startAsync(handleSleepReturnValue => {
+    assert(!handleSleepReturnValue || typeof handleSleepReturnValue == "number" || typeof handleSleepReturnValue == "boolean");
     if (ABORT) return;
     Asyncify.handleSleepReturnValue = handleSleepReturnValue || 0;
     reachedCallback = true;
     if (!reachedAfterCallback) {
      return;
     }
+    assert(!Asyncify.exportCallStack.length, "Waking up (starting to rewind) must be done from JS, without compiled code on the stack.");
     Asyncify.state = Asyncify.State.Rewinding;
-    runAndAbortIfError(() => Module["_asyncify_start_rewind"](Asyncify.currData));
+    runAndAbortIfError(() => _asyncify_start_rewind(Asyncify.currData));
     if (typeof Browser != "undefined" && Browser.mainLoop.func) {
      Browser.mainLoop.resume();
     }
@@ -1585,11 +1557,11 @@ var Asyncify = {
     if (typeof Browser != "undefined" && Browser.mainLoop.func) {
      Browser.mainLoop.pause();
     }
-    runAndAbortIfError(() => Module["_asyncify_start_unwind"](Asyncify.currData));
+    runAndAbortIfError(() => _asyncify_start_unwind(Asyncify.currData));
    }
   } else if (Asyncify.state === Asyncify.State.Rewinding) {
    Asyncify.state = Asyncify.State.Normal;
-   runAndAbortIfError(Module["_asyncify_stop_rewind"]);
+   runAndAbortIfError(_asyncify_stop_rewind);
    _free(Asyncify.currData);
    Asyncify.currData = null;
    Asyncify.sleepCallbacks.forEach(func => callUserCallback(func));
@@ -1605,155 +1577,293 @@ var Asyncify = {
  }
 };
 
-var ASSERTIONS = false;
-
-function intArrayFromString(stringy, dontAddNull, length) {
- var len = length > 0 ? length : lengthBytesUTF8(stringy) + 1;
- var u8array = new Array(len);
- var numBytesWritten = stringToUTF8Array(stringy, u8array, 0, u8array.length);
- if (dontAddNull) u8array.length = numBytesWritten;
- return u8array;
+function uleb128Encode(n, target) {
+ assert(n < 16384);
+ if (n < 128) {
+  target.push(n);
+ } else {
+  target.push(n % 128 | 128, n >> 7);
+ }
 }
 
-function intArrayToString(array) {
- var ret = [];
- for (var i = 0; i < array.length; i++) {
-  var chr = array[i];
-  if (chr > 255) {
-   if (ASSERTIONS) {
-    assert(false, "Character code " + chr + " (" + String.fromCharCode(chr) + ")  at offset " + i + " not in 0x00-0xFF.");
-   }
-   chr &= 255;
-  }
-  ret.push(String.fromCharCode(chr));
+function generateFuncType(sig, target) {
+ var sigRet = sig.slice(0, 1);
+ var sigParam = sig.slice(1);
+ var typeCodes = {
+  "i": 127,
+  "p": 127,
+  "j": 126,
+  "f": 125,
+  "d": 124
+ };
+ target.push(96);
+ uleb128Encode(sigParam.length, target);
+ for (var i = 0; i < sigParam.length; ++i) {
+  assert(sigParam[i] in typeCodes, "invalid signature char: " + sigParam[i]);
+  target.push(typeCodes[sigParam[i]]);
  }
- return ret.join("");
+ if (sigRet == "v") {
+  target.push(0);
+ } else {
+  target.push(1, typeCodes[sigRet]);
+ }
+}
+
+function convertJsFunctionToWasm(func, sig) {
+ if (typeof WebAssembly.Function == "function") {
+  return new WebAssembly.Function(sigToWasmTypes(sig), func);
+ }
+ var typeSectionBody = [ 1 ];
+ generateFuncType(sig, typeSectionBody);
+ var bytes = [ 0, 97, 115, 109, 1, 0, 0, 0, 1 ];
+ uleb128Encode(typeSectionBody.length, bytes);
+ bytes.push.apply(bytes, typeSectionBody);
+ bytes.push(2, 7, 1, 1, 101, 1, 102, 0, 0, 7, 5, 1, 1, 102, 0, 0);
+ var module = new WebAssembly.Module(new Uint8Array(bytes));
+ var instance = new WebAssembly.Instance(module, {
+  "e": {
+   "f": func
+  }
+ });
+ var wrappedFunc = instance.exports["f"];
+ return wrappedFunc;
+}
+
+var wasmTableMirror = [];
+
+function getWasmTableEntry(funcPtr) {
+ var func = wasmTableMirror[funcPtr];
+ if (!func) {
+  if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
+  wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
+ }
+ assert(wasmTable.get(funcPtr) == func, "JavaScript-side Wasm function table mirror is out of date!");
+ return func;
+}
+
+function updateTableMap(offset, count) {
+ if (functionsInTableMap) {
+  for (var i = offset; i < offset + count; i++) {
+   var item = getWasmTableEntry(i);
+   if (item) {
+    functionsInTableMap.set(item, i);
+   }
+  }
+ }
+}
+
+var functionsInTableMap = undefined;
+
+var freeTableIndexes = [];
+
+function getEmptyTableSlot() {
+ if (freeTableIndexes.length) {
+  return freeTableIndexes.pop();
+ }
+ try {
+  wasmTable.grow(1);
+ } catch (err) {
+  if (!(err instanceof RangeError)) {
+   throw err;
+  }
+  throw "Unable to grow wasm table. Set ALLOW_TABLE_GROWTH.";
+ }
+ return wasmTable.length - 1;
+}
+
+function setWasmTableEntry(idx, func) {
+ wasmTable.set(idx, func);
+ wasmTableMirror[idx] = wasmTable.get(idx);
+}
+
+function addFunction(func, sig) {
+ assert(typeof func != "undefined");
+ if (!functionsInTableMap) {
+  functionsInTableMap = new WeakMap();
+  updateTableMap(0, wasmTable.length);
+ }
+ if (functionsInTableMap.has(func)) {
+  return functionsInTableMap.get(func);
+ }
+ var ret = getEmptyTableSlot();
+ try {
+  setWasmTableEntry(ret, func);
+ } catch (err) {
+  if (!(err instanceof TypeError)) {
+   throw err;
+  }
+  assert(typeof sig != "undefined", "Missing signature argument to addFunction: " + func);
+  var wrapped = convertJsFunctionToWasm(func, sig);
+  setWasmTableEntry(ret, wrapped);
+ }
+ functionsInTableMap.set(func, ret);
+ return ret;
+}
+
+function getCFunc(ident) {
+ var func = Module["_" + ident];
+ assert(func, "Cannot call unknown function " + ident + ", make sure it is exported");
+ return func;
+}
+
+function ccall(ident, returnType, argTypes, args, opts) {
+ var toC = {
+  "string": str => {
+   var ret = 0;
+   if (str !== null && str !== undefined && str !== 0) {
+    var len = (str.length << 2) + 1;
+    ret = stackAlloc(len);
+    stringToUTF8(str, ret, len);
+   }
+   return ret;
+  },
+  "array": arr => {
+   var ret = stackAlloc(arr.length);
+   writeArrayToMemory(arr, ret);
+   return ret;
+  }
+ };
+ function convertReturnValue(ret) {
+  if (returnType === "string") {
+   return UTF8ToString(ret);
+  }
+  if (returnType === "boolean") return Boolean(ret);
+  return ret;
+ }
+ var func = getCFunc(ident);
+ var cArgs = [];
+ var stack = 0;
+ assert(returnType !== "array", 'Return type should not be "array".');
+ if (args) {
+  for (var i = 0; i < args.length; i++) {
+   var converter = toC[argTypes[i]];
+   if (converter) {
+    if (stack === 0) stack = stackSave();
+    cArgs[i] = converter(args[i]);
+   } else {
+    cArgs[i] = args[i];
+   }
+  }
+ }
+ var previousAsync = Asyncify.currData;
+ var ret = func.apply(null, cArgs);
+ function onDone(ret) {
+  runtimeKeepalivePop();
+  if (stack !== 0) stackRestore(stack);
+  return convertReturnValue(ret);
+ }
+ runtimeKeepalivePush();
+ var asyncMode = opts && opts.async;
+ if (Asyncify.currData != previousAsync) {
+  assert(!(previousAsync && Asyncify.currData), "We cannot start an async operation when one is already flight");
+  assert(!(previousAsync && !Asyncify.currData), "We cannot stop an async operation in flight");
+  assert(asyncMode, "The call to " + ident + " is running asynchronously. If this was intended, add the async option to the ccall/cwrap call.");
+  return Asyncify.whenDone().then(onDone);
+ }
+ ret = onDone(ret);
+ if (asyncMode) return Promise.resolve(ret);
+ return ret;
+}
+
+function cwrap(ident, returnType, argTypes, opts) {
+ return function() {
+  return ccall(ident, returnType, argTypes, arguments, opts);
+ };
+}
+
+var ASSERTIONS = true;
+
+function checkIncomingModuleAPI() {
+ ignoredModuleProp("fetchSettings");
 }
 
 var asmLibraryArg = {
  "__assert_fail": ___assert_fail,
  "__cxa_allocate_exception": ___cxa_allocate_exception,
  "__cxa_throw": ___cxa_throw,
- "_emscripten_date_now": __emscripten_date_now,
  "abort": _abort,
+ "emscripten_date_now": _emscripten_date_now,
  "emscripten_idb_load": _emscripten_idb_load,
  "emscripten_idb_store": _emscripten_idb_store,
  "emscripten_memcpy_big": _emscripten_memcpy_big,
  "emscripten_resize_heap": _emscripten_resize_heap,
  "fd_close": _fd_close,
  "fd_seek": _fd_seek,
- "fd_write": _fd_write,
- "setTempRet0": _setTempRet0
+ "fd_write": _fd_write
 };
+
+Asyncify.instrumentWasmImports(asmLibraryArg);
 
 var asm = createWasm();
 
-var ___wasm_call_ctors = Module["___wasm_call_ctors"] = function() {
- return (___wasm_call_ctors = Module["___wasm_call_ctors"] = Module["asm"]["__wasm_call_ctors"]).apply(null, arguments);
-};
+var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__wasm_call_ctors");
 
-var _checkUsageTimeBomb = Module["_checkUsageTimeBomb"] = function() {
- return (_checkUsageTimeBomb = Module["_checkUsageTimeBomb"] = Module["asm"]["checkUsageTimeBomb"]).apply(null, arguments);
-};
+var _fflush = Module["_fflush"] = createExportWrapper("fflush");
 
-var _decode = Module["_decode"] = function() {
- return (_decode = Module["_decode"] = Module["asm"]["decode"]).apply(null, arguments);
-};
+var _checkUsageTimeBomb = Module["_checkUsageTimeBomb"] = createExportWrapper("checkUsageTimeBomb");
 
-var _initBufferAddr = Module["_initBufferAddr"] = function() {
- return (_initBufferAddr = Module["_initBufferAddr"] = Module["asm"]["initBufferAddr"]).apply(null, arguments);
-};
+var _decode = Module["_decode"] = createExportWrapper("decode");
 
-var _malloc = Module["_malloc"] = function() {
- return (_malloc = Module["_malloc"] = Module["asm"]["malloc"]).apply(null, arguments);
-};
+var _free = Module["_free"] = createExportWrapper("free");
 
-var _parsePart = Module["_parsePart"] = function() {
- return (_parsePart = Module["_parsePart"] = Module["asm"]["parsePart"]).apply(null, arguments);
-};
+var _initBufferAddr = Module["_initBufferAddr"] = createExportWrapper("initBufferAddr");
 
-var _setRewind = Module["_setRewind"] = function() {
- return (_setRewind = Module["_setRewind"] = Module["asm"]["setRewind"]).apply(null, arguments);
-};
+var _malloc = Module["_malloc"] = createExportWrapper("malloc");
 
-var _isPProf = Module["_isPProf"] = function() {
- return (_isPProf = Module["_isPProf"] = Module["asm"]["isPProf"]).apply(null, arguments);
-};
+var _parsePart = Module["_parsePart"] = createExportWrapper("parsePart");
 
-var _build = Module["_build"] = function() {
- return (_build = Module["_build"] = Module["asm"]["build"]).apply(null, arguments);
-};
+var _setRewind = Module["_setRewind"] = createExportWrapper("setRewind");
 
-var _free = Module["_free"] = function() {
- return (_free = Module["_free"] = Module["asm"]["free"]).apply(null, arguments);
-};
+var _isPProf = Module["_isPProf"] = createExportWrapper("isPProf");
 
-var _getRootID = Module["_getRootID"] = function() {
- return (_getRootID = Module["_getRootID"] = Module["asm"]["getRootID"]).apply(null, arguments);
-};
+var _build = Module["_build"] = createExportWrapper("build");
 
-var _updateValueTree = Module["_updateValueTree"] = function() {
- return (_updateValueTree = Module["_updateValueTree"] = Module["asm"]["updateValueTree"]).apply(null, arguments);
-};
+var _getRootID = Module["_getRootID"] = createExportWrapper("getRootID");
 
-var _sortContextTreeByMetricIdx = Module["_sortContextTreeByMetricIdx"] = function() {
- return (_sortContextTreeByMetricIdx = Module["_sortContextTreeByMetricIdx"] = Module["asm"]["sortContextTreeByMetricIdx"]).apply(null, arguments);
-};
+var _initBUTree = Module["_initBUTree"] = createExportWrapper("initBUTree");
 
-var _getMetricDesJsonStr = Module["_getMetricDesJsonStr"] = function() {
- return (_getMetricDesJsonStr = Module["_getMetricDesJsonStr"] = Module["asm"]["getMetricDesJsonStr"]).apply(null, arguments);
-};
+var _initFlatTree = Module["_initFlatTree"] = createExportWrapper("initFlatTree");
 
-var _getSourceFileJsonStr = Module["_getSourceFileJsonStr"] = function() {
- return (_getSourceFileJsonStr = Module["_getSourceFileJsonStr"] = Module["asm"]["getSourceFileJsonStr"]).apply(null, arguments);
-};
+var _updateValueTree = Module["_updateValueTree"] = createExportWrapper("updateValueTree");
 
-var _getClickNodeMessage = Module["_getClickNodeMessage"] = function() {
- return (_getClickNodeMessage = Module["_getClickNodeMessage"] = Module["asm"]["getClickNodeMessage"]).apply(null, arguments);
-};
+var _sortContextTreeByMetricIdx = Module["_sortContextTreeByMetricIdx"] = createExportWrapper("sortContextTreeByMetricIdx");
 
-var _updateSourceFileExistStatus = Module["_updateSourceFileExistStatus"] = function() {
- return (_updateSourceFileExistStatus = Module["_updateSourceFileExistStatus"] = Module["asm"]["updateSourceFileExistStatus"]).apply(null, arguments);
-};
+var _getMetricDesJsonStr = Module["_getMetricDesJsonStr"] = createExportWrapper("getMetricDesJsonStr");
 
-var _getJsonStrSize = Module["_getJsonStrSize"] = function() {
- return (_getJsonStrSize = Module["_getJsonStrSize"] = Module["asm"]["getJsonStrSize"]).apply(null, arguments);
-};
+var _getSourceFileJsonStr = Module["_getSourceFileJsonStr"] = createExportWrapper("getSourceFileJsonStr");
 
-var _setFunctionFilter = Module["_setFunctionFilter"] = function() {
- return (_setFunctionFilter = Module["_setFunctionFilter"] = Module["asm"]["setFunctionFilter"]).apply(null, arguments);
-};
+var _getClickNodeMessage = Module["_getClickNodeMessage"] = createExportWrapper("getClickNodeMessage");
 
-var _setUpDrawFlameGraph = Module["_setUpDrawFlameGraph"] = function() {
- return (_setUpDrawFlameGraph = Module["_setUpDrawFlameGraph"] = Module["asm"]["setUpDrawFlameGraph"]).apply(null, arguments);
-};
+var _updateSourceFileExistStatus = Module["_updateSourceFileExistStatus"] = createExportWrapper("updateSourceFileExistStatus");
 
-var _drawFlameGraphClickNode = Module["_drawFlameGraphClickNode"] = function() {
- return (_drawFlameGraphClickNode = Module["_drawFlameGraphClickNode"] = Module["asm"]["drawFlameGraphClickNode"]).apply(null, arguments);
-};
+var _getJsonStrSize = Module["_getJsonStrSize"] = createExportWrapper("getJsonStrSize");
 
-var _getContextName = Module["_getContextName"] = function() {
- return (_getContextName = Module["_getContextName"] = Module["asm"]["getContextName"]).apply(null, arguments);
-};
+var _setFunctionFilter = Module["_setFunctionFilter"] = createExportWrapper("setFunctionFilter");
 
-var _getContextDetails = Module["_getContextDetails"] = function() {
- return (_getContextDetails = Module["_getContextDetails"] = Module["asm"]["getContextDetails"]).apply(null, arguments);
-};
+var _setUpDrawFlameGraph = Module["_setUpDrawFlameGraph"] = createExportWrapper("setUpDrawFlameGraph");
 
-var _getTreeTableList = Module["_getTreeTableList"] = function() {
- return (_getTreeTableList = Module["_getTreeTableList"] = Module["asm"]["getTreeTableList"]).apply(null, arguments);
-};
+var _drawFlameGraphClickNode = Module["_drawFlameGraphClickNode"] = createExportWrapper("drawFlameGraphClickNode");
 
-var _getTreeTableChildrenList = Module["_getTreeTableChildrenList"] = function() {
- return (_getTreeTableChildrenList = Module["_getTreeTableChildrenList"] = Module["asm"]["getTreeTableChildrenList"]).apply(null, arguments);
-};
+var _getContextName = Module["_getContextName"] = createExportWrapper("getContextName");
 
-var ___errno_location = Module["___errno_location"] = function() {
- return (___errno_location = Module["___errno_location"] = Module["asm"]["__errno_location"]).apply(null, arguments);
+var _getContextDetails = Module["_getContextDetails"] = createExportWrapper("getContextDetails");
+
+var _getTreeTableList = Module["_getTreeTableList"] = createExportWrapper("getTreeTableList");
+
+var _getTreeTableChildrenList = Module["_getTreeTableChildrenList"] = createExportWrapper("getTreeTableChildrenList");
+
+var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
+
+var _emscripten_stack_init = Module["_emscripten_stack_init"] = function() {
+ return (_emscripten_stack_init = Module["_emscripten_stack_init"] = Module["asm"]["emscripten_stack_init"]).apply(null, arguments);
 };
 
 var _emscripten_stack_set_limits = Module["_emscripten_stack_set_limits"] = function() {
  return (_emscripten_stack_set_limits = Module["_emscripten_stack_set_limits"] = Module["asm"]["emscripten_stack_set_limits"]).apply(null, arguments);
+};
+
+var _emscripten_stack_get_free = Module["_emscripten_stack_get_free"] = function() {
+ return (_emscripten_stack_get_free = Module["_emscripten_stack_get_free"] = Module["asm"]["emscripten_stack_get_free"]).apply(null, arguments);
 };
 
 var _emscripten_stack_get_base = Module["_emscripten_stack_get_base"] = function() {
@@ -1764,85 +1874,45 @@ var _emscripten_stack_get_end = Module["_emscripten_stack_get_end"] = function()
  return (_emscripten_stack_get_end = Module["_emscripten_stack_get_end"] = Module["asm"]["emscripten_stack_get_end"]).apply(null, arguments);
 };
 
-var stackSave = Module["stackSave"] = function() {
- return (stackSave = Module["stackSave"] = Module["asm"]["stackSave"]).apply(null, arguments);
-};
+var stackSave = Module["stackSave"] = createExportWrapper("stackSave");
 
-var stackRestore = Module["stackRestore"] = function() {
- return (stackRestore = Module["stackRestore"] = Module["asm"]["stackRestore"]).apply(null, arguments);
-};
+var stackRestore = Module["stackRestore"] = createExportWrapper("stackRestore");
 
-var stackAlloc = Module["stackAlloc"] = function() {
- return (stackAlloc = Module["stackAlloc"] = Module["asm"]["stackAlloc"]).apply(null, arguments);
-};
+var stackAlloc = Module["stackAlloc"] = createExportWrapper("stackAlloc");
 
-var ___cxa_is_pointer_type = Module["___cxa_is_pointer_type"] = function() {
- return (___cxa_is_pointer_type = Module["___cxa_is_pointer_type"] = Module["asm"]["__cxa_is_pointer_type"]).apply(null, arguments);
-};
+var ___cxa_is_pointer_type = Module["___cxa_is_pointer_type"] = createExportWrapper("__cxa_is_pointer_type");
 
-var dynCall_jii = Module["dynCall_jii"] = function() {
- return (dynCall_jii = Module["dynCall_jii"] = Module["asm"]["dynCall_jii"]).apply(null, arguments);
-};
+var dynCall_ii = Module["dynCall_ii"] = createExportWrapper("dynCall_ii");
 
-var dynCall_ii = Module["dynCall_ii"] = function() {
- return (dynCall_ii = Module["dynCall_ii"] = Module["asm"]["dynCall_ii"]).apply(null, arguments);
-};
+var dynCall_viii = Module["dynCall_viii"] = createExportWrapper("dynCall_viii");
 
-var dynCall_viii = Module["dynCall_viii"] = function() {
- return (dynCall_viii = Module["dynCall_viii"] = Module["asm"]["dynCall_viii"]).apply(null, arguments);
-};
+var dynCall_vii = Module["dynCall_vii"] = createExportWrapper("dynCall_vii");
 
-var dynCall_vii = Module["dynCall_vii"] = function() {
- return (dynCall_vii = Module["dynCall_vii"] = Module["asm"]["dynCall_vii"]).apply(null, arguments);
-};
+var dynCall_jii = Module["dynCall_jii"] = createExportWrapper("dynCall_jii");
 
-var dynCall_vi = Module["dynCall_vi"] = function() {
- return (dynCall_vi = Module["dynCall_vi"] = Module["asm"]["dynCall_vi"]).apply(null, arguments);
-};
+var dynCall_vi = Module["dynCall_vi"] = createExportWrapper("dynCall_vi");
 
-var dynCall_iii = Module["dynCall_iii"] = function() {
- return (dynCall_iii = Module["dynCall_iii"] = Module["asm"]["dynCall_iii"]).apply(null, arguments);
-};
+var dynCall_iii = Module["dynCall_iii"] = createExportWrapper("dynCall_iii");
 
-var dynCall_iiii = Module["dynCall_iiii"] = function() {
- return (dynCall_iiii = Module["dynCall_iiii"] = Module["asm"]["dynCall_iiii"]).apply(null, arguments);
-};
+var dynCall_iiii = Module["dynCall_iiii"] = createExportWrapper("dynCall_iiii");
 
-var dynCall_jiji = Module["dynCall_jiji"] = function() {
- return (dynCall_jiji = Module["dynCall_jiji"] = Module["asm"]["dynCall_jiji"]).apply(null, arguments);
-};
+var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
 
-var dynCall_iidiiii = Module["dynCall_iidiiii"] = function() {
- return (dynCall_iidiiii = Module["dynCall_iidiiii"] = Module["asm"]["dynCall_iidiiii"]).apply(null, arguments);
-};
+var dynCall_iidiiii = Module["dynCall_iidiiii"] = createExportWrapper("dynCall_iidiiii");
 
-var dynCall_viiiiii = Module["dynCall_viiiiii"] = function() {
- return (dynCall_viiiiii = Module["dynCall_viiiiii"] = Module["asm"]["dynCall_viiiiii"]).apply(null, arguments);
-};
+var dynCall_viiiiii = Module["dynCall_viiiiii"] = createExportWrapper("dynCall_viiiiii");
 
-var dynCall_viiiii = Module["dynCall_viiiii"] = function() {
- return (dynCall_viiiii = Module["dynCall_viiiii"] = Module["asm"]["dynCall_viiiii"]).apply(null, arguments);
-};
+var dynCall_viiiii = Module["dynCall_viiiii"] = createExportWrapper("dynCall_viiiii");
 
-var dynCall_viiii = Module["dynCall_viiii"] = function() {
- return (dynCall_viiii = Module["dynCall_viiii"] = Module["asm"]["dynCall_viiii"]).apply(null, arguments);
-};
+var dynCall_viiii = Module["dynCall_viiii"] = createExportWrapper("dynCall_viiii");
 
-var _asyncify_start_unwind = Module["_asyncify_start_unwind"] = function() {
- return (_asyncify_start_unwind = Module["_asyncify_start_unwind"] = Module["asm"]["asyncify_start_unwind"]).apply(null, arguments);
-};
+var _asyncify_start_unwind = Module["_asyncify_start_unwind"] = createExportWrapper("asyncify_start_unwind");
 
-var _asyncify_stop_unwind = Module["_asyncify_stop_unwind"] = function() {
- return (_asyncify_stop_unwind = Module["_asyncify_stop_unwind"] = Module["asm"]["asyncify_stop_unwind"]).apply(null, arguments);
-};
+var _asyncify_stop_unwind = Module["_asyncify_stop_unwind"] = createExportWrapper("asyncify_stop_unwind");
 
-var _asyncify_start_rewind = Module["_asyncify_start_rewind"] = function() {
- return (_asyncify_start_rewind = Module["_asyncify_start_rewind"] = Module["asm"]["asyncify_start_rewind"]).apply(null, arguments);
-};
+var _asyncify_start_rewind = Module["_asyncify_start_rewind"] = createExportWrapper("asyncify_start_rewind");
 
-var _asyncify_stop_rewind = Module["_asyncify_stop_rewind"] = function() {
- return (_asyncify_stop_rewind = Module["_asyncify_stop_rewind"] = Module["asm"]["asyncify_stop_rewind"]).apply(null, arguments);
-};
+var _asyncify_stop_rewind = Module["_asyncify_stop_rewind"] = createExportWrapper("asyncify_stop_rewind");
 
 Module["ccall"] = ccall;
 
@@ -1852,26 +1922,32 @@ Module["addFunction"] = addFunction;
 
 Module["writeArrayToMemory"] = writeArrayToMemory;
 
+var unexportedRuntimeSymbols = [ "run", "UTF8ArrayToString", "UTF8ToString", "stringToUTF8Array", "stringToUTF8", "lengthBytesUTF8", "addOnPreRun", "addOnInit", "addOnPreMain", "addOnExit", "addOnPostRun", "addRunDependency", "removeRunDependency", "FS_createFolder", "FS_createPath", "FS_createDataFile", "FS_createPreloadedFile", "FS_createLazyFile", "FS_createLink", "FS_createDevice", "FS_unlink", "getLEB", "getFunctionTables", "alignFunctionTables", "registerFunctions", "prettyPrint", "getCompilerSetting", "print", "printErr", "callMain", "abort", "keepRuntimeAlive", "wasmMemory", "stackAlloc", "stackSave", "stackRestore", "getTempRet0", "setTempRet0", "writeStackCookie", "checkStackCookie", "ptrToString", "zeroMemory", "stringToNewUTF8", "exitJS", "getHeapMax", "emscripten_realloc_buffer", "ENV", "ERRNO_CODES", "ERRNO_MESSAGES", "setErrNo", "inetPton4", "inetNtop4", "inetPton6", "inetNtop6", "readSockaddr", "writeSockaddr", "DNS", "getHostByName", "Protocols", "Sockets", "getRandomDevice", "warnOnce", "traverseStack", "UNWIND_CACHE", "convertPCtoSourceLocation", "readAsmConstArgsArray", "readAsmConstArgs", "mainThreadEM_ASM", "jstoi_q", "jstoi_s", "getExecutableName", "listenOnce", "autoResumeAudioContext", "dynCallLegacy", "getDynCaller", "dynCall", "handleException", "runtimeKeepalivePush", "runtimeKeepalivePop", "callUserCallback", "maybeExit", "safeSetTimeout", "asmjsMangle", "asyncLoad", "alignMemory", "mmapAlloc", "writeI53ToI64", "writeI53ToI64Clamped", "writeI53ToI64Signaling", "writeI53ToU64Clamped", "writeI53ToU64Signaling", "readI53FromI64", "readI53FromU64", "convertI32PairToI53", "convertI32PairToI53Checked", "convertU32PairToI53", "getCFunc", "uleb128Encode", "sigToWasmTypes", "generateFuncType", "convertJsFunctionToWasm", "freeTableIndexes", "functionsInTableMap", "getEmptyTableSlot", "updateTableMap", "removeFunction", "reallyNegative", "unSign", "strLen", "reSign", "formatString", "setValue", "getValue", "PATH", "PATH_FS", "intArrayFromString", "intArrayToString", "AsciiToString", "stringToAscii", "UTF16Decoder", "UTF16ToString", "stringToUTF16", "lengthBytesUTF16", "UTF32ToString", "stringToUTF32", "lengthBytesUTF32", "allocateUTF8", "allocateUTF8OnStack", "writeStringToMemory", "writeAsciiToMemory", "SYSCALLS", "getSocketFromFD", "getSocketAddress", "JSEvents", "registerKeyEventCallback", "specialHTMLTargets", "maybeCStringToJsString", "findEventTarget", "findCanvasEventTarget", "getBoundingClientRect", "fillMouseEventData", "registerMouseEventCallback", "registerWheelEventCallback", "registerUiEventCallback", "registerFocusEventCallback", "fillDeviceOrientationEventData", "registerDeviceOrientationEventCallback", "fillDeviceMotionEventData", "registerDeviceMotionEventCallback", "screenOrientation", "fillOrientationChangeEventData", "registerOrientationChangeEventCallback", "fillFullscreenChangeEventData", "registerFullscreenChangeEventCallback", "JSEvents_requestFullscreen", "JSEvents_resizeCanvasForFullscreen", "registerRestoreOldStyle", "hideEverythingExceptGivenElement", "restoreHiddenElements", "setLetterbox", "currentFullscreenStrategy", "restoreOldWindowedStyle", "softFullscreenResizeWebGLRenderTarget", "doRequestFullscreen", "fillPointerlockChangeEventData", "registerPointerlockChangeEventCallback", "registerPointerlockErrorEventCallback", "requestPointerLock", "fillVisibilityChangeEventData", "registerVisibilityChangeEventCallback", "registerTouchEventCallback", "fillGamepadEventData", "registerGamepadEventCallback", "registerBeforeUnloadEventCallback", "fillBatteryEventData", "battery", "registerBatteryEventCallback", "setCanvasElementSize", "getCanvasElementSize", "demangle", "demangleAll", "jsStackTrace", "stackTrace", "ExitStatus", "getEnvStrings", "checkWasiClock", "flush_NO_FILESYSTEM", "dlopenMissingError", "createDyncallWrapper", "setImmediateWrapped", "clearImmediateWrapped", "polyfillSetImmediate", "uncaughtExceptionCount", "exceptionLast", "exceptionCaught", "ExceptionInfo", "exception_addRef", "exception_decRef", "Browser", "setMainLoop", "wget", "FS", "MEMFS", "TTY", "PIPEFS", "SOCKFS", "_setNetworkCallback", "tempFixedLengthArray", "miniTempWebGLFloatBuffers", "heapObjectForWebGLType", "heapAccessShiftForWebGLHeap", "GL", "emscriptenWebGLGet", "computeUnpackAlignedImageSize", "emscriptenWebGLGetTexPixelData", "emscriptenWebGLGetUniform", "webglGetUniformLocation", "webglPrepareUniformLocationsBeforeFirstUse", "webglGetLeftBracePos", "emscriptenWebGLGetVertexAttrib", "writeGLArray", "AL", "SDL_unicode", "SDL_ttfContext", "SDL_audio", "SDL", "SDL_gfx", "GLUT", "EGL", "GLFW_Window", "GLFW", "GLEW", "IDBStore", "runAndAbortIfError", "Asyncify", "Fibers", "ALLOC_NORMAL", "ALLOC_STACK", "allocate" ];
+
+unexportedRuntimeSymbols.forEach(unexportedRuntimeSymbol);
+
+var missingLibrarySymbols = [ "ptrToString", "zeroMemory", "stringToNewUTF8", "exitJS", "setErrNo", "inetPton4", "inetNtop4", "inetPton6", "inetNtop6", "readSockaddr", "writeSockaddr", "getHostByName", "getRandomDevice", "traverseStack", "convertPCtoSourceLocation", "readAsmConstArgs", "mainThreadEM_ASM", "jstoi_q", "jstoi_s", "getExecutableName", "listenOnce", "autoResumeAudioContext", "dynCallLegacy", "getDynCaller", "dynCall", "maybeExit", "safeSetTimeout", "asmjsMangle", "asyncLoad", "alignMemory", "mmapAlloc", "writeI53ToI64", "writeI53ToI64Clamped", "writeI53ToI64Signaling", "writeI53ToU64Clamped", "writeI53ToU64Signaling", "readI53FromI64", "readI53FromU64", "convertI32PairToI53", "convertU32PairToI53", "removeFunction", "reallyNegative", "unSign", "strLen", "reSign", "formatString", "intArrayFromString", "intArrayToString", "AsciiToString", "stringToAscii", "UTF16ToString", "stringToUTF16", "lengthBytesUTF16", "UTF32ToString", "stringToUTF32", "lengthBytesUTF32", "allocateUTF8", "allocateUTF8OnStack", "writeStringToMemory", "writeAsciiToMemory", "getSocketFromFD", "getSocketAddress", "registerKeyEventCallback", "maybeCStringToJsString", "findEventTarget", "findCanvasEventTarget", "getBoundingClientRect", "fillMouseEventData", "registerMouseEventCallback", "registerWheelEventCallback", "registerUiEventCallback", "registerFocusEventCallback", "fillDeviceOrientationEventData", "registerDeviceOrientationEventCallback", "fillDeviceMotionEventData", "registerDeviceMotionEventCallback", "screenOrientation", "fillOrientationChangeEventData", "registerOrientationChangeEventCallback", "fillFullscreenChangeEventData", "registerFullscreenChangeEventCallback", "JSEvents_requestFullscreen", "JSEvents_resizeCanvasForFullscreen", "registerRestoreOldStyle", "hideEverythingExceptGivenElement", "restoreHiddenElements", "setLetterbox", "softFullscreenResizeWebGLRenderTarget", "doRequestFullscreen", "fillPointerlockChangeEventData", "registerPointerlockChangeEventCallback", "registerPointerlockErrorEventCallback", "requestPointerLock", "fillVisibilityChangeEventData", "registerVisibilityChangeEventCallback", "registerTouchEventCallback", "fillGamepadEventData", "registerGamepadEventCallback", "registerBeforeUnloadEventCallback", "fillBatteryEventData", "battery", "registerBatteryEventCallback", "setCanvasElementSize", "getCanvasElementSize", "getEnvStrings", "checkWasiClock", "createDyncallWrapper", "setImmediateWrapped", "clearImmediateWrapped", "polyfillSetImmediate", "exception_addRef", "exception_decRef", "setMainLoop", "_setNetworkCallback", "heapObjectForWebGLType", "heapAccessShiftForWebGLHeap", "emscriptenWebGLGet", "computeUnpackAlignedImageSize", "emscriptenWebGLGetTexPixelData", "emscriptenWebGLGetUniform", "webglGetUniformLocation", "webglPrepareUniformLocationsBeforeFirstUse", "webglGetLeftBracePos", "emscriptenWebGLGetVertexAttrib", "writeGLArray", "SDL_unicode", "SDL_ttfContext", "SDL_audio", "GLFW_Window", "ALLOC_NORMAL", "ALLOC_STACK", "allocate" ];
+
+missingLibrarySymbols.forEach(missingLibrarySymbol);
+
 var calledRun;
-
-function ExitStatus(status) {
- this.name = "ExitStatus";
- this.message = "Program terminated with exit(" + status + ")";
- this.status = status;
-}
-
-var calledMain = false;
 
 dependenciesFulfilled = function runCaller() {
  if (!calledRun) run();
  if (!calledRun) dependenciesFulfilled = runCaller;
 };
 
+function stackCheckInit() {
+ _emscripten_stack_init();
+ writeStackCookie();
+}
+
 function run(args) {
  args = args || arguments_;
  if (runDependencies > 0) {
   return;
  }
+ stackCheckInit();
  preRun();
  if (runDependencies > 0) {
   return;
@@ -1883,6 +1959,7 @@ function run(args) {
   if (ABORT) return;
   initRuntime();
   if (Module["onRuntimeInitialized"]) Module["onRuntimeInitialized"]();
+  assert(!Module["_main"], 'compiled without a main, but one is present. if you added it from JS, use Module["onRuntimeInitialized"]');
   postRun();
  }
  if (Module["setStatus"]) {
@@ -1896,22 +1973,25 @@ function run(args) {
  } else {
   doRun();
  }
+ checkStackCookie();
 }
 
-Module["run"] = run;
-
-function exit(status, implicit) {
- EXITSTATUS = status;
- procExit(status);
-}
-
-function procExit(code) {
- EXITSTATUS = code;
- if (!keepRuntimeAlive()) {
-  if (Module["onExit"]) Module["onExit"](code);
-  ABORT = true;
+function checkUnflushedContent() {
+ var oldOut = out;
+ var oldErr = err;
+ var has = false;
+ out = err = x => {
+  has = true;
+ };
+ try {
+  flush_NO_FILESYSTEM();
+ } catch (e) {}
+ out = oldOut;
+ err = oldErr;
+ if (has) {
+  warnOnce("stdio streams had content in them that was not flushed. you should set EXIT_RUNTIME to 1 (see the FAQ), or make sure to emit a newline when you printf etc.");
+  warnOnce("(this may also be due to not including full filesystem support - try building with -sFORCE_FILESYSTEM)");
  }
- quit_(code, new ExitStatus(code));
 }
 
 if (Module["preInit"]) {

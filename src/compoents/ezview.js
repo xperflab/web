@@ -1,6 +1,16 @@
+import { wrap } from "comlink";
+import WasmWorker from "../worker/wasm.worker";
+
 const instance = window.Module
 
 window.x = instance
+
+// initialize Webworker
+// const wasmWorker = wrap(new WasmWorker());
+// (async function () {
+//     const result = await wasmWorker(1, 4);
+//     alert(result);
+// })();
 
 export const bufferSize = 128 * 1024 * 1024;
 async function parsePart(buf) {
@@ -16,8 +26,8 @@ async function parsePart(buf) {
 }
 
 async function build() {
-    await instance.ccall('build', '', [], [], { async: true });
     console.log("build finished.")
+    return await instance.ccall('build', '', [], [], { async: true });
 }
 
 function isPProf() {
@@ -41,9 +51,29 @@ export const getTreeTableChildrenList = instance.cwrap('getTreeTableChildrenList
 
 export const getClickNodeMessage = instance.cwrap('getClickNodeMessage', 'string', ['number', 'number', 'number'])
 
+export const getContextDetails = instance.cwrap('getContextDetails', 'string', ['number'])
+
+export const getContextName = instance.cwrap('getContextName', 'string', ['number'])
+
+export const updateSourceFileExistStatus = instance.cwrap('updateSourceFileExistStatus', '', ['number', 'number'])
+
 export const updateValueTree = instance.cwrap('updateValueTree', '', ['number', 'number', 'number'], { async: true })
 
 export const drawFlameGraphClickNode = instance.cwrap('drawFlameGraphClickNode', '', ['number', 'number', 'number', 'number', 'number'], { async: true })
+
+export const setFunctionFilter = instance.cwrap('setFunctionFilter', '', ['string'])
+
+export const setUpDrawFlameGraph = f => instance._setUpDrawFlameGraph(-1, instance.addFunction(f, 'viiiiiji'));
+
+export const sortContextTreeByMetricIdx = instance.cwrap('sortContextTreeByMetricIdx', '', ['number', 'number'])
+
+export async function initFlatTree() {
+    return await instance.ccall('initFlatTree', '', [''], [], { async: true });
+}
+
+export async function initBUTree() {
+    return await instance.ccall('initBUTree', '', [''], [], { async: true });
+}
 
 export async function parseFile(f) {
     console.time("parse")
@@ -59,7 +89,11 @@ export async function parseFile(f) {
         if (s.size == 0)
             break
 
-        const a = await s.arrayBuffer()
+        // compatible for blob and arraybuffer
+        const a = s
+        if(!(a instanceof ArrayBuffer))
+            a = await s.arrayBuffer()
+
         let view = new Uint8Array(a);
         remain = await parsePart(view)
 
@@ -96,7 +130,8 @@ export async function parseFile(f) {
         }
     }
 
-    await build()
+    let res = await build()
     console.timeEnd("parse")
+    return Boolean(res)
 }
 

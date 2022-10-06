@@ -7,8 +7,9 @@ import { LeftCircleFilled } from '@ant-design/icons';
 import '../pages-css/treetable.css';
 import React from 'react';
 const { Option } = Select;
+import { message } from "antd";
 
-import { updateValueTree, getRootID, getMetricDesJsonStr, getTreeTableChildrenList } from '../compoents/ezview';
+import { updateValueTree, getRootID, getMetricDesJsonStr, getTreeTableChildrenList, initFlatTree, initBUTree, sortContextTreeByMetricIdx } from '../compoents/ezview';
 
 
 let root_id
@@ -37,7 +38,7 @@ export default class treetable extends Component {
 
   componentWillMount() {
     let temp = []
-    let defaultSelect =[]
+    let defaultSelect = []
     let jsonStr2 = getMetricDesJsonStr();
     let MetricTypesArray = JSON.parse(jsonStr2)
     console.log(MetricTypesArray)
@@ -45,15 +46,15 @@ export default class treetable extends Component {
     cols.push({
       dataIndex: "name",
       title: "name",
-      width:600,
+      width: 600,
       ellipsis: true,
-      
+
     });
     MetricTypesArray.forEach(element => {
       cols.push({
         dataIndex: "i" + element.id,
         title: element.name + " [INC]",
-        width:100,
+        width: 100,
         onHeaderCell: (column) => {
           return {
             onClick: () => {
@@ -61,7 +62,7 @@ export default class treetable extends Component {
               console.log(element);
               let metricIdx = parseInt(element.id);
               let valueType = 0;
-              window.Module._sortContextTreeByMetricIdx(valueType, metricIdx);
+              sortContextTreeByMetricIdx(valueType, metricIdx);
               let jsonStr = getTreeTableChildrenList(root_id);
               let dataList = JSON.parse(jsonStr)
               console.log(dataList)
@@ -74,7 +75,7 @@ export default class treetable extends Component {
       cols.push({
         dataIndex: "e" + element.id,
         title: element.name + " [EXC]",
-        width:100,
+        width: 100,
         onHeaderCell: (column) => {
           return {
             onClick: () => {
@@ -83,7 +84,7 @@ export default class treetable extends Component {
               let metricIdx = parseInt(element.id);
               console.log(metricIdx)
               let valueType = 1;
-              window.Module._sortContextTreeByMetricIdx(valueType, metricIdx);
+              sortContextTreeByMetricIdx(valueType, metricIdx);
               let jsonStr = getTreeTableChildrenList(root_id);
               let dataList = JSON.parse(jsonStr)
               console.log(dataList)
@@ -101,10 +102,10 @@ export default class treetable extends Component {
       defaultSelect.push(cols[i].dataIndex)
     }
     this.setState({ children: temp })
-     this.setState({ defaultSelects: defaultSelect})
+    this.setState({ defaultSelects: defaultSelect })
     console.log(temp)
 
-    window.Module._updateValueTree(1, this.state.dataShowType, 0);
+    updateValueTree(1, this.state.dataShowType, 0);
     let jsonStr = getTreeTableChildrenList(root_id);
     const tableData = JSON.parse(jsonStr);
 
@@ -114,19 +115,19 @@ export default class treetable extends Component {
     console.log(this.viewContainer.current.clientHeight)
     console.log(this.buttons.current.clientHeight)
     console.log(this.select.current.clientHeight)
-    let tableHeight = this.viewContainer.current.clientHeight - this.buttons.current.clientHeight-this.select.current.clientHeight
-    this.setState({tableHeight : tableHeight})
+    let tableHeight = this.viewContainer.current.clientHeight - this.buttons.current.clientHeight - this.select.current.clientHeight
+    this.setState({ tableHeight: tableHeight })
     this.resizeObserver = new ResizeObserver(entries => {
       console.log("resize")
-      let tableHeight = this.viewContainer.current.clientHeight - this.buttons.current.clientHeight-this.select.current.clientHeight
-      this.setState({tableHeight : tableHeight})
-   });
-   this.resizeObserver.observe(document.getElementById("select"));
+      let tableHeight = this.viewContainer.current.clientHeight - this.buttons.current.clientHeight - this.select.current.clientHeight
+      this.setState({ tableHeight: tableHeight })
+    });
+    this.resizeObserver.observe(document.getElementById("select"));
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.dataShowType != this.state.dataShowType) {
-      window.Module._updateValueTree(1, this.state.dataShowType, 0);
+      updateValueTree(1, this.state.dataShowType, 0);
       let jsonStr = getTreeTableChildrenList(root_id);
       const tableData = JSON.parse(jsonStr);
 
@@ -146,10 +147,11 @@ export default class treetable extends Component {
 
   changeToBottomUp = () => {
     //this.state.dataShowType = 1;
+    message.success("Changing to bottom up")
+    initBUTree().then(e =>
+      this.setState({ dataShowType: 1 })
+    )
 
-    this.setState({ dataShowType: 1 });
-    console.log(this.state.dataShowType)
-    // console.log(this.state.dataShowType)
     //  window.onresize = this.onWindowResize;
     //this.drawFlameGraph(this.state.dataShowType,  this.state.metricIndex, "")
   }
@@ -157,7 +159,10 @@ export default class treetable extends Component {
   changeToFlat = () => {
     //this.state.dataShowType = 1;
     // this.drawFlameGraph(2,  this.state.metricIndex, "")
-    this.setState({ dataShowType: 2 })
+    message.success("Changing to flat")
+    initFlatTree().then(e =>
+      this.setState({ dataShowType: 2 })
+    )
   }
   handleChange = (value) => {
     console.log(value)
@@ -166,7 +171,7 @@ export default class treetable extends Component {
     cols.push({
       dataIndex: "name",
       title: "name",
-      width:600,
+      width: 600,
       ellipsis: true,
     });
     this.state.metricArray.forEach(element => {
@@ -175,7 +180,7 @@ export default class treetable extends Component {
         cols.push({
           dataIndex: "i" + element.id,
           title: element.name + " [INC]",
-          width:100,
+          width: 100,
           onHeaderCell: (column) => {
             return {
               onClick: () => {
@@ -183,7 +188,7 @@ export default class treetable extends Component {
                 console.log(element);
                 let metricIdx = parseInt(element.id);
                 let valueType = 0;
-                window.Module._sortContextTreeByMetricIdx(valueType, metricIdx);
+                sortContextTreeByMetricIdx(valueType, metricIdx);
                 let jsonStr = getTreeTableChildrenList(root_id);
                 let dataList = JSON.parse(jsonStr)
                 this.setState({ tableList: dataList, tablekey: this.state.tablekey + 1 })
@@ -198,7 +203,7 @@ export default class treetable extends Component {
         cols.push({
           dataIndex: "e" + element.id,
           title: element.name + " [EXC]",
-          width:100,
+          width: 100,
           onHeaderCell: (column) => {
             return {
               onClick: () => {
@@ -207,7 +212,7 @@ export default class treetable extends Component {
                 let metricIdx = parseInt(element.id);
                 console.log(metricIdx)
                 let valueType = 1;
-                window.Module._sortContextTreeByMetricIdx(valueType, metricIdx);
+                sortContextTreeByMetricIdx(valueType, metricIdx);
                 let jsonStr = getTreeTableChildrenList(root_id);
                 let dataList = JSON.parse(jsonStr)
                 console.log(dataList)
@@ -226,46 +231,46 @@ export default class treetable extends Component {
 
   render() {
     return (
-      <div   ref={this.viewContainer}  className='h-full w-full'>
-        <div  ref={this.buttons} >
-        <button
-          type="button"
-          onClick={this.changeToTopDown}
-          className="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-        >
-          Top Down
-        </button>
-        <button
-          type="button"
-          onClick={this.changeToBottomUp}
-          className="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-        >
-          Bottom Up
-        </button>
-        <button
-          type="button"
-          onClick={this.changeToFlat}
-          className="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-        >
-          Flat
-        </button>
+      <div ref={this.viewContainer} className='h-full w-full'>
+        <div ref={this.buttons} >
+          <button
+            type="button"
+            onClick={this.changeToTopDown}
+            className="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            Top Down
+          </button>
+          <button
+            type="button"
+            onClick={this.changeToBottomUp}
+            className="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            Bottom Up
+          </button>
+          <button
+            type="button"
+            onClick={this.changeToFlat}
+            className="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            Flat
+          </button>
         </div>
-        <div  id= "select"ref={this.select}>
-        <Select
-         
-          mode="multiple"
-          allowClear
-          style={{
-            width: "100%"
-          }}
-          placeholder="Please select"
-          defaultValue={this.state.defaultSelects}
-          onChange={this.handleChange}
-        >
-          {this.state.children}
-        </Select>
+        <div id="select" ref={this.select}>
+          <Select
+
+            mode="multiple"
+            allowClear
+            style={{
+              width: "100%"
+            }}
+            placeholder="Please select"
+            defaultValue={this.state.defaultSelects}
+            onChange={this.handleChange}
+          >
+            {this.state.children}
+          </Select>
         </div>
-        <div><TreetableTopDown tableHeight ={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={this.state.columns} tableList={this.state.tableList} /></div>
+        <div><TreetableTopDown tableHeight={this.state.tableHeight} key={this.state.tablekey} dataShowType={this.state.dataShowType} cols={this.state.columns} tableList={this.state.tableList} /></div>
 
       </div>
     );

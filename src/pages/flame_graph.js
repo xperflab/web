@@ -8,7 +8,9 @@ import { Component } from "react";
 import XEUtils from "xe-utils";
 import '../pages-css/flame_graph.css';
 import { useResizeObserver } from 'react-use-observer'
-import { updateValueTree, drawFlameGraphClickNode, getRootID } from '../compoents/ezview';
+import { updateValueTree, drawFlameGraphClickNode, getRootID, initFlatTree, initBUTree, getMetricDesJsonStr, setUpDrawFlameGraph, getContextDetails, getClickNodeMessage, setFunctionFilter, getContextName } from '../compoents/ezview';
+import { message } from "antd";
+
 function str2ab(str) {
   var buf = new ArrayBuffer(str.length);
   var bufView = new Uint8Array(buf);
@@ -109,11 +111,11 @@ export default class FlameGraph extends Component {
     });
     this.state.global.container.appendChild(this.state.global.app.view);
 
-    window.Module._setUpDrawFlameGraph(-1, window.Module.addFunction(this.drawRectNode, 'viiiiiji'));
+    setUpDrawFlameGraph(this.drawRectNode)
+
     window.onresize = this.onWindowResize;
-    let jsonStr = window.Module.cwrap('getMetricDesJsonStr', 'string')();
-    //console.log(jsonStr)
-    // this.state.metricTypesArray = JSON.parse(jsonStr);
+    let jsonStr = getMetricDesJsonStr();
+
     let metricJson = JSON.parse(jsonStr)
     this.setState({ metricTypesArray: metricJson })
     window.postMessage(
@@ -147,15 +149,15 @@ export default class FlameGraph extends Component {
           console.log(message.data.x)
           //   console.log(this.state.global.width)
           //    console.log("2")
-          let drawClickNodes = XEUtils.debounce(window.Module._drawFlameGraphClickNode(message.data.id, message.data.x, message.data.y, this.state.global.width, message.data.h), 200);
-          let clickNodeMessageStr = window.Module.cwrap('getClickNodeMessage', 'string', ['number', 'number', 'number'])(this.state.focusNode.id, 0, this.state.metricIndex);
+          let drawClickNodes = XEUtils.debounce(drawFlameGraphClickNode(message.data.id, message.data.x, message.data.y, this.state.global.width, message.data.h), 200);
+          let clickNodeMessageStr = getClickNodeMessage(this.state.focusNode.id, 0, this.state.metricIndex);
           let obj = JSON.parse(clickNodeMessageStr);
           break;
         }
         case "changeMessageDetails": {
           // console.log(message.type);
           this.state.focusNode.hovorId = message.data.id;
-          this.state.global.messageDetails.innerHTML = Module.cwrap('getContextDetails', 'string', ['number'])(this.state.focusNode.hovorId);
+          this.state.global.messageDetails.innerHTML = getContextDetails(this.state.focusNode.hovorId);
           break;
         }
         // case"Flamegraph resize":{
@@ -206,7 +208,7 @@ export default class FlameGraph extends Component {
       this.state.focusNode.hovorId = root_id;
     }
 
-    window.Module.ccall("setFunctionFilter", null, ["string"], [functionFilter]);
+    setFunctionFilter(functionFilter)
 
     updateValueTree(0, dataShowType, metricIndex).then(
       res => {
@@ -239,7 +241,8 @@ export default class FlameGraph extends Component {
 
     var label = document.createElement("div");
     label.setAttribute("class", "flamegraph-tag");
-    label.innerHTML = window.Module.cwrap("getContextName", "string", ["number"])(id);
+    
+    label.innerHTML = getContextName(id);
     label.style.width = w + "px";
     label.style.height = h + "px";
     label.style.top = y + "px";
@@ -261,7 +264,6 @@ export default class FlameGraph extends Component {
     //     tint: 0x9f78d9
     //   });
 
-    //   this.state.global.messageDetails.innerHTML = window.Module.cwrap('getContextDetails', 'string', ['number'])(id);
     // };
     outline.mouseover = function (mouseData) {
 
@@ -353,12 +355,15 @@ export default class FlameGraph extends Component {
 
   changeToBottomUp = () => {
     //this.state.dataShowType = 1;
-    console.log(this)
-    this.state.focusNode.id = root_id;
-    this.state.focusNode.x = 0;
-    this.state.focusNode.y = 0;
-    this.state.focusNode.hovorId = root_id;
-    this.setState({ dataShowType: 1 });
+    message.info("Changing to bottom up")
+    initBUTree().then(e => {
+      this.state.focusNode.id = root_id;
+      this.state.focusNode.x = 0;
+      this.state.focusNode.y = 0;
+      this.state.focusNode.hovorId = root_id;
+      this.setState({ dataShowType: 1 })
+    }
+    )
     // console.log(this.state.dataShowType)
     //  window.onresize = this.onWindowResize;
     //this.drawFlameGraph(this.state.dataShowType,  this.state.metricIndex, "")
@@ -367,11 +372,15 @@ export default class FlameGraph extends Component {
   changeToFlat = () => {
     //this.state.dataShowType = 1;
     // this.drawFlameGraph(2,  this.state.metricIndex, "")
-    this.state.focusNode.id = root_id;
-    this.state.focusNode.x = 0;
-    this.state.focusNode.y = 0;
-    this.state.focusNode.hovorId = root_id;
-    this.setState({ dataShowType: 2 })
+    message.info("Changing to flat")
+    initFlatTree().then(e => {
+      this.state.focusNode.id = root_id;
+      this.state.focusNode.x = 0;
+      this.state.focusNode.y = 0;
+      this.state.focusNode.hovorId = root_id;
+      this.setState({ dataShowType: 2 })
+    }
+    )
   }
 
   componentWillReceiveProps(nextProps) {

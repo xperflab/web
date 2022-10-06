@@ -1,6 +1,7 @@
 import 'antd/dist/antd.min.css';
 import { Component } from 'react';
 import TreeTable, { useLazyloadPlugin } from 'react-antd-treetable';
+import { getTreeTableChildrenList } from '../compoents/ezview';
 
 
 export default class TreetableTopDown extends Component {
@@ -22,11 +23,11 @@ export default class TreetableTopDown extends Component {
     const res = await this.loadData(record);
     return res;
   };
-  
+
   loadData = record => new Promise(resolve => {
     setTimeout(() => {
       console.log(record);
-      let jsonStr = Module.cwrap('getTreeTableChildrenList', 'string', ['number'])(record.id);
+      let jsonStr = getTreeTableChildrenList(record.id);
       const children = JSON.parse(jsonStr);
       // console.log(children);
       resolve(children)
@@ -44,7 +45,7 @@ export default class TreetableTopDown extends Component {
         onExpandedRowsChange={this.onExpandedRowsChange}
         dataSource={this.props.tableList}
         columns={this.props.cols}
-        scroll={{y:this.props.tableHeight,x:1000}}
+        scroll={{ y: this.props.tableHeight, x: 1000 }}
         plugins={[
           useLazyloadPlugin({
             onLoad: this.onLoadMore,

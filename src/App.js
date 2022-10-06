@@ -16,31 +16,25 @@ import "antd/dist/antd.min.css";
 import { InboxOutlined } from "@ant-design/icons";
 import { message, Upload, Layout, Spin } from "antd";
 
-import { parseFile, getSourceFileJsonStr } from "./compoents/ezview"
+import { parseFile, getSourceFileJsonStr, updateSourceFileExistStatus } from "./compoents/ezview"
 
 
 function MyDropzone(props) {
   const { Dragger } = Upload;
   const [loading, setLoading] = useState(false)
   const { changeComponentToFlamegraph, changeShowCurrentProfile } = props
-  //   onDrop(e) {
-  //     console.log("Dropped files", e.dataTransfer);
-  //   }
 
   useEffect(() => {
     console.log(loading);
   }, [loading]);
-  const onDrop = useCallback((acceptedFiles) => {
-    acceptedFiles.forEach(async (f) => {
+  const onDrop = useCallback(acceptedFiles => {
+    acceptedFiles.forEach(async f => {
 
       await parseFile(f)
-
       let jsonStr = getSourceFileJsonStr()
-      
-      // console.log(jsonStr)
       let fileExistList = JSON.parse(jsonStr)
       for (let i = 0; i < fileExistList.length; i++) {
-        window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
+        updateSourceFileExistStatus(i, fileExistList[i]);
       }
       changeComponentToFlamegraph()
       changeShowCurrentProfile()
