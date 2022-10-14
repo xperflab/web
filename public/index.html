@@ -39,6 +39,34 @@
       runtimeReady = true
       sessionStorage.setItem('runtimeReady', runtimeReady);
     }
+    function decodeProfile(buffer, mime) {
+      let data = new Uint8Array(buffer);
+      let len = data.length;
+      if (mime == "application/gzip") {
+        data = pako.ungzip(data);
+        len = data.length;
+        let newBuf = Module._malloc(data.length);
+        Module.HEAPU8.set(data, newBuf);
+        let result = Module._decode(newBuf, len);
+        return result;
+      } else {
+        let newBuf = Module._malloc(data.length);
+        Module.HEAPU8.set(data, newBuf);
+        let result = Module._decode(newBuf, len);
+        if (result == 1) {
+          try {
+            data = pako.ungzip(data);
+            len = data.length;
+            newBuf = Module._malloc(data.length);
+            Module.HEAPU8.set(data, newBuf);
+            result = Module._decode(newBuf, len);
+          } catch (error) {
+            return 1;
+          }
+        }
+        return result;
+      }
+    }
   </script>
 </body>
 

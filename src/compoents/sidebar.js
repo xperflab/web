@@ -42,17 +42,17 @@ export default class sidebar extends React.Component {
   openExampleProfile = () => {
     fetch('example.ezview')
       .then(e => e.arrayBuffer())
-      .then(b => parseFile(b))
-      .then(error => {
-        console.log(error)
-        if (!error) {
-          let jsonStr = getSourceFileJsonStr()
+      .then(binaryStr => {
+        let result = window.decodeProfile(binaryStr, "0")
+        console.log(result)
+        if (result == 0) {
+          let jsonStr = window.Module.cwrap('getSourceFileJsonStr', 'string')()
           console.log(jsonStr)
           let fileExistList = JSON.parse(jsonStr)
           for (let i = 0; i < fileExistList.length; i++) {
-            updateSourceFileExistStatus(i, fileExistList[i]);
+            window.Module._updateSourceFileExistStatus(i, fileExistList[i]);
           }
-
+          //window.navigate("/flame_graph");  
           this.props.changeComponentToFlamegraph()
           this.props.changeShowCurrentProfile()
           this.setState({ selectKey: '3' })

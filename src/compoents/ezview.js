@@ -1,16 +1,9 @@
-import { wrap } from "comlink";
-import WasmWorker from "../worker/wasm.worker";
-
 const instance = window.Module
 
 window.x = instance
 
-// initialize Webworker
-// const wasmWorker = wrap(new WasmWorker());
-// (async function () {
-//     const result = await wasmWorker(1, 4);
-//     alert(result);
-// })();
+let callback = {}
+window.cb = callback
 
 export const bufferSize = 128 * 1024 * 1024;
 async function parsePart(buf) {
@@ -90,9 +83,7 @@ export async function parseFile(f) {
             break
 
         // compatible for blob and arraybuffer
-        const a = s
-        if(!(a instanceof ArrayBuffer))
-            a = await s.arrayBuffer()
+        const a = await s.arrayBuffer()
 
         let view = new Uint8Array(a);
         remain = await parsePart(view)
