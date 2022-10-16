@@ -1,9 +1,7 @@
 const instance = window.Module
 
 window.x = instance
-
-let callback = {}
-window.cb = callback
+window.cb = {}
 
 export const bufferSize = 128 * 1024 * 1024;
 async function parsePart(buf) {
@@ -29,6 +27,10 @@ function isPProf() {
 
 function setRewind() {
     return instance._setRewind()
+}
+
+export function setCallback(name, callback) {
+    window.cb[name] = callback
 }
 
 let bufAddr = 0
@@ -64,8 +66,8 @@ export async function initFlatTree() {
     return await instance.ccall('initFlatTree', '', [''], [], { async: true });
 }
 
-export async function initBUTree() {
-    return await instance.ccall('initBUTree', '', [''], [], { async: true });
+export function initBUTree() {
+    return instance.ccall('initBUTree', '', [''], []);
 }
 
 export async function parseFile(f) {

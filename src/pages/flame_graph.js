@@ -8,7 +8,7 @@ import { Component } from "react";
 import XEUtils from "xe-utils";
 import '../pages-css/flame_graph.css';
 import { useResizeObserver } from 'react-use-observer'
-import { updateValueTree, drawFlameGraphClickNode, getRootID, initFlatTree, initBUTree, getMetricDesJsonStr, setUpDrawFlameGraph, getContextDetails, getClickNodeMessage, setFunctionFilter, getContextName } from '../compoents/ezview';
+import { setCallback, updateValueTree, drawFlameGraphClickNode, getRootID, initFlatTree, initBUTree, getMetricDesJsonStr, setUpDrawFlameGraph, getContextDetails, getClickNodeMessage, setFunctionFilter, getContextName } from '../compoents/ezview';
 import { message } from "antd";
 
 function str2ab(str) {
@@ -241,7 +241,7 @@ export default class FlameGraph extends Component {
 
     var label = document.createElement("div");
     label.setAttribute("class", "flamegraph-tag");
-    
+
     label.innerHTML = getContextName(id);
     label.style.width = w + "px";
     label.style.height = h + "px";
@@ -352,18 +352,17 @@ export default class FlameGraph extends Component {
     this.setState({ dataShowType: 0 })
   }
 
-
   changeToBottomUp = () => {
-    //this.state.dataShowType = 1;
-    message.info("Changing to bottom up")
-    initBUTree().then(e => {
+    setCallback('initBUTree', () => {
       this.state.focusNode.id = root_id;
       this.state.focusNode.x = 0;
       this.state.focusNode.y = 0;
       this.state.focusNode.hovorId = root_id;
       this.setState({ dataShowType: 1 })
-    }
-    )
+    })
+    //this.state.dataShowType = 1;
+    initBUTree()
+    message.info("Changing to bottom up")
     // console.log(this.state.dataShowType)
     //  window.onresize = this.onWindowResize;
     //this.drawFlameGraph(this.state.dataShowType,  this.state.metricIndex, "")
