@@ -1,7 +1,50 @@
 const instance = window.Module
 
-window.x = instance
-window.cb = {}
+let ezview = {}
+window.ezview = ezview
+
+// Export wasm instance for debugging
+ezview.i = instance
+
+// Call back from wasm
+// In C++ code, we call this code from EM_ASM
+ezview.cb = {}
+
+// Memory cache for wasm
+// In Wasm32, the max size of memory is 4GB
+let mem_cache_sz = 64 * 1024 // 64KB (wasm memory page size)
+let mem_map = new Map() // name - arrayBuffer
+
+ezview.mmsz = mem_cache_sz
+ezview.mm = mem_map
+
+ezview.setMemCacheSize = sz => {
+    mem_cache_sz = sz
+    console.log("set mem cache size to " + mem_cache_sz)
+}
+
+ezview.swapInJS = function (namePtr, bufAddr) {
+    let name = instance.AsciiToString(namePtr)
+    let dst = new ArrayBuffer(mem_cache_sz);
+    new Uint8Array(dst).set(instance.HEAPU8.slice(bufAddr, bufAddr + mem_cache_sz));
+
+    mem_map.set(name, dst)
+    return 0;
+}
+
+ezview.swapOutJS = function (namePtr, bufAddr) {
+    let name = instance.AsciiToString(namePtr)
+    let m = mem_map.get(name)
+    if (m == undefined) {
+        console.log(name)
+        return -1;
+    }
+
+    instance.HEAPU8.set(new Uint8Array(mem_map.get(name)), bufAddr)
+    mem_map.delete(name);
+    return 0;
+}
+
 
 export const bufferSize = 128 * 1024 * 1024;
 async function parsePart(buf) {
@@ -30,7 +73,7 @@ function setRewind() {
 }
 
 export function setCallback(name, callback) {
-    window.cb[name] = callback
+    ezview.cb[name] = callback
 }
 
 let bufAddr = 0
