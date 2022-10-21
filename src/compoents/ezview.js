@@ -58,7 +58,7 @@ ezview.swapOutJS = function (namePtr, index, bufAddr) {
 
 
 export const bufferSize = 128 * 1024 * 1024;
-async function parsePart(buf) {
+function parsePart(buf) {
     // delete all used db
     indexedDB.deleteDatabase('td')
 
@@ -67,12 +67,12 @@ async function parsePart(buf) {
     }
     instance.writeArrayToMemory(buf, bufAddr + remain);
 
-    return await instance.ccall('parsePart', 'number', ['number'], [buf.length + remain], { async: true });
+    return instance.ccall('parsePart', 'number', ['number'], [buf.length + remain]);
 }
 
 async function build() {
     console.log("build finished.")
-    return await instance.ccall('build', '', [], [], { async: true });
+    return instance.ccall('build', '', [], []);
 }
 
 function isPProf() {
@@ -106,9 +106,9 @@ export const getContextName = instance.cwrap('getContextName', 'string', ['numbe
 
 export const updateSourceFileExistStatus = instance.cwrap('updateSourceFileExistStatus', '', ['number', 'number'])
 
-export const updateValueTree = instance.cwrap('updateValueTree', '', ['number', 'number', 'number'], { async: true })
+export const updateValueTree = instance.cwrap('updateValueTree', '', ['number', 'number', 'number'])
 
-export const drawFlameGraphClickNode = instance.cwrap('drawFlameGraphClickNode', '', ['number', 'number', 'number', 'number', 'number'], { async: true })
+export const drawFlameGraphClickNode = instance.cwrap('drawFlameGraphClickNode', '', ['number', 'number', 'number', 'number', 'number'])
 
 export const setFunctionFilter = instance.cwrap('setFunctionFilter', '', ['string'])
 
@@ -117,7 +117,7 @@ export const setUpDrawFlameGraph = f => instance._setUpDrawFlameGraph(-1, instan
 export const sortContextTreeByMetricIdx = instance.cwrap('sortContextTreeByMetricIdx', '', ['number', 'number'])
 
 export async function initFlatTree() {
-    return await instance.ccall('initFlatTree', '', [''], [], { async: true });
+    return instance.ccall('initFlatTree', '', [''], []);
 }
 
 export function initBUTree() {
@@ -143,7 +143,7 @@ export async function parseFile(f) {
         const a = await s.arrayBuffer()
 
         let view = new Uint8Array(a);
-        remain = await parsePart(view)
+        remain = parsePart(view)
 
         if (remain == -1) {
             console.log("Error")
@@ -168,7 +168,7 @@ export async function parseFile(f) {
 
             const a = await s.arrayBuffer()
             let view = new Uint8Array(a);
-            remain = await parsePart(view)
+            remain = parsePart(view)
 
             if (remain == -1) {
                 console.log("Error")

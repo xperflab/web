@@ -553,23 +553,12 @@ function ccall(ident, returnType, argTypes, args, opts) {
    }
   }
  }
- var previousAsync = Asyncify.currData;
  var ret = func.apply(null, cArgs);
  function onDone(ret) {
-  runtimeKeepalivePop();
   if (stack !== 0) stackRestore(stack);
   return convertReturnValue(ret);
  }
- runtimeKeepalivePush();
- var asyncMode = opts && opts.async;
- if (Asyncify.currData != previousAsync) {
-  assert(!(previousAsync && Asyncify.currData), "We cannot start an async operation when one is already flight");
-  assert(!(previousAsync && !Asyncify.currData), "We cannot stop an async operation in flight");
-  assert(asyncMode, "The call to " + ident + " is running asynchronously. If this was intended, add the async option to the ccall/cwrap call.");
-  return Asyncify.whenDone().then(onDone);
- }
  ret = onDone(ret);
- if (asyncMode) return Promise.resolve(ret);
  return ret;
 }
 
@@ -1208,7 +1197,6 @@ function createWasm() {
  };
  function receiveInstance(instance, module) {
   var exports = instance.exports;
-  exports = Asyncify.instrumentWasmExports(exports);
   Module["asm"] = exports;
   registerTLSInit(Module["asm"]["_emscripten_tls_init"]);
   wasmTable = Module["asm"]["__indirect_function_table"];
@@ -1265,7 +1253,6 @@ function createWasm() {
  if (Module["instantiateWasm"]) {
   try {
    var exports = Module["instantiateWasm"](info, receiveInstance);
-   exports = Asyncify.instrumentWasmExports(exports);
    return exports;
   } catch (e) {
    err("Module.instantiateWasm callback failed with error: " + e);
@@ -1524,13 +1511,9 @@ function callRuntimeCallbacks(callbacks) {
   var func = callback.func;
   if (typeof func == "number") {
    if (callback.arg === undefined) {
-    (function() {
-     dynCall_v.call(null, func);
-    })();
+    getWasmTableEntry(func)();
    } else {
-    (function(a1) {
-     dynCall_vi.apply(null, [ func, a1 ]);
-    })(callback.arg);
+    getWasmTableEntry(func)(callback.arg);
    }
   } else {
    func(callback.arg === undefined ? null : callback.arg);
@@ -1625,9 +1608,7 @@ function getWasmTableEntry(funcPtr) {
 }
 
 function invokeEntryPoint(ptr, arg) {
- var result = function(a1) {
-  return dynCall_ii.apply(null, [ ptr, a1 ]);
- }(arg);
+ var result = getWasmTableEntry(ptr)(arg);
  checkStackCookie();
  if (keepRuntimeAlive()) {
   PThread.setExitStatus(result);
@@ -2078,225 +2059,6 @@ function _setTempRet0(val) {
  setTempRet0(val);
 }
 
-function runAndAbortIfError(func) {
- try {
-  return func();
- } catch (e) {
-  abort(e);
- }
-}
-
-function maybeExit() {}
-
-function callUserCallback(func, synchronous) {
- if (ABORT) {
-  err("user callback triggered after runtime exited or application aborted.  Ignoring.");
-  return;
- }
- if (synchronous) {
-  func();
-  return;
- }
- try {
-  func();
-  if (ENVIRONMENT_IS_PTHREAD) maybeExit();
- } catch (e) {
-  handleException(e);
- }
-}
-
-function runtimeKeepalivePush() {}
-
-function runtimeKeepalivePop() {}
-
-var Asyncify = {
- State: {
-  Normal: 0,
-  Unwinding: 1,
-  Rewinding: 2,
-  Disabled: 3
- },
- state: 0,
- StackSize: 4096,
- currData: null,
- handleSleepReturnValue: 0,
- exportCallStack: [],
- callStackNameToId: {},
- callStackIdToName: {},
- callStackId: 0,
- asyncPromiseHandlers: null,
- sleepCallbacks: [],
- getCallStackId: function(funcName) {
-  var id = Asyncify.callStackNameToId[funcName];
-  if (id === undefined) {
-   id = Asyncify.callStackId++;
-   Asyncify.callStackNameToId[funcName] = id;
-   Asyncify.callStackIdToName[id] = funcName;
-  }
-  return id;
- },
- instrumentWasmImports: function(imports) {
-  var ASYNCIFY_IMPORTS = [ "env.invoke_*", "env.emscripten_sleep", "env.emscripten_wget", "env.emscripten_wget_data", "env.emscripten_idb_load", "env.emscripten_idb_store", "env.emscripten_idb_delete", "env.emscripten_idb_exists", "env.emscripten_idb_load_blob", "env.emscripten_idb_store_blob", "env.SDL_Delay", "env.emscripten_scan_registers", "env.emscripten_lazy_load_code", "env.emscripten_fiber_swap", "wasi_snapshot_preview1.fd_sync", "env.__wasi_fd_sync", "env._emval_await", "env._dlopen_js", "env.__asyncjs__*" ].map(x => x.split(".")[1]);
-  for (var x in imports) {
-   (function(x) {
-    var original = imports[x];
-    var sig = original.sig;
-    if (typeof original == "function") {
-     var isAsyncifyImport = ASYNCIFY_IMPORTS.indexOf(x) >= 0 || x.startsWith("__asyncjs__");
-     imports[x] = function() {
-      var originalAsyncifyState = Asyncify.state;
-      try {
-       return original.apply(null, arguments);
-      } finally {
-       var changedToDisabled = originalAsyncifyState === Asyncify.State.Normal && Asyncify.state === Asyncify.State.Disabled;
-       var ignoredInvoke = x.startsWith("invoke_") && true;
-       if (Asyncify.state !== originalAsyncifyState && !isAsyncifyImport && !changedToDisabled && !ignoredInvoke) {
-        throw new Error("import " + x + " was not in ASYNCIFY_IMPORTS, but changed the state");
-       }
-      }
-     };
-    }
-   })(x);
-  }
- },
- instrumentWasmExports: function(exports) {
-  var ret = {};
-  for (var x in exports) {
-   (function(x) {
-    var original = exports[x];
-    if (typeof original == "function") {
-     ret[x] = function() {
-      Asyncify.exportCallStack.push(x);
-      try {
-       return original.apply(null, arguments);
-      } finally {
-       if (!ABORT) {
-        var y = Asyncify.exportCallStack.pop();
-        assert(y === x);
-        Asyncify.maybeStopUnwind();
-       }
-      }
-     };
-    } else {
-     ret[x] = original;
-    }
-   })(x);
-  }
-  return ret;
- },
- maybeStopUnwind: function() {
-  if (Asyncify.currData && Asyncify.state === Asyncify.State.Unwinding && Asyncify.exportCallStack.length === 0) {
-   runtimeKeepalivePush();
-   Asyncify.state = Asyncify.State.Normal;
-   runAndAbortIfError(Module["_asyncify_stop_unwind"]);
-   if (typeof Fibers != "undefined") {
-    Fibers.trampoline();
-   }
-  }
- },
- whenDone: function() {
-  assert(Asyncify.currData, "Tried to wait for an async operation when none is in progress.");
-  assert(!Asyncify.asyncPromiseHandlers, "Cannot have multiple async operations in flight at once");
-  return new Promise((resolve, reject) => {
-   Asyncify.asyncPromiseHandlers = {
-    resolve: resolve,
-    reject: reject
-   };
-  });
- },
- allocateData: function() {
-  var ptr = _malloc(12 + Asyncify.StackSize);
-  Asyncify.setDataHeader(ptr, ptr + 12, Asyncify.StackSize);
-  Asyncify.setDataRewindFunc(ptr);
-  return ptr;
- },
- setDataHeader: function(ptr, stack, stackSize) {
-  GROWABLE_HEAP_I32()[ptr >>> 2] = stack;
-  GROWABLE_HEAP_I32()[ptr + 4 >>> 2] = stack + stackSize;
- },
- setDataRewindFunc: function(ptr) {
-  var bottomOfCallStack = Asyncify.exportCallStack[0];
-  var rewindId = Asyncify.getCallStackId(bottomOfCallStack);
-  GROWABLE_HEAP_I32()[ptr + 8 >>> 2] = rewindId;
- },
- getDataRewindFunc: function(ptr) {
-  var id = GROWABLE_HEAP_I32()[ptr + 8 >>> 2];
-  var name = Asyncify.callStackIdToName[id];
-  var func = Module["asm"][name];
-  return func;
- },
- doRewind: function(ptr) {
-  var start = Asyncify.getDataRewindFunc(ptr);
-  runtimeKeepalivePop();
-  return start();
- },
- handleSleep: function(startAsync) {
-  assert(Asyncify.state !== Asyncify.State.Disabled, "Asyncify cannot be done during or after the runtime exits");
-  if (ABORT) return;
-  if (Asyncify.state === Asyncify.State.Normal) {
-   var reachedCallback = false;
-   var reachedAfterCallback = false;
-   startAsync(handleSleepReturnValue => {
-    assert(!handleSleepReturnValue || typeof handleSleepReturnValue == "number" || typeof handleSleepReturnValue == "boolean");
-    if (ABORT) return;
-    Asyncify.handleSleepReturnValue = handleSleepReturnValue || 0;
-    reachedCallback = true;
-    if (!reachedAfterCallback) {
-     return;
-    }
-    assert(!Asyncify.exportCallStack.length, "Waking up (starting to rewind) must be done from JS, without compiled code on the stack.");
-    Asyncify.state = Asyncify.State.Rewinding;
-    runAndAbortIfError(() => Module["_asyncify_start_rewind"](Asyncify.currData));
-    if (typeof Browser != "undefined" && Browser.mainLoop.func) {
-     Browser.mainLoop.resume();
-    }
-    var asyncWasmReturnValue, isError = false;
-    try {
-     asyncWasmReturnValue = Asyncify.doRewind(Asyncify.currData);
-    } catch (err) {
-     asyncWasmReturnValue = err;
-     isError = true;
-    }
-    var handled = false;
-    if (!Asyncify.currData) {
-     var asyncPromiseHandlers = Asyncify.asyncPromiseHandlers;
-     if (asyncPromiseHandlers) {
-      Asyncify.asyncPromiseHandlers = null;
-      (isError ? asyncPromiseHandlers.reject : asyncPromiseHandlers.resolve)(asyncWasmReturnValue);
-      handled = true;
-     }
-    }
-    if (isError && !handled) {
-     throw asyncWasmReturnValue;
-    }
-   });
-   reachedAfterCallback = true;
-   if (!reachedCallback) {
-    Asyncify.state = Asyncify.State.Unwinding;
-    Asyncify.currData = Asyncify.allocateData();
-    if (typeof Browser != "undefined" && Browser.mainLoop.func) {
-     Browser.mainLoop.pause();
-    }
-    runAndAbortIfError(() => Module["_asyncify_start_unwind"](Asyncify.currData));
-   }
-  } else if (Asyncify.state === Asyncify.State.Rewinding) {
-   Asyncify.state = Asyncify.State.Normal;
-   runAndAbortIfError(Module["_asyncify_stop_rewind"]);
-   _free(Asyncify.currData);
-   Asyncify.currData = null;
-   Asyncify.sleepCallbacks.forEach(func => callUserCallback(func));
-  } else {
-   abort("invalid state: " + Asyncify.state);
-  }
-  return Asyncify.handleSleepReturnValue;
- },
- handleAsync: function(startAsync) {
-  return Asyncify.handleSleep(wakeUp => {
-   startAsync().then(wakeUp);
-  });
- }
-};
-
 PThread.init();
 
 var proxiedFunctionTable = [ null, exitOnMainThread, pthreadCreateProxied, _fd_close, _fd_seek, _fd_write ];
@@ -2357,8 +2119,6 @@ var asmLibraryArg = {
  "memory": wasmMemory,
  "setTempRet0": _setTempRet0
 };
-
-Asyncify.instrumentWasmImports(asmLibraryArg);
 
 var asm = createWasm();
 
@@ -2470,39 +2230,9 @@ var stackAlloc = Module["stackAlloc"] = createExportWrapper("stackAlloc");
 
 var ___cxa_is_pointer_type = Module["___cxa_is_pointer_type"] = createExportWrapper("__cxa_is_pointer_type");
 
-var dynCall_ii = Module["dynCall_ii"] = createExportWrapper("dynCall_ii");
-
-var dynCall_viii = Module["dynCall_viii"] = createExportWrapper("dynCall_viii");
-
-var dynCall_vii = Module["dynCall_vii"] = createExportWrapper("dynCall_vii");
-
 var dynCall_jii = Module["dynCall_jii"] = createExportWrapper("dynCall_jii");
 
-var dynCall_vi = Module["dynCall_vi"] = createExportWrapper("dynCall_vi");
-
-var dynCall_iii = Module["dynCall_iii"] = createExportWrapper("dynCall_iii");
-
-var dynCall_iiii = Module["dynCall_iiii"] = createExportWrapper("dynCall_iiii");
-
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
-
-var dynCall_iidiiii = Module["dynCall_iidiiii"] = createExportWrapper("dynCall_iidiiii");
-
-var dynCall_v = Module["dynCall_v"] = createExportWrapper("dynCall_v");
-
-var dynCall_viiiiii = Module["dynCall_viiiiii"] = createExportWrapper("dynCall_viiiiii");
-
-var dynCall_viiiii = Module["dynCall_viiiii"] = createExportWrapper("dynCall_viiiii");
-
-var dynCall_viiii = Module["dynCall_viiii"] = createExportWrapper("dynCall_viiii");
-
-var _asyncify_start_unwind = Module["_asyncify_start_unwind"] = createExportWrapper("asyncify_start_unwind");
-
-var _asyncify_stop_unwind = Module["_asyncify_stop_unwind"] = createExportWrapper("asyncify_stop_unwind");
-
-var _asyncify_start_rewind = Module["_asyncify_start_rewind"] = createExportWrapper("asyncify_start_rewind");
-
-var _asyncify_stop_rewind = Module["_asyncify_stop_rewind"] = createExportWrapper("asyncify_stop_rewind");
 
 Module["ccall"] = ccall;
 
@@ -2971,10 +2701,6 @@ unexportedRuntimeFunction("GLEW", false);
 unexportedRuntimeFunction("IDBStore", false);
 
 unexportedRuntimeFunction("runAndAbortIfError", false);
-
-unexportedRuntimeFunction("Asyncify", false);
-
-unexportedRuntimeFunction("Fibers", false);
 
 unexportedRuntimeFunction("PThread", false);
 

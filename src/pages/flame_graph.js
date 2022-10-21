@@ -210,12 +210,11 @@ export default class FlameGraph extends Component {
 
     setFunctionFilter(functionFilter)
 
-    updateValueTree(0, dataShowType, metricIndex).then(
-      res => {
-        console.log("Update Value Ready ... ");
-        this.onDraw()
-      }
-    )
+    updateValueTree(0, dataShowType, metricIndex)
+
+    console.log("Update Value Ready ... ");
+    this.onDraw()
+
   }
   onDraw() {
     this.state.global.texts.innerHTML = "";
