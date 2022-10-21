@@ -359,6 +359,7 @@ export default class FlameGraph extends Component {
       this.state.focusNode.y = 0;
       this.state.focusNode.hovorId = root_id;
       this.setState({ dataShowType: 1 })
+      console.timeEnd("bu")
     })
     //this.state.dataShowType = 1;
     initBUTree()

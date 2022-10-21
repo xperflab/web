@@ -12,36 +12,47 @@ ezview.cb = {}
 
 // Memory cache for wasm
 // In Wasm32, the max size of memory is 4GB
-let mem_cache_sz = 64 * 1024 // 64KB (wasm memory page size)
 let mem_map = new Map() // name - arrayBuffer
+let name_sz_m = new Map()
 
-ezview.mmsz = mem_cache_sz
 ezview.mm = mem_map
 
-ezview.setMemCacheSize = sz => {
-    mem_cache_sz = sz
-    console.log("set mem cache size to " + mem_cache_sz)
+ezview.newCache = (namePtr, size) => {
+    let name = instance.AsciiToString(namePtr)
+    mem_map.set(name, new Map())
+    name_sz_m.set(name, size)
+    console.log("new cache " + name + " size " + size)
 }
 
-ezview.swapInJS = function (namePtr, bufAddr) {
-    let name = instance.AsciiToString(namePtr)
-    let dst = new ArrayBuffer(mem_cache_sz);
-    new Uint8Array(dst).set(instance.HEAPU8.slice(bufAddr, bufAddr + mem_cache_sz));
+ezview.deleteCache = name => {
+    mem_map.delete(name)
+    name_sz_m.delete(name)
+    console.log("delete memory cache " + name)
+}
 
-    mem_map.set(name, dst)
+ezview.swapInJS = function (namePtr, index, bufAddr) {
+    let name = instance.AsciiToString(namePtr)
+    let size = name_sz_m.get(name)
+
+    let dst = new ArrayBuffer(size);
+    new Uint8Array(dst).set(instance.HEAPU8.slice(bufAddr, bufAddr + size));
+
+    mem_map.get(name).set(index, dst)
     return 0;
 }
 
-ezview.swapOutJS = function (namePtr, bufAddr) {
+ezview.swapOutJS = function (namePtr, index, bufAddr) {
     let name = instance.AsciiToString(namePtr)
+
     let m = mem_map.get(name)
-    if (m == undefined) {
+    let mem = m.get(index)
+    if (!m || !mem) {
         console.log(name)
         return -1;
     }
 
-    instance.HEAPU8.set(new Uint8Array(mem_map.get(name)), bufAddr)
-    mem_map.delete(name);
+    instance.HEAPU8.set(new Uint8Array(mem), bufAddr)
+    m.delete(name);
     return 0;
 }
 
@@ -110,6 +121,7 @@ export async function initFlatTree() {
 }
 
 export function initBUTree() {
+    console.time("bu")
     return instance.ccall('initBUTree', '', [''], []);
 }
 
