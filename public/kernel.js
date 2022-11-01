@@ -855,7 +855,7 @@ var TOTAL_STACK = 5242880;
 
 if (Module["TOTAL_STACK"]) assert(TOTAL_STACK === Module["TOTAL_STACK"], "the stack size can no longer be determined at runtime");
 
-var INITIAL_MEMORY = Module["INITIAL_MEMORY"] || 1073741824;
+var INITIAL_MEMORY = Module["INITIAL_MEMORY"] || 16777216;
 
 legacyModuleProp("INITIAL_MEMORY", "INITIAL_MEMORY");
 
@@ -1268,17 +1268,61 @@ var tempDouble;
 var tempI64;
 
 var ASM_CONSTS = {
- 15256: ($0, $1, $2) => {
-  return ezview.swapInJS($0, $1, $2);
+ 15864: ($0, $1, $2, $3) => {
+  return ezview.swapInJS($0, $1, $2, $3);
  },
- 15296: ($0, $1, $2) => {
+ 15908: ($0, $1, $2) => {
   return ezview.swapOutJS($0, $1, $2);
  },
- 15337: ($0, $1) => {
+ 15949: ($0, $1) => {
   ezview.newCache($0, $1);
  },
- 15366: () => {
+ 15978: () => {
+  let ezview = {};
+  self.ezview = ezview;
+  let mem_map = new Map();
+  ezview.mm = mem_map;
+  ezview.newCache = (namePtr, size) => {
+   let name = Module.AsciiToString(namePtr);
+   mem_map.set(name, new Map());
+   console.log("new memory cache " + name);
+  };
+  ezview.deleteCache = name => {
+   mem_map.delete(name);
+   name_sz_m.delete(name);
+   console.log("delete memory cache " + name);
+  };
+  ezview.swapInJS = function(namePtr, index, bufAddr, size) {
+   let name = Module.AsciiToString(namePtr);
+   let dst = new ArrayBuffer(size);
+   new Uint8Array(dst).set(Module.HEAPU8.slice(bufAddr, bufAddr + size));
+   mem_map.get(name).set(index, dst);
+   return 0;
+  };
+  ezview.swapOutJS = function(namePtr, index, bufAddr) {
+   let name = Module.AsciiToString(namePtr);
+   let m = mem_map.get(name);
+   let mem = m.get(index);
+   if (!m || !mem) {
+    console.log(name);
+    return -1;
+   }
+   Module.HEAPU8.set(new Uint8Array(mem), bufAddr);
+   m.delete(name);
+   return 0;
+  };
+ },
+ 16878: () => {
   ezview.cb.initBUTree();
+ },
+ 16906: ($0, $1, $2, $3) => {
+  return ezview.swapInJS($0, $1, $2, $3);
+ },
+ 16950: ($0, $1, $2) => {
+  return ezview.swapOutJS($0, $1, $2);
+ },
+ 16991: ($0, $1) => {
+  ezview.newCache($0, $1);
  }
 };
 
@@ -1889,6 +1933,12 @@ function readAsmConstArgs(sigPtr, buf) {
  return readAsmConstArgsArray;
 }
 
+function _emscripten_asm_const_int(code, sigPtr, argbuf) {
+ var args = readAsmConstArgs(sigPtr, argbuf);
+ if (!ASM_CONSTS.hasOwnProperty(code)) abort("No EM_ASM constant found at address " + code);
+ return ASM_CONSTS[code].apply(null, args);
+}
+
 function mainThreadEM_ASM(code, sigPtr, argbuf, sync) {
  var args = readAsmConstArgs(sigPtr, argbuf);
  if (ENVIRONMENT_IS_PTHREAD) {
@@ -2105,6 +2155,7 @@ var asmLibraryArg = {
  "_emscripten_notify_task_queue": __emscripten_notify_task_queue,
  "_emscripten_set_offscreencanvas_size": __emscripten_set_offscreencanvas_size,
  "abort": _abort,
+ "emscripten_asm_const_int": _emscripten_asm_const_int,
  "emscripten_asm_const_int_sync_on_main_thread": _emscripten_asm_const_int_sync_on_main_thread,
  "emscripten_check_blocking_allowed": _emscripten_check_blocking_allowed,
  "emscripten_get_now": _emscripten_get_now,

@@ -1,7 +1,22 @@
 const instance = window.Module
 
+
+const TopDown = 0
+const BottomUp = 1
+const Flat = 2
+
+const Name = 0
+const IncValue = 1
+const ExcValue = 2
+
+const FlameGraph = 0
+const TreeTable = 1
+
+const Inclusive = 0
+const Exclusive = 1
+
 let ezview = {}
-window.ezview = ezview
+self.ezview = ezview
 
 // Export wasm instance for debugging
 ezview.i = instance
@@ -10,18 +25,15 @@ ezview.i = instance
 // In C++ code, we call this code from EM_ASM
 ezview.cb = {}
 
-// Memory cache for wasm
-// In Wasm32, the max size of memory is 4GB
+// Block memory cache for wasm
 let mem_map = new Map() // name - arrayBuffer
-let name_sz_m = new Map()
 
 ezview.mm = mem_map
 
 ezview.newCache = (namePtr, size) => {
     let name = instance.AsciiToString(namePtr)
     mem_map.set(name, new Map())
-    name_sz_m.set(name, size)
-    console.log("new cache " + name + " size " + size)
+    console.log("new memory cache " + name)
 }
 
 ezview.deleteCache = name => {
@@ -30,9 +42,8 @@ ezview.deleteCache = name => {
     console.log("delete memory cache " + name)
 }
 
-ezview.swapInJS = function (namePtr, index, bufAddr) {
+ezview.swapInJS = function (namePtr, index, bufAddr, size) {
     let name = instance.AsciiToString(namePtr)
-    let size = name_sz_m.get(name)
 
     let dst = new ArrayBuffer(size);
     new Uint8Array(dst).set(instance.HEAPU8.slice(bufAddr, bufAddr + size));
@@ -115,6 +126,15 @@ export const setFunctionFilter = instance.cwrap('setFunctionFilter', '', ['strin
 export const setUpDrawFlameGraph = f => instance._setUpDrawFlameGraph(-1, instance.addFunction(f, 'viiiiiji'));
 
 export const sortContextTreeByMetricIdx = instance.cwrap('sortContextTreeByMetricIdx', '', ['number', 'number'])
+
+
+export function loadTDValue(index) {
+    updateValueTree(FlameGraph, TopDown, index)
+}
+
+export function loadBUValue(index) {
+    updateValueTree(FlameGraph, BottomUp, index)
+}
 
 export async function initFlatTree() {
     return instance.ccall('initFlatTree', '', [''], []);

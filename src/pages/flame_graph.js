@@ -8,7 +8,7 @@ import { Component } from "react";
 import XEUtils from "xe-utils";
 import '../pages-css/flame_graph.css';
 import { useResizeObserver } from 'react-use-observer'
-import { setCallback, updateValueTree, drawFlameGraphClickNode, getRootID, initFlatTree, initBUTree, getMetricDesJsonStr, setUpDrawFlameGraph, getContextDetails, getClickNodeMessage, setFunctionFilter, getContextName } from '../compoents/ezview';
+import { setCallback, updateValueTree, drawFlameGraphClickNode, getRootID, initFlatTree, initBUTree, getMetricDesJsonStr, setUpDrawFlameGraph, getContextDetails, getClickNodeMessage, setFunctionFilter, getContextName, loadBUValue } from '../compoents/ezview';
 import { message } from "antd";
 
 function str2ab(str) {
@@ -212,9 +212,8 @@ export default class FlameGraph extends Component {
 
     updateValueTree(0, dataShowType, metricIndex)
 
-    console.log("Update Value Ready ... ");
+    console.log("Update Value Ready ... ", dataShowType, metricIndex);
     this.onDraw()
-
   }
   onDraw() {
     this.state.global.texts.innerHTML = "";
@@ -357,6 +356,7 @@ export default class FlameGraph extends Component {
       this.state.focusNode.x = 0;
       this.state.focusNode.y = 0;
       this.state.focusNode.hovorId = root_id;
+
       this.setState({ dataShowType: 1 })
       console.timeEnd("bu")
     })
