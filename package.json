@@ -2,6 +2,7 @@
   "name": "my-project",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://www.xperflab.org/web",
   "dependencies": {
     "@ant-design/dark-theme": "^2.0.2",
     "@headlessui/react": "^1.6.4",

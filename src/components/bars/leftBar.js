@@ -82,7 +82,7 @@ function LeftBar(props) {
                 <div className="flex-shrink-0 flex items-center px-4 ">
                   <img
                     className="h-8 w-auto"
-                    src="/new_logo.png"
+                    src="https://www.xperflab.org/web/new_logo.png"
                     alt="Workflow"
                   />
                   <div className="text-xl pl-3 font-bold
@@ -120,7 +120,7 @@ function LeftBar(props) {
           <div className="flex items-center flex-shrink-0 px-4 pt-2  dark:bg-[#1E1D2B]">
             <img
               className="h-8 w-auto"
-              src="/new_logo.png"
+              src="https://www.xperflab.org/web/new_logo.png"
               alt="Workflow"
             />
             <div className="text-xl pl-3 font-bold
