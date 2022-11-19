@@ -1,0 +1,9 @@
+{
+    "eslint.format.enable": true,
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "files.autoSave": "afterDelay",
+    "files.eol": "\n",
+}
