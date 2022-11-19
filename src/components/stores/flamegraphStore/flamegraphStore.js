@@ -9,29 +9,25 @@ import {makeAutoObservable} from 'mobx';
  * if sidebar is hided, the dropzone will be shown.
  * else, the dropzone will be hidden.
  */
-class BarStore {
-  sidebarOpen = false;
-  showSidebar = true;
-  showCurrentProfile = false;
-  showVRTrace = false;
+class FlameGraphStore {
+  dataShowType=0;
+  metricIndex=0;
+  flamegraphId = 0;
   /**
    * Creating observable state
    */
   constructor() {
     makeAutoObservable(this);
   }
-  setSidebarOpen = (value) => {
-    this.sidebarOpen = value;
+  incrementFlamegraphId = () => {
+    this.flamegraphId += 1;
   };
-  setShowSidebar = (value) => {
-    this.showSidebar = value;
+  setDataShowType = (value) => {
+    this.dataShowType = value;
   };
-  setShowCurrentProfile = (value) => {
-    this.showCurrentProfile = value;
-  };
-  setShowVRTrace = (value) => {
-    this.showVRTrace = value;
+  setMetricIndex = (value) => {
+    this.metricIndex = value;
   };
 }
-const barStore = new BarStore();
-export default barStore;
+const flamegraphStore = new FlameGraphStore();
+export default flamegraphStore;
