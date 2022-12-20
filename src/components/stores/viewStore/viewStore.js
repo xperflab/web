@@ -27,7 +27,7 @@ class ViewStore {
   setCurrentHomeView= () => {
     this.currentComponent = 'homeview';
   };
-  setVRTrace= () => {
+  setCurrentVRTrace= () => {
     this.currentComponent = 'vrtrace';
   };
 }

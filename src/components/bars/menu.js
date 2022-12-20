@@ -196,7 +196,7 @@ function Menu(props) {
         </div>)}
 
 
-        {/* <button
+        <button
           className=" dark:text-white text-gray-600 hover:text-gray-900 group w-full flex items-center
             pl-4 pr-1 py-2 text-left text-sm font-medium rounded-md
             focus:outline-none ocus:ring-2 focus:ring-indigo-500 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355] "
@@ -221,14 +221,14 @@ function Menu(props) {
           >
             <path d="M6 6L14 10L6 14V6Z" fill="currentColor" />
           </svg>
-        </button> */}
+        </button>
         {VRProfileOpen && ( <div className="space-y-1">
           <div
-
             className="group w-full flex dark:text-slate-200
                  items-center pl-[3.3rem] pr-2 py-2
                  text-sm font-medium text-gray-600
                   rounded-md hover:text-gray-900 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355]"
+            onClick={() => props.ViewStore.setCurrentVRTrace()}
           >
                 Example VR Trace
           </div>

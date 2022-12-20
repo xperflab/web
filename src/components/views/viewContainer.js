@@ -13,6 +13,7 @@ import TreetableDataProcess from './treetableDataProcess';
 import DarkModeButton from '../widget/DarkModeButton';
 import FlameGraph from './flamegraph';
 import XEUtils from 'xe-utils';
+import VR from './vr';
 /**
  *  inject('BarStore, ViewStore')
  * @class ViewContainer
@@ -65,7 +66,7 @@ class ViewContainer extends Component {
         {this.props.ProfileStore.ProfileId}
       height ={this.state.treetableViewContainerHeight}/>);
     } else if (this.props.ViewStore.currentComponent === 'vrtrace') {
-      renderComponent = ( <div></div>);
+      renderComponent = ( <VR/>);
     }
     return (
       <div ref={this.rightContainer}
