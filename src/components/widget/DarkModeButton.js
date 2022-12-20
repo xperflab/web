@@ -34,6 +34,7 @@ function DarkModeButton(props) {
       props.ViewStore.setThemeDark();
     }
     props.FlameGraphStore.incrementFlamegraphId();
+    localStorage.setItem('theme', props.ViewStore.theme);
     // setTheme(theme === 'dark'? 'light' : 'dark');
   };
   return (
