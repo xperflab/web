@@ -5,7 +5,7 @@ export default class VR extends Component {
   render() {
     return (
       <iframe
-        src="web/vr.html"
+        src="vr.html"
         width="100%"
         height="100%"
         title="iframe"
