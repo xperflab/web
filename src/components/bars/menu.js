@@ -207,7 +207,7 @@ function Menu(props) {
                 text-gray-400 group-hover:text-gray-500"
             aria-hidden="true"
           />
-          <span className="flex-1">VR Profile</span>
+          <span className="flex-1">3D View</span>
           <svg
             className={classNames(
                  VRProfileOpen ? 'text-gray-400 rotate-90' :
@@ -230,7 +230,7 @@ function Menu(props) {
                   rounded-md hover:text-gray-900 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355]"
             onClick={() => props.ViewStore.setCurrentVRTrace()}
           >
-                Example VR Trace
+                Example 3D View
           </div>
         </div>)}
       </div>
