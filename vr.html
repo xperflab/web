@@ -132,6 +132,14 @@
                 navigator.serviceWorker.register('sw.js');
             });
         }
+        //listen theme item change from local storage
+         window.addEventListener('storage', function (e) {
+                if (e.newValue == "dark") {
+                    console.log("dark");
+                } else {
+                    console.log("light");
+                }
+        });       
     </script>
 
 
