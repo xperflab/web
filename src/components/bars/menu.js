@@ -165,7 +165,7 @@ function Menu(props) {
                   rounded-md hover:text-gray-900 hover:bg-[#B73793CC] dark:hover:bg-[#B7379355]"
             onClick={() =>{
               props.TreetableStore.columns.clear();
-              fetch('example.ezview')
+              fetch('https://www.xperflab.org/web/example.ezview')
                   .then((e) => e.arrayBuffer())
                   .then((binaryStr) => {
                     const result = props.ProfileStore.decodeProfile(binaryStr, '0');
