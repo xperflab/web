@@ -9,7 +9,6 @@
 
     <!-- config for our rust wasm binary. go to https://trunkrs.dev/assets/#rust for more customization -->
     <script type="module">import init from '/web/metaflame.js';init('/web/metaflame_bg.wasm');</script>
-    <script type="module"> import {toggle_dark_mode} from "/web/metaflame.js"; </script>
     <!-- this is the base url relative to which other urls will be constructed. trunk will insert this from the public-url option -->
     <base href="/web/">
 
@@ -126,9 +125,9 @@
 
     <!--Register Service Worker. this will cache the wasm / js scripts for offline use (for PWA functionality). -->
     <!-- Force refresh (Ctrl + F5) to load the latest files instead of cached files  -->
-    <script>
+    <script type="module">
         // We disable caching during development so that we always view the latest version.
-      
+        import {toggle_dark_mode} from "/web/metaflame.js"
         if ('serviceWorker' in navigator && window.location.hash !== "#dev") {
             window.addEventListener('load', function () {
                 navigator.serviceWorker.register('sw.js');
