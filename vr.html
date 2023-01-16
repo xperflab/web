@@ -127,6 +127,7 @@
     <!-- Force refresh (Ctrl + F5) to load the latest files instead of cached files  -->
     <script>
         // We disable caching during development so that we always view the latest version.
+        import {toggle_dark_mode} from "./src/app/app_widgets.js";
         if ('serviceWorker' in navigator && window.location.hash !== "#dev") {
             window.addEventListener('load', function () {
                 navigator.serviceWorker.register('sw.js');
@@ -136,8 +137,10 @@
          window.addEventListener('storage', function (e) {
                 if (e.newValue == "dark") {
                     console.log("dark");
+                    toggle_dark_mode();
                 } else {
                     console.log("light");
+                    toggle_dark_mode();
                 }
         });       
     </script>
