@@ -133,6 +133,8 @@
                 navigator.serviceWorker.register('sw.js');
             });
         }
+        //remove theme from local storage
+        localStorage.removeItem("theme");
         //listen theme item change from local storage
          window.addEventListener('storage', function (e) {
                 if (e.newValue == "dark") {
