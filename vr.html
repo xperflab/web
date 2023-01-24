@@ -125,16 +125,14 @@
 
     <!--Register Service Worker. this will cache the wasm / js scripts for offline use (for PWA functionality). -->
     <!-- Force refresh (Ctrl + F5) to load the latest files instead of cached files  -->
-    <script type="module">
+    <script>
         // We disable caching during development so that we always view the latest version.
-        import {toggle_dark_mode} from "/web/metaflame.js"
+        import {toggle_dark_mode} from "./src/app/app_widgets.js";
         if ('serviceWorker' in navigator && window.location.hash !== "#dev") {
             window.addEventListener('load', function () {
                 navigator.serviceWorker.register('sw.js');
             });
         }
-        //remove theme from local storage
-        localStorage.removeItem("theme");
         //listen theme item change from local storage
          window.addEventListener('storage', function (e) {
                 if (e.newValue == "dark") {
