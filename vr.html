@@ -116,7 +116,9 @@
         </style>
     
     <link rel="preload" href="/web/metaflame_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
-    <link rel="modulepreload" href="/web/metaflame.js"></head>
+    <link rel="modulepreload" href="/web/metaflame.js">
+<link rel="preload" href="/web/metaflame_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
+<link rel="modulepreload" href="/web/metaflame.js"></head>
     
     <body>
         <!-- The WASM code will resize the canvas dynamically -->
@@ -151,4 +153,4 @@
     
     
     
-    </body></html><!-- Powered by egui: https://github.com/emilk/egui/ -->
+    <script type="module">import init from '/web/metaflame.js';init('/web/metaflame_bg.wasm');</script></body></html><!-- Powered by egui: https://github.com/emilk/egui/ -->
