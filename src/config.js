@@ -1,0 +1,3 @@
+global.constants = {
+    runtimeReady:false
+};
